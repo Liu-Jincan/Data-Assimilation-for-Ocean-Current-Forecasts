@@ -1,0 +1,62 @@
+{
+    "tasks" : [
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo",
+            "args": [
+                "'",
+                "workspaceFolder",
+                "${workspaceFolder}\n",
+                "workspaceFolderBasename",
+                "${workspaceFolderBasename}\n",
+                "file",
+                "${file}\n",
+                "relativeFile",
+                "${relativeFile}\n",
+                "fileBasename",
+                "${fileBasename}\n",
+                "fileBasenameNoExtension",
+                "${fileBasenameNoExtension}\n",
+                "cwd",
+                "${cwd}\n",
+                "fileDirname",
+                "${fileDirname}\n",
+                "fileExtname",
+                "${fileExtname}\n",
+                "lineNumber",
+                "${lineNumber}\n",
+                "'"
+            ],            
+        },
+        {
+            "label": "echo2",
+            "type": "shell",
+            "command": "echo",
+            "args": [
+                "'",
+                "workspaceFolder",
+                "${workspaceFolder}\n",
+                "workspaceFolderBasename",
+                "${workspaceFolderBasename}\n",
+                "file",
+                "${file}\n",
+                "relativeFile",
+                "${relativeFile}\n",
+                "fileBasename",
+                "${fileBasename}\n",
+                "fileBasenameNoExtension",
+                "${fileBasenameNoExtension}\n",
+                "cwd",
+                "${cwd}\n",
+                "fileDirname",
+                "${fileDirname}\n",
+                "fileExtname",
+                "${fileExtname}\n",
+                "lineNumber",
+                "${lineNumber}\n",
+                "'"
+            ],            
+        }
+    ]
+    }
