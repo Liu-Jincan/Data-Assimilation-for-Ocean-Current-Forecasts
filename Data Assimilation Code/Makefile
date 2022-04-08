@@ -3,15 +3,15 @@
 #FFLAGS = -g -C
 
 # GNU Compiler
-#FC = gfortran
+FC = gfortran
 #FFLAGS = -g -C -mcmodel=medium -fbackslash -fconvert=big-endian
-#FFLAGS = -g -C
+FFLAGS = -g -C
 
 # Intel Compiler
-FC = ifort
+#FC = ifort
 #FFLAGS = -g -C -shared-intel -convert big_endian -I${NFDIR}/include -L${NFDIR}/lib -lnetcdff
 #FFLAGS = -g -C -O3 -mcmodel=medium -convert big_endian -I${NCDF_INC} -L${NCDF_LIB} -lnetcdf -lnetcdff
-FFLAGS = -g -C -O3 -xHost -ipo -no-prec-div -mcmodel=medium -convert big_endian -lnetcdf -lnetcdff
+#FFLAGS = -g -C -O3 -xHost -ipo -no-prec-div -mcmodel=medium -convert big_endian -lnetcdf -lnetcdff
 #FFLAGS = -g -C
 #FFLAGS = -g -C -convert big_endian
 #FFLAGS = -g -check bounds -fpe0 -ftrapuv -debug semantic_stepping -debug variable_locations -fpp
@@ -28,7 +28,7 @@ run:$(runOBJS)
 	$(FC) $(FFLAGS) $(runOBJS) -o run 
 
 clean:
-	rm *.mod *.o run /home/chako/Argo/bias_nay/Index* /home/chako/Argo/bias_nay/bin* ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* DA_time.txt input/*
+	rm -f *.mod *.o run /home/chako/Argo/bias_nay/Index* /home/chako/Argo/bias_nay/bin* ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* DA_time.txt input/*
 
 depend:
 	sfmakedepend $(SOURCES)

@@ -1,3 +1,5 @@
+# 主要内容
+
 This project constructs an EnOI (Ensemble Optimal Interpolation) data assimilation model for ocean current forecasts. 
 
 The model constructs the background file from the restart files; 
@@ -7,4 +9,5 @@ The model constructs the background file from the restart files;
 
 Next, NEMO restarts with the updated restart files, and another cycle of data assimilation begins...
 
-> v0.1.0分支是fork的项目
+本分支`v0.1.0`是fork的项目，～～
+
