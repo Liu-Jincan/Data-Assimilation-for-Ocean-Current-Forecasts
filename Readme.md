@@ -14,13 +14,12 @@ Next, NEMO restarts with the updated restart files, and another cycle of data as
 在v0.1.0的基础上，使用fpm对项目进行管理，并对项目的文件进行具体分析；
 > `fpm`的内容看`FAQ：寻找关于fortran的项目管理方法`博客，
 >
-> 还需看`Win10+VScode+Msys2+Mingw64+GFortran+Git`博客，
->
-> 所有命令应在`Msys MinGW64`的bash中运行。
+> 所有命令应在`Msys MinGW64`的bash(for windows,`Win10+VScode+Msys2+Mingw64+GFortran+Git`博客),或者`conda fpm`环境(for linux, `ubuntu+VScode+conda+GFortran+Git`博客)中运行。
 >
 
 ## FAQ：fpm使用VScode中fortran-language-server(fortls)？
 问题，app文件夹program函数跳转到src中的mod？ 
+已经解决（Win10+VScode+Msys2+Mingw64+GFortran+Git博客），
 
 # Data-Assimilation-Code文件夹
 ## makefile
@@ -53,4 +52,5 @@ clean:
 命令`make run`，
 
 
-## mod_params.f90
+# Data-Assimilation-fpm文件夹
+## FAQ：Unable to find source for module dependency: "netcdf" used by "././src/mod_read_data.f90"

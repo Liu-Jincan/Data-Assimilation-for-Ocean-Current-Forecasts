@@ -13,10 +13,8 @@ library = false
 [library]
 source-dir="src"
 [[ executable ]]
-name="DA_cycle"
-source-dir="app"
-main="DA_cycle.f90"
-[[ executable ]]
 name="test"
 source-dir="app"
 main="test.f90"
+[dependencies]
+netcdf = { git = "https://github.com/Unidata/netcdf-fortran.git"}
