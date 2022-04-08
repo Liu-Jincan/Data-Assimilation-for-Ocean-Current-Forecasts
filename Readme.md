@@ -10,7 +10,7 @@ The model
 
 Next, NEMO restarts with the updated restart files, and another cycle of data assimilation begins...
 
-# 本分支目标
+# 本分支目标(感觉实现不了呀，fpm)
 在v0.1.0的基础上，使用fpm对项目进行管理，并对项目的文件进行具体分析；
 > `fpm`的内容看`FAQ：寻找关于fortran的项目管理方法`博客，
 >
