@@ -24,3 +24,12 @@ Next, NEMO restarts with the updated restart files, and another cycle of data as
 帮助文档，`fprettify --help`;
 格式化，`fprettify -i 4 -r 文件夹路径`；(感觉格式化前后区别不大呀)
 
+# fortran基本语法的学习
+[视频：fcode实用编程基础篇](https://liu-jincan.github.io/2022/04/09/yan-jiu-sheng-justtry-function/fortran/07-shi-pin-fcode-shi-yong-bian-cheng-ji-chu-pian/),
+
+# 编译项目的.f90文件
+makefile 编译部分，
+
+# 跨文件调试.f90文件 (???)
+
+# DA_cycle.f90入手

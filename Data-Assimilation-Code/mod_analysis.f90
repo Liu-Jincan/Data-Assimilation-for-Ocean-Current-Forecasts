@@ -14,6 +14,7 @@ contains
 
         integer :: i, M2(2), M                            ! M = M2(1)+M2(2)
         integer, parameter :: NRECS = 1
+        ! tag ?
         character :: tag*8
         real :: tmp4D(sub_x, sub_y, NLVLS, NRECS), tmp(sub_x, sub_y, NLVLS)
         real :: sal4D(sub_x, sub_y, NLVLS, NRECS), sal(sub_x, sub_y, NLVLS)
