@@ -11,4 +11,4 @@ run:$(runOBJS)
 	$(FC) $(FFLAGS) $(runOBJS) -o main 
 
 clean:
-	rm -f *.o *.exe *.mod
+	rm -f *.o *.exe *.mod main

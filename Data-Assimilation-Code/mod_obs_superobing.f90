@@ -115,11 +115,11 @@ contains
             if (k == 1) then
                 do i = 1, recs
                     if (dpts_o(i) < (dpt_m(k) + dpt_m(k + 1))/2.0) then
-                        if (isnan(tmps(i)) .eq. .false.) then
+                        if (isnan(tmps(i)) .eqv. .false.) then
                             mt = mt + 1
                             tmp(z) = tmp(z) + tmps(i)
                         end if
-                        if (isnan(sals(i)) .eq. .false.) then
+                        if (isnan(sals(i)) .eqv. .false.) then
                             ms = ms + 1
                             sal(z) = sal(z) + sals(i)
                         end if
@@ -128,11 +128,11 @@ contains
             elseif (k == NLVLS) then
                 do i = 1, recs
                     if (dpts_o(i) >= (dpt_m(k - 1) + dpt_m(k))/2.0) then
-                        if (isnan(tmps(i)) .eq. .false.) then
+                        if (isnan(tmps(i)) .eqv. .false.) then
                             mt = mt + 1
                             tmp(z) = tmp(z) + tmps(i)
                         end if
-                        if (isnan(sals(i)) .eq. .false.) then
+                        if (isnan(sals(i)) .eqv. .false.) then
                             ms = ms + 1
                             sal(z) = sal(z) + sals(i)
                         end if
@@ -142,11 +142,11 @@ contains
                 do i = 1, recs
                     if (dpts_o(i) >= (dpt_m(k - 1) + dpt_m(k))/2.0 .and. &
                         dpts_o(i) < (dpt_m(k) + dpt_m(k + 1))/2.0) then
-                        if (isnan(tmps(i)) .eq. .false.) then
+                        if (isnan(tmps(i)) .eqv. .false.) then
                             mt = mt + 1
                             tmp(z) = tmp(z) + tmps(i)
                         end if
-                        if (isnan(sals(i)) .eq. .false.) then
+                        if (isnan(sals(i)) .eqv. .false.) then
                             ms = ms + 1
                             sal(z) = sal(z) + sals(i)
                         end if
@@ -161,10 +161,10 @@ contains
         ! (2.2) find and save the bins that are not NaNs
         mt = 0; ms = 0
         do k = 1, lvls
-            if (isnan(tmp(k)) .eq. .false.) then
+            if (isnan(tmp(k)) .eqv. .false.) then
                 mt = mt + 1
             end if
-            if (isnan(sal(k)) .eq. .false.) then
+            if (isnan(sal(k)) .eqv. .false.) then
                 ms = ms + 1
             end if
         end do
@@ -173,12 +173,12 @@ contains
         mt = 0; ms = 0; z = 0
         do k = lvl(1), lvl(2)
             z = z + 1
-            if (isnan(tmp(z)) .eq. .false.) then
+            if (isnan(tmp(z)) .eqv. .false.) then
                 mt = mt + 1
                 lvl_t(mt) = k
                 tmp_save(mt) = tmp(z)
             end if
-            if (isnan(sal(z)) .eq. .false.) then
+            if (isnan(sal(z)) .eqv. .false.) then
                 ms = ms + 1
                 lvl_s(ms) = k
                 sal_save(ms) = sal(z)
@@ -210,7 +210,9 @@ contains
 
         m = 0.0; n2 = 0
         do i = 1, n
-            if (isnan(x(i)) .eq. .false.) then
+            ! if (isnan(x(i)) .eq. .false.) then
+            ! 
+            if (isnan(x(i)) .eqv. .false.) then
                 n2 = n2 + 1
                 m = m + x(i)
             end if
@@ -232,7 +234,9 @@ contains
         m = mean(x, n)
         s = 0.0; n2 = 0
         do i = 1, n
-            if (isnan(x(i)) .eq. .false.) then
+            !if (isnan(x(i)) .eq. .false.) then
+            !
+            if (isnan(x(i)) .eqv. .false.) then
                 n2 = n2 + 1
                 s = s + (x(i) - m)**2.0
             end if

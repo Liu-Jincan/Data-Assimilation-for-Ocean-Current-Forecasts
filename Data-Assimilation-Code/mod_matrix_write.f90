@@ -7,7 +7,7 @@ contains
         integer, intent(in)   :: dim1, dim2
         real, intent(in)      :: matrix(dim1, dim2)
         integer, intent(in)   :: name_length
-        character, intent(in) :: mat_name*name_length
+        character, intent(in) :: mat_name !mat_name*name_length
 
         write (*, *) "*** Writing matrix "//mat_name//"..."
 

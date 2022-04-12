@@ -104,9 +104,9 @@ contains
 
         if (loc_Lh .and. loc_Lv) then
             c = exp(-L**2.0/(2.0*(Lh**2.0)) - D**2.0/(2.0*(Lv**2.0)))
-        elseif (loc_Lh .and. (loc_Lv == .false.)) then
+        elseif (loc_Lh .and. (loc_Lv .eqv. .false.)) then
             c = exp(-L**2.0/(2.0*(Lh**2.0)))
-        elseif ((loc_Lh == .false.) .and. loc_Lv) then
+        elseif ((loc_Lh .eqv. .false.) .and. loc_Lv) then
             c = exp(-D**2.0/(2.0*(Lv**2.0)))
         else
             c = 1.0

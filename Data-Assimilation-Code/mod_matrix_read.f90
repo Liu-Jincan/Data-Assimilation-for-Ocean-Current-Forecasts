@@ -6,7 +6,7 @@ contains
         implicit none
         integer, intent(in)   :: name_length
         integer, intent(in)   :: dim1, dim2
-        character, intent(in) :: mat_name*name_length
+        character, intent(in) :: mat_name !mat_name*name_length
         real, intent(out)     :: matrix(dim1, dim2)
         integer, intent(in), optional :: opt
 
