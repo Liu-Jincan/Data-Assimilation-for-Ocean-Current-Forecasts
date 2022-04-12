@@ -1,21 +1,36 @@
-# Portland Group Compiler
+
+
+Build = ../build# 当前路径为 makefile 所在路径
+OBJ_dir = $(Build)/objs##
+APP_dir = $(Build)/apps##
+MOD_dir = $(Build)/mods
+EXEC = run#可执行文件的名称
+
+
+
+#SOURCES = mod_params.f90 mod_date.f90 mod_namelist.f90 mod_read_coor.f90 mod_read_data.f90 mod_matrix_read.f90 mod_matrix_write.f90 mod_obs_superobing.f90 mod_obs_sorting.f90 mod_matrix_A.f90 mod_matrix_H.f90 mod_matrix_L.f90 mod_matrix_R.f90 mod_matrix_inverse.f90 mod_matrix_W.f90 mod_analysis.f90 DA_cycle.f90
+################################################################################################
+################################################################################################
+#-----                                        编译（编译器）                                         -----#
+################################################################################################
+################################################################################################
+#---- Portland Group Compiler
 #FC = pgf90
 #FFLAGS = -g -C
-
-# GNU Compiler
+#
+#---- GNU Compiler
 FC = gfortran
-
 FFLAGS = -g -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
-#----- FFLAGS，gfortran编译器常用的参数，https://zhuanlan.zhihu.com/p/388598857
+#		* FFLAGS，gfortran编译器常用的参数，https://zhuanlan.zhihu.com/p/388598857
 #
-#----- FFLAGS，实际操作
-#		FFLAGS = -g -C -mcmodel=medium -fbackslash -fconvert=big-endian 
-#		FFLAGS = -g -I/usr/include -I/home/jincanliu/桌面  #可以多个include
-#		-I 表示 include，一般是为了解决编译时的路径问题，在《视频：fcode实用编程基础篇》博客第三方库的引用，介绍了一个例子，
+#		* FFLAGS，实际操作
+#			FFLAGS = -g -C -mcmodel=medium -fbackslash -fconvert=big-endian 
+#			FFLAGS = -g -I/usr/include -I/home/jincanliu/桌面  #可以多个include
+#			-I 表示 include，一般是为了解决编译时的路径问题，在《视频：fcode实用编程基础篇》博客第三方库的引用，介绍了一个例子，
 #
-#----- FAQ：在链接时，FFLAGS需要放到 -o 的后面？为什么
-
-# Intel Compiler
+#		* FAQ：在链接时，FFLAGS需要放到 -o 的后面？为什么
+#
+#----- Intel Compiler 
 #FC = ifort
 #FFLAGS = -g -C -shared-intel -convert big_endian -I${NFDIR}/include -L${NFDIR}/lib -lnetcdff
 #FFLAGS = -g -C -O3 -mcmodel=medium -convert big_endian -I${NCDF_INC} -L${NCDF_LIB} -lnetcdf -lnetcdff
@@ -24,29 +39,13 @@ FFLAGS = -g -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
 #FFLAGS = -g -C -convert big_endian
 #FFLAGS = -g -check bounds -fpe0 -ftrapuv -debug semantic_stepping -debug variable_locations -fpp
 #FFLAGS = -O3 -ipo -no-prec-div
-
-
-
-SOURCES = mod_params.f90 mod_date.f90 mod_namelist.f90 mod_read_coor.f90 mod_read_data.f90 mod_matrix_read.f90 mod_matrix_write.f90 mod_obs_superobing.f90 mod_obs_sorting.f90 mod_matrix_A.f90 mod_matrix_H.f90 mod_matrix_L.f90 mod_matrix_R.f90 mod_matrix_inverse.f90 mod_matrix_W.f90 mod_analysis.f90 DA_cycle.f90
-
-runOBJS = mod_date.o mod_params.o  mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_read.o mod_matrix_write.o mod_obs_superobing.o mod_obs_sorting.o mod_matrix_A.o mod_matrix_H.o mod_matrix_L.o mod_matrix_R.o mod_matrix_inverse.o mod_matrix_W.o mod_analysis.o DA_cycle.o
-
-
-
-
-
-################################################################################################
-################################################################################################
-#-----                                        编译（编译器）                                         -----#
-################################################################################################
-################################################################################################
 #
 #----- Makefile的静态模式%.o : %.c，https://blog.csdn.net/u012351051/article/details/88600562 
 #
+#----- 编译的顺序在 $(runOBJS)调整, 可通过命令make进行验证；
+runOBJS = mod_date.o mod_params.o  mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_read.o mod_matrix_write.o mod_obs_superobing.o mod_obs_sorting.o mod_matrix_A.o mod_matrix_H.o mod_matrix_L.o mod_matrix_R.o mod_matrix_inverse.o mod_matrix_W.o mod_analysis.o DA_cycle.o
 %.o:%.f90  
 	$(FC) -c $(FFLAGS) $<
-#
-#----- 编译的顺序在 $(runOBJS)调整, 可通过命令make进行验证；
 #
 #----- makefile编译常见错误及原因分析，https://blog.csdn.net/Bgm_Nilbb/article/details/122996596，
 #      错误原因：makefile里面的文件依赖关系有问题，导致头文件找不到。（不一定是头文件找不到，但基本跟依赖关系有关）
@@ -162,8 +161,8 @@ runOBJS = mod_date.o mod_params.o  mod_namelist.o mod_read_coor.o mod_read_data.
 run:$(runOBJS)
 	@echo "编译完成"
 	@#$(FC) $(FFLAGS) $(runOBJS) -o run  #这个为什么会失败，为什么把$(FFLAGS)放到-o后面才可以？
-	@#$(FC) $(runOBJS) -o run $(FFLAGS) 
-	$(FC) DA_cycle.o mod_date.o mod_params.o  mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_read.o mod_matrix_write.o mod_obs_superobing.o mod_obs_sorting.o mod_matrix_A.o mod_matrix_H.o mod_matrix_L.o mod_matrix_R.o mod_matrix_inverse.o mod_matrix_W.o mod_analysis.o -o 	run $(FFLAGS) 
+	$(FC) $(runOBJS) -o $(EXEC) $(FFLAGS) 
+	@#$(FC) DA_cycle.o mod_date.o mod_params.o  mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_read.o mod_matrix_write.o mod_obs_superobing.o mod_obs_sorting.o mod_matrix_A.o mod_matrix_H.o mod_matrix_L.o mod_matrix_R.o mod_matrix_inverse.o mod_matrix_W.o mod_analysis.o -o 	run $(FFLAGS) 
 	@echo "链接完成"
 #
 #----- 链接常见错误：https://liu-jincan.github.io/2022/03/31/yan-jiu-sheng-justtry-function/bian-yi-qi-bian-ji-qi-ji-cheng-kai-fa-huan-jing/make-02-makefile-bian-yi-linux-c-he-c-xiang-mu-kuai-su-ru-men/#toc-heading-17
@@ -206,7 +205,15 @@ run:$(runOBJS)
 clean:
 	@#rm -f *.mod *.o run /home/chako/Argo/bias_nay/Index* /home/chako/Argo/bias_nay/bin* ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* DA_time.txt input/*
 	rm -f *.mod *.o run
-.PHONY: clean
+	@echo "清理完毕"
+trans:
+	mkdir -p $(OBJ_dir) $(MOD_dir) $(APP_dir)
+	mv -f *.o $(OBJ_dir)
+	mv -f *.mod $(MOD_dir)
+	mv -f $(EXEC) $(APP_dir)/
+	@echo "目标文件转移到了$(OBJ_dir) ，可执行文件转移到了$(APP_dir)，MOD文件转移到了$(MOD_dir)"
+
+.PHONY: clean trans
 
 
 

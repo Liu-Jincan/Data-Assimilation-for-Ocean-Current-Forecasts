@@ -14,6 +14,7 @@ Next, NEMO restarts with the updated restart files, and another cycle of data as
 > 使用VScode技巧，文件斜体再点击其他文件，斜体的文件会改变；第一次打开的文件是斜体文件；双击文件，斜体的文件会变成正体；
 
 # git上传更新
+...
 
 # .90格式化文档
 ## 使用fprettify命令格式化.90文件
@@ -29,6 +30,7 @@ Next, NEMO restarts with the updated restart files, and another cycle of data as
 
 # fortran基本语法的学习
 [视频：fcode实用编程基础篇](https://liu-jincan.github.io/2022/04/09/yan-jiu-sheng-justtry-function/fortran/07-shi-pin-fcode-shi-yong-bian-cheng-ji-chu-pian/),
+## FAQ：帮助文档？
 
 # VScode进行gdb调试fortran
 ## 跨文件调试.f90文件 
@@ -48,11 +50,18 @@ OK，生成了所有的.o文件，即目标文件。
 
 ## FAQ：如何在makefile中写上echo "开始编译"？
 在链接的时候，makefile对应的第一行写吧～
-## FAQ：编译顺序问题？需先编译底层.f90文件，即先编译被调用的文件。那么如何生成一个满足顺序要求的runOBJS
+## FAQ：编译顺序问题？需先编译底层.f90文件，即先编译被调用的文件。那么如何生成一个满足顺序要求的runOBJS？（待解决）
+...
+## FAQ：可以不需要runOBJS吗？如何写大项目的makefile？（待解决）
+借鉴的项目代码1：https://www.partow.net/programming/makefile/index.html
+* SRC
+* apps, objects
 
 # 链接项目的.o文件(makefile文件的链接部分）
 OK，生成了一个run可执行程序～
 ldd run 可查看执行run所需的依赖库～
 ## FAQ：链接顺序问题？.o链接顺序没有要求，随意
 前提是编译好了，即在编译时文件相互之间的依赖就需要搞清楚，那么链接就不用考虑顺序问题了；
-# DA_cycle.f90入手
+
+# 对生成的可执行文件入手，输入什么？输出什么？ 
+DA_cycle.f90入手
