@@ -45,23 +45,8 @@ Win10和Ubuntu对应的两个博客都记录了跨文件调试的过程；
 3、根据情况更改相关文件，
 4、make clean, make,
 
-# 编译项目的.f90文件 (makefile文件的编译部分）
-OK，生成了所有的.o文件，即目标文件。
+# 编译+链接
+看Data-Assimilation-Code/src2/Readme.md
 
-## FAQ：如何在makefile中写上echo "开始编译"？
-在链接的时候，makefile对应的第一行写吧～
-## FAQ：编译顺序问题？需先编译底层.f90文件，即先编译被调用的文件。那么如何生成一个满足顺序要求的runOBJS？（待解决）
-...
-## FAQ：可以不需要runOBJS吗？如何写大项目的makefile？（待解决）
-借鉴的项目代码1：https://www.partow.net/programming/makefile/index.html
-* SRC
-* apps, objects
-
-# 链接项目的.o文件(makefile文件的链接部分）
-OK，生成了一个run可执行程序～
-ldd run 可查看执行run所需的依赖库～
-## FAQ：链接顺序问题？.o链接顺序没有要求，随意
-前提是编译好了，即在编译时文件相互之间的依赖就需要搞清楚，那么链接就不用考虑顺序问题了；
-
-# 2022-04-13 对生成的可执行文件入手，输入什么？输出什么？ 
-DA_cycle.f90入手
+# 可执行文件
+看Data-Assimilation-Code/build/apps/Readme.md
