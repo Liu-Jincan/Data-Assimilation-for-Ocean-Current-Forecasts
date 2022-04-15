@@ -8,14 +8,20 @@ module mod_analysis
     implicit none
 
 contains
-    subroutine analysis(time)
-        implicit none
-        integer, intent(in) :: time(6)
 
-        integer :: i, M2(2), M                            ! M = M2(1)+M2(2)
+
+
+    
+    subroutine analysis(time) ! d
+        ! 函数说明：
+        ! 输入：    time    (/yyyy, mm, dd, hh, ff, ss/)
+        ! 输出：
+        
+        implicit none
+        integer, intent(in) :: time(6)              ! 年、月、日、时、分、秒
+        integer :: i, M2(2), M                      ! M = M2(1)+M2(2)
         integer, parameter :: NRECS = 1
-        ! tag ?
-        character :: tag*8
+        character :: tag*8                          ! tag = '20210121'
         real :: tmp4D(sub_x, sub_y, NLVLS, NRECS), tmp(sub_x, sub_y, NLVLS)
         real :: sal4D(sub_x, sub_y, NLVLS, NRECS), sal(sub_x, sub_y, NLVLS)
         real, allocatable :: tmp_o(:), sal_o(:), yo(:)
@@ -24,12 +30,14 @@ contains
 
         integer, allocatable :: Tindex3D(:, :), Sindex3D(:, :)
 
-        real :: start, finish
+        real :: start, finish                       ! cpu开始时间   cpu结束时间
+                                                        ! CPU时间与系统时间(CPU time and wall clock time), https://blog.csdn.net/fanyue1989/article/details/8223989           
+                                                        ! Fortran三种计时方法：，https://blog.csdn.net/weixin_43880667/article/details/86292969
 
-        call cpu_time(start)
+        call cpu_time(start)                       
 
         ! (0) write date from observation time
-        call date(tag, time)
+        call date(tag, time)                        
 
         ! (1) get the number of observations
         write (*, *) 'Preparing observational data...'
@@ -145,6 +153,9 @@ contains
 
         return
     end subroutine analysis
+
+
+
 
     subroutine squeeze(var, var1, var2)
         implicit none

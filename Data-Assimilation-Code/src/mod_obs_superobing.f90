@@ -4,6 +4,9 @@ module mod_obs_superobing
 
 contains
     subroutine bins(loc, lvl, filename)
+        ! 函数说明：
+        ! 输入：
+        ! 输出：
         implicit none
         character, intent(in) :: filename*14        ! argo file name
         integer, intent(out)  :: loc(2)             ! (lon or i)- and (lat or j)-direction
@@ -63,7 +66,7 @@ contains
                 lat_o = lat_o + lats_o(i)
             end if
         end do
-        lon_o = lon_o/n
+        lon_o = lon_o/n             ! 有必要这么求？不就是lon_o吗？哦，有可能浮标位置会变动，～～
         lat_o = lat_o/m
 
         do j = 1, sub_y
@@ -73,8 +76,8 @@ contains
         end do
         loc = minloc(m_o)
 
-        ! (1.2) determine the levels that the vertical bins at
-        dpt_o_min = dpts_o(1)
+        ! (1.2) determine the levels that the vertical bins at, 水深
+        dpt_o_min = dpts_o(1)       ! FAQ: 不理解～
         dpt_o_max = dpts_o(recs)
 
         lvl = -1

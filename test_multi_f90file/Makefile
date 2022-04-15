@@ -2,6 +2,8 @@ FC = gfortran
 FFLAGS = -g
 runOBJS =  mod_parms.o main.o 
 
+all: clean run 
+
 %.o:%.f90
 	$(FC) -c $(FFLAGS) $<
 

@@ -2,7 +2,7 @@ Build = ../build# 当前路径为 makefile 所在路径, 一般不改变
 OBJ_dir = $(Build)/objs##
 APP_dir = $(Build)/apps## 一般不改变，
 MOD_dir = $(Build)/mods
-EXEC = DA_cycle #生成的可执行文件的名称，
+EXEC = DA_cycle2 #生成的可执行文件的名称，
 RUN = DA_cycle#所需跑的项目文件的名称，不包含.f90的扩展名
 all : comp link trans clean # depend 
 

@@ -4,10 +4,15 @@ module mod_obs_sorting
     implicit none
 
 contains
+
+
     subroutine sort_obs(M2, time)
+        ! 函数说明：
+        ! 输入：    time    (/yyyy, mm, dd, hh, ff, ss/)
+        ! 输出：    M2     M2包括两个整数 
         implicit none
         integer, intent(in)  :: time(6)
-        integer, intent(out) :: M2(2)                   ! # of T&S observations
+        integer, intent(out) :: M2(2)                   ! # of T&S observations, T 表示 True，S 表示 simulate
 
         character :: filename*14
         integer   :: argos                              ! total number of argo profiles
@@ -29,11 +34,11 @@ contains
 
         ! (1) check the number of the argo profiles on 'date'
         argos = 0
-        do p = 1, max_argo
-            call argo_name(filename, time, p)
-            inquire (file='/home/chako/Argo/daily/'//filename, exist=exist)
+        do p = 1, max_argo                              ! max_argo = 准备去同化的最大argo数量，
+            call argo_name(filename, time, p)           ! filename = year//month//day//tags//'.dta'
+            inquire (file='/home/chako/Argo/daily/'//filename, exist=exist)     ! fortran inquire语句, https://blog.csdn.net/weixin_30294295/article/details/97587647
             if (exist .eqv. .true.) then
-                argos = argos + 1
+                argos = argos + 1                       ! argos = 实际去同化的最大argo数量，
             else
                 exit
             end if
@@ -51,7 +56,7 @@ contains
         allocate (locs(argos, 2), Mt(argos), Ms(argos))
 
         do p = 1, argos
-            call argo_name(filename, time, p)
+            call argo_name(filename, time, p)          !
             call bins(loc, lvl, filename)
             locs(p, 1) = loc(1)        ! location: loc(n,1)=lon=i
             locs(p, 2) = loc(2)        ! location: loc(n,2)=lat=j
@@ -153,8 +158,13 @@ contains
         return
     end subroutine sort_obs
 
+
+
 !========================================================================================
     subroutine argo_name(argoname, date, tag)
+        ! 函数说明：
+        ! 输入：
+        ! 输出：
         implicit none
         character, intent(out) :: argoname*14
         integer, intent(in)    :: date(3)
