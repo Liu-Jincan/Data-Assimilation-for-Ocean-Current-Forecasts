@@ -50,3 +50,6 @@ Win10和Ubuntu对应的两个博客都记录了跨文件调试的过程；
 
 # 可执行文件
 看Data-Assimilation-Code/build/apps/Readme.md
+
+# 2022-04-16 DA_Code.zip
+来自与wjc老师，进行解读，老师好像将原来的温度和盐度同化的代码做成了有效波高同化的代码，看DA_Code/Readme.md～～
