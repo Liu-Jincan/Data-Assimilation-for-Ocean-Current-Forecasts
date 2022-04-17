@@ -1,7 +1,7 @@
 Build = ../build# 当前路径为 makefile 所在路径, 一般不改变
-OBJ_dir = $(Build)/objs##
-APP_dir = $(Build)/apps## 一般不改变，
-MOD_dir = $(Build)/mods
+OBJ_dir = $(Build)/objs2##
+APP_dir = $(Build)/apps2## 一般不改变，
+MOD_dir = $(Build)/mods2
 EXEC = DA_cycle2 #生成的可执行文件的名称，
 RUN = DA_cycle#所需跑的项目文件的名称，不包含.f90的扩展名
 all : comp link trans clean # depend 
@@ -189,10 +189,10 @@ DA_cycle.o: DA_cycle.f90 mod_params.o mod_matrix_A.o mod_analysis.o
 #-----                                        运行(链接器)                                         
 ################################################################################################
 ################################################################################################
-link:$(OBJ_dir)/*.o
+link:*.o
 	@echo "编译完成"
 	@#$(FC) $(FFLAGS) $(runOBJS) -o run  #这个为什么会失败，为什么把$(FFLAGS)放到-o后面才可以？
-	$(FC) $(OBJ_dir)/*.o -o $(EXEC) $(FFLAGS) 
+	$(FC) *.o -o $(EXEC) $(FFLAGS) 
 	@#$(FC) DA_cycle.o mod_date.o mod_params.o  mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_read.o mod_matrix_write.o mod_obs_superobing.o mod_obs_sorting.o mod_matrix_A.o mod_matrix_H.o mod_matrix_L.o mod_matrix_R.o mod_matrix_inverse.o mod_matrix_W.o mod_analysis.o -o 	run $(FFLAGS) 
 	@echo "链接完成"
 #
@@ -253,8 +253,8 @@ trans:
 #-----                                        依赖(貌似没什么用，其实很有用)                                  
 ################################################################################################
 ################################################################################################
-depend:
-	sfmakedepend $(SOURCES)
+# depend:
+# 	sfmakedepend $(SOURCES)
 # DO NOT DELETE THIS LINE - used by make depend
 # mod_namelist.o: mod_params.o 
 
