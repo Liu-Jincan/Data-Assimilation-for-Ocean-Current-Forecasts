@@ -29,6 +29,7 @@ contains
         call date(tag, time)
 
         ! (1) compute & write H, HA, LHT, HLHT, R
+        write (*, *) '             ├── 「函数」H_matrix(M), use 1D locations to compute H,HA,AHATT, AHASS...'
         call H_matrix(M)                    ! H(M,N), use 1D locations to compute H,HA,AHATT, AHASS
         !call L_matrix(M2,M)                    ! LHT(N,M), use 3D locations to get LHTT, LHSS
         !call R_matrix(M,M)                    ! magnitude still needs to be determined

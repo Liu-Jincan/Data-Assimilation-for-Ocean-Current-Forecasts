@@ -25,19 +25,20 @@ contains
 
       real :: start, finish
 
-      call cpu_time(start)
+      call cpu_time(start) ! start: 0.00205700006
+         
 
       ! (0) write date from observation time
-      call date(tag, time)
+      call date(tag, time) ! tag: '20080317'
 
       ! (1) get the number of observations
-      write (*, *) 'Preparing observational data...'
+      write (*, *) '      ├── Preparing observational data...'
       !call sort_obs(M2,time)
       !!obtain observation
       M = 5
 
       ! (2) compute gain matrix W
-      write (*, *) 'Computing gain matrix...'
+      write (*, *) '      ├── 「函数」W_matrix(M, time)，Computing gain matrix...'
       call W_matrix(M, time)
 
       ! (3) read in observation

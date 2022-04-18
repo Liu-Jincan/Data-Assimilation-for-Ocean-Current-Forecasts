@@ -336,6 +336,8 @@ Time =       0.00 minutes.
 
 nice～
 
+* VScode有个断点面板～
+
 # src 中的文件组成及其功能
 
 ## tree
@@ -414,3 +416,10 @@ $ tree
 $ cat input/DA_time.txt 
 2008 03 17 00 00 00
 ```
+
+# 在调试中debug过程中，生成DA_cycle的整体流程～
+断点面板，
+变量查看面板，
+write (*, *)，
+有及时反馈，不担心编辑的文件是另一个文件夹下的文件，F12跳转的坑点～
+nice～

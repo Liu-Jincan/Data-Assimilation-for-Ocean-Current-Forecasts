@@ -14,6 +14,11 @@ contains
         integer :: i, j
         integer :: Index1D(M)
 
+        write (*, *) '                    ├── 「读取文件」input/Index1D.txt'
+        write (*, *) '                                  Tindex1D,存储温度观测数据相对于背景场的位置，'
+        write (*, *) '                                  假如有5个观测,则Tindex1D=(10 15 20 22 30 36),'
+        write (*, *) '                                  其中10表示第一个观测最近的网格点的index为10'
+        
         ! open (55, file='/home/wjc/wjc_work/DA_Code/input/Index1D.txt', status='old')
         open (55, file='input/Index1D.txt', status='old')
         read (55, *) Index1D

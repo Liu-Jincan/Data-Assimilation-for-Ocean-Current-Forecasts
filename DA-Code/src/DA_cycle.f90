@@ -7,12 +7,15 @@ program DA_cycle
 
    ! if (step) call A_matrix()     ! A matrix: run only 1 time before DA cycles
 
+   write (*, *) 'DA_cycle.f90'
+   write (*, *) '├──「读取文件」input/DA_time.txt'
    open (unit=11, file='input/DA_time.txt')
    read (11, *) yyyy, mm, dd, hh, ff, ss
    close (11)
 
    time = (/yyyy, mm, dd, hh, ff, ss/)
 
+   write (*, *) '├──「函数」analysis(time)'
    call analysis(time)
 
    write (*, *) 'dfdfdf'

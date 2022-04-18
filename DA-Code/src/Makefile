@@ -99,6 +99,7 @@ apps_makefile:
 
 	@-echo "debug-gdb:" >> $(APP_dir)/Makefile
 	@-echo "	@make clean" >> $(APP_dir)/Makefile
+	@-echo "	@cd $(SRC_dir) && make" >> $(APP_dir)/Makefile  # 为了方便调试
 	@-echo "	# 在选择对应的调试项目，F5" >> $(APP_dir)/Makefile
 	@echo "「已为apps生成makefile」"
 

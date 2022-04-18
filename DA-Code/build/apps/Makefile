@@ -18,4 +18,5 @@ gdb-debug-launch:
 		},
 debug-gdb:
 	@make clean
+	@cd /home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/../src && make
 	# 在选择对应的调试项目，F5
