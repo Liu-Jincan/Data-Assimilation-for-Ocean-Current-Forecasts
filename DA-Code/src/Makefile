@@ -4,7 +4,7 @@ APP_dir = $(Build)/apps## 一般不改变，
 MOD_dir = $(Build)/mods
 EXEC = DA_cycle #生成的可执行文件的名称，
 RUN = DA_cycle#所需跑的项目文件的名称，不包含.f90的扩展名
-all : comp link trans clean # depend 
+all : comp link trans clean apps_makefile # depend 
 
 # Portland Group Compiler
 #FC = pgf90
@@ -69,7 +69,19 @@ trans:
 	-mv -f *.o $(OBJ_dir)						#在 mv 命令前加一个减号，可以避免无文件而报错。
 	-mv -f *.mod $(MOD_dir)
 	-mv -f $(EXEC) $(APP_dir)/
-	@echo "目标文件转移到了$(OBJ_dir) ，可执行文件转移到了$(APP_dir)，MOD文件转移到了$(MOD_dir)"
+	@echo "「目标文件转移到了$(OBJ_dir) ，可执行文件转移到了$(APP_dir)，MOD文件转移到了$(MOD_dir)」"
+
+apps_makefile:
+	-rm -f $(APP_dir)/Makefile && touch -f $(APP_dir)/Makefile 
+	-echo "all: clean run" >> $(APP_dir)/Makefile
+	-echo "clean:" >> $(APP_dir)/Makefile 
+	-echo "	rm -f ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*" >> $(APP_dir)/Makefile
+	-echo "run:" >> $(APP_dir)/Makefile  
+	-echo "	./$(EXEC)" >> $(APP_dir)/Makefile 
+	-echo ".PHONY: clean run" >> $(APP_dir)/Makefile 
+	@echo "「已为apps生成makefile」"
+
+
 
 .PHONY: clean trans 
 # depend:

@@ -16,7 +16,8 @@ contains
 
         write (*, *) "*** Reading matrix "//mat_name//"..."
 
-        open (unit=110, file='/home/wjc/wjc_work/DA_Code/ensemble/'//mat_name//'matrix.txt', status='old')
+        ! open (unit=110, file='/home/wjc/wjc_work/DA_Code/ensemble/'//mat_name//'matrix.txt', status='old')
+        open (unit=110, file='ensemble/'//mat_name//'matrix.txt', status='old')
         ! if (present(opt)) then
         do i = 1, dim1
             read (110, *, end=110) (matrix(i, j), j=1, dim2)

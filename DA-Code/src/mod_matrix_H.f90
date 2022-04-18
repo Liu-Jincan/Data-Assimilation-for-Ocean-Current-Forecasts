@@ -14,7 +14,8 @@ contains
         integer :: i, j
         integer :: Index1D(M)
 
-        open (55, file='/home/wjc/wjc_work/DA_Code/input/Index1D.txt', status='old')
+        ! open (55, file='/home/wjc/wjc_work/DA_Code/input/Index1D.txt', status='old')
+        open (55, file='input/Index1D.txt', status='old')
         read (55, *) Index1D
         close (55)
         print *, Index1D
