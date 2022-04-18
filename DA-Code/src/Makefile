@@ -1,9 +1,11 @@
-Build = ../build# 当前路径为 makefile 所在路径, 一般不改变
+Build = /home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build#../build 不能用相对路径# 当前路径为 makefile 所在路径, 一般不改变
 OBJ_dir = $(Build)/objs##
 APP_dir = $(Build)/apps## 一般不改变，
-MOD_dir = $(Build)/mods
-EXEC = DA_cycle #生成的可执行文件的名称，
+MOD_dir = $(Build)/mods#
+SRC_dir = $(Build)/../src#
+EXEC = DA_cycle#生成的可执行文件的名称，
 RUN = DA_cycle#所需跑的项目文件的名称，不包含.f90的扩展名
+
 all : comp link trans clean apps_makefile # depend 
 
 # Portland Group Compiler
@@ -65,20 +67,39 @@ clean:
 	@echo "清理完毕" 
 
 trans:
-	-mkdir -p $(OBJ_dir) $(MOD_dir) $(APP_dir)  #在 mkdir 命令前加一个减号，可以避免文件夹已生成而报错。
-	-mv -f *.o $(OBJ_dir)						#在 mv 命令前加一个减号，可以避免无文件而报错。
-	-mv -f *.mod $(MOD_dir)
-	-mv -f $(EXEC) $(APP_dir)/
+	@-mkdir -p $(OBJ_dir) $(MOD_dir) $(APP_dir)  #在 mkdir 命令前加一个减号，可以避免文件夹已生成而报错。
+	@-mv -f *.o $(OBJ_dir)						#在 mv 命令前加一个减号，可以避免无文件而报错。
+	@-mv -f *.mod $(MOD_dir)
+	@-mv -f $(EXEC) $(APP_dir)/
+	@#-cp -f * $(APP_dir)/						# 为了在$(APP_dir)调试(废弃了)
+	@#-cp -f $(OBJ_dir)/* $(APP_dir)/				# 为了在$(APP_dir)调试（废弃了）
 	@echo "「目标文件转移到了$(OBJ_dir) ，可执行文件转移到了$(APP_dir)，MOD文件转移到了$(MOD_dir)」"
 
 apps_makefile:
 	-rm -f $(APP_dir)/Makefile && touch -f $(APP_dir)/Makefile 
-	-echo "all: clean run" >> $(APP_dir)/Makefile
-	-echo "clean:" >> $(APP_dir)/Makefile 
-	-echo "	rm -f ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*" >> $(APP_dir)/Makefile
-	-echo "run:" >> $(APP_dir)/Makefile  
-	-echo "	./$(EXEC)" >> $(APP_dir)/Makefile 
-	-echo ".PHONY: clean run" >> $(APP_dir)/Makefile 
+	@-echo "all: clean run #gdb-debug" >> $(APP_dir)/Makefile
+	@-echo "clean:" >> $(APP_dir)/Makefile 
+	@-echo "	rm -f ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*" >> $(APP_dir)/Makefile
+	@-echo "run:" >> $(APP_dir)/Makefile  
+	@-echo "	./$(EXEC)" >> $(APP_dir)/Makefile 
+	@-echo ".PHONY: clean run" >> $(APP_dir)/Makefile
+
+	@-echo "gdb-debug-launch:" >> $(APP_dir)/Makefile
+	@-echo "		{" >> $(APP_dir)/Makefile
+	@-echo '			"type": "cppdbg",' >> $(APP_dir)/Makefile
+	@-echo '			"request": "launch",' >> $(APP_dir)/Makefile
+	@-echo '			"name": "$(EXEC)",' >> $(APP_dir)/Makefile
+	@-echo '			"program": "$(APP_dir)/DA_cycle",' >> $(APP_dir)/Makefile
+	@-echo '			"args": [' >> $(APP_dir)/Makefile
+	@-echo '				"$(OBJ_dir)/*.o"' >> $(APP_dir)/Makefile
+	@-echo '				"$(SRC_dir)/*.f90"' >> $(APP_dir)/Makefile
+	@-echo '			],' >> $(APP_dir)/Makefile
+	@-echo '			"cwd": "$(APP_dir)/"' >> $(APP_dir)/Makefile
+	@-echo "		}," >> $(APP_dir)/Makefile
+
+	@-echo "debug-gdb:" >> $(APP_dir)/Makefile
+	@-echo "	@make clean" >> $(APP_dir)/Makefile
+	@-echo "	# 在选择对应的调试项目，F5" >> $(APP_dir)/Makefile
 	@echo "「已为apps生成makefile」"
 
 

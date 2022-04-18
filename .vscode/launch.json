@@ -8,12 +8,34 @@
         {
             "type": "cppdbg",
             "request": "launch",
-            "name": "test",
+            "name": "test",//
             "program": "${workspaceRoot}/test_multi_f90file/main",
             "args": [
                 "${workspaceRoot}/test_multi_f90file/mod_parms.o"
             ],
             "cwd": "${workspaceRoot}"
-        }
+        },
+        // {
+        //     "type": "cppdbg",
+        //     "request": "launch",
+        //     "name": "DA_cycle",
+        //     "program": "${workspaceRoot}/DA-Code/build/apps/DA_cycle",
+        //     "args": [
+        //         "${workspaceRoot}/DA-Code/build/apps/*.o",
+        //         "${workspaceRoot}/DA-Code/src/*.f90"
+        //     ],
+        //     "cwd": "${workspaceRoot}/DA-Code/build/apps"   //program可执行文件工作的文件夹
+        // },  
+        {
+			"type": "cppdbg",
+			"request": "launch",
+			"name": "DA_cycle",
+			"program": "/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/apps/DA_cycle",
+			"args": [
+				"/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/objs/*.o"
+				"/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/../src/*.f90"
+			],
+			"cwd": "/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/apps/"
+		},   
     ]
-}
+}       

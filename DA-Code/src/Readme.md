@@ -132,7 +132,7 @@ B，
 流依赖，
 
 
-# 运行 DA-Code/build/apps/DA_cycle 可执行文件 + makefile
+# 初步运行 DA-Code/build/apps/DA_cycle 可执行文件 + makefile + debug
 ## error: input/Index1D.txt
 ```
 $ ./DA_cycle 
@@ -322,4 +322,95 @@ rm -f ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*
  *** SUCCESS Analysis is saved!
 Time =       0.00 minutes.
  dfdfdf
+```
+
+## gdb debug launch.json 配置， （通过makefile实现）
+
+先手动配置：ok
+
+智能配置解决方法：
+
+* 在src中的makefile中的apps_makefile目标中，echo重定向在apps中的makefile，生成gdb-debug目标（此目标实现make debug功能），gdb-debug-launch目标（此目标包含.vscode/launch.json对应的配置信息）
+
+* FAQ: 命令行实现gdb debug，即运行VScode 中launch.json的配置文件；（暂时先不管吧，凑合着用）
+
+nice～
+
+# src 中的文件组成及其功能
+
+## tree
+```
+$ tree
+.
+├── ceshi.f90
+├── DA_cycle.f90
+├── DA_time.f90
+├── Makefile
+├── mod_analysis.f90
+├── mod_date.f90
+├── mod_matrix_H.f90
+├── mod_matrix_inverse.f90
+├── mod_matrix_L.f90
+├── mod_matrix_read.f90
+├── mod_matrix_R.f90
+├── mod_matrix_W.f90
+├── mod_matrix_write.f90
+├── mod_namelist.f90
+├── mod_obs_sorting.f90
+├── mod_obs_superobing.f90
+├── mod_params.f90
+├── mod_read_coor.f90
+├── mod_read_data.f90
+├── Readme.md
+└── wjc_analysis
+
+0 directories, 21 files
+```
+## DA_cycle.f90
+
+
+
+## mod_analysis.f90
+
+
+
+# build/apps 中的文件组成及其功能
+
+## tree
+
+```
+$ tree
+.
+├── DA_cycle
+├── data
+│   └── README.txt
+├── DA_time.txt
+├── ensemble
+│   ├── AHATmatrix.txt
+│   ├── Amatrix.txt
+│   ├── HAmatrix.txt
+│   ├── Hmatrix.txt
+│   ├── HXbmatrix.txt
+│   └── Wmatrix.txt
+├── input
+│   ├── bg_data.txt
+│   ├── DA_time.txt
+│   ├── Index1D.txt
+│   ├── obs_data.txt
+│   ├── README.txt
+│   ├── wjc_data.txt
+│   └── wjcobs_data.txt
+├── Makefile
+└── output
+    ├── analysis20080317.txt
+    └── README.txt
+
+4 directories, 19 files
+```
+
+## input/DA_time.txt
+
+```
+$ cat input/DA_time.txt 
+2008 03 17 00 00 00
 ```

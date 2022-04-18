@@ -13,7 +13,7 @@ contains
       integer, intent(in) :: time(6)
 
       integer :: i, M
-      integer, parameter :: NRECS = 1
+      ! integer, parameter :: NRECS = 1
       character :: tag*8
       ! real :: tmp4D(sub_x,sub_y,NLVLS,NRECS), tmp(sub_x,sub_y,NLVLS)
       ! real :: sal4D(sub_x,sub_y,NLVLS,NRECS), sal(sub_x,sub_y,NLVLS)
