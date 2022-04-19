@@ -6,7 +6,7 @@ module mod_matrix_W
     use mod_matrix_inverse
     use mod_matrix_H
     ! use mod_matrix_L
-    use mod_matrix_R
+    ! use mod_matrix_R
     implicit none
 
 contains

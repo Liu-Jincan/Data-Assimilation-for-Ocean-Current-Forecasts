@@ -24,7 +24,7 @@ contains
       !  integer, allocatable :: Tindex3D(:,:), Sindex3D(:,:)
 
       real :: start, finish
-
+      write (*, *) '      ├── 「cpu_time」start'
       call cpu_time(start) ! start: 0.00205700006
          
 
@@ -46,10 +46,12 @@ contains
 
       allocate (yo(M))
       ! open (55, file='/home/wjc/wjc_work/DA_Code/input/obs_data.txt', status='old')
+      write (*, *) '      ├── 「读取文件」input/obs_data.txt,'
       open (55, file='input/obs_data.txt', status='old')
       read (55, *) yo
       close (55)
-      write (*, *) '*** SUCCESS Sorted observation is read in!'
+      write (*, *) '                    得到yo，其维度为M*1,'
+      write (*, *) '                    *** SUCCESS Sorted observation is read in!'
 
       ! (4) read in background
       !open(55,file=input_pth//'background.dta',form='unformatted')
@@ -60,11 +62,13 @@ contains
 
       !call squeeze(Xb,tmp,sal)                       ! reshape tmp&sal to get Xb(N)
 
+      write (*, *) '      ├── 「读取文件」input/bg_data.txt,'
       ! open (55, file='/home/wjc/wjc_work/DA_Code/input/bg_data.txt', status='old')
       open (55, file='input/bg_data.txt', status='old')
       read (55, *) Xb
       close (55)
-      write (*, *) '*** SUCCESS Sorted observation is read in!'
+      write (*, *) '                    得到Xb，其维度为N*1,'
+      write (*, *) '                     *** SUCCESS Sorted background is read in!'
 
       ! (5) correct model bias
       ! if (crt_bias) then
@@ -78,19 +82,27 @@ contains
 
       ! (6) calculate increment
       allocate (H(M, N), HXb(M))
+      write (*, *) '      ├── 「函数」readmatrix(H, M, N, “H”, 1),'
       call readmatrix(H, M, N, 'H', 1)
+      write (*, *) '          「读取文件」ensemble/Hmatrix.txt,'
+      write (*, *) "                    Reading matrix H(",M,",",N,"),"
 
       HXb = matmul(H, Xb)
 
+      write (*, *) '      ├── 「函数」writematrix(HXb, M, 1, "HXb", 3),'
       call writematrix(HXb, M, 1, 'HXb', 3)
+      write (*, *) '          「生成文件」ensemble/HXbmatrix.txt,'
+      write (*, *) "                    Writing matrix HXb(",M,",",1,"),"
       deallocate (H)
+      
+      !!========================================================================
       ! IMPORTANT: find topography points in model output (=0.0): model topo points
       ! different from argo topo points
-      do i = 1, M
-         if (HXb(i) == 0.0) then
-            yo(i) = 0.0
-         end if
-      end do
+      ! do i = 1, M
+      !    if (HXb(i) == 0.0) then
+      !       yo(i) = 0.0
+      !    end if
+      ! end do
       !!========================================================================
       !!                       Check innovations                              !!
       !allocate(Tindex3D(M2(1),4), Sindex3D(M2(2),4))                          !!
@@ -111,8 +123,9 @@ contains
       !close(33)                                                               !!
       !deallocate(Tindex3D, Sindex3D)                                          !!
       !!========================================================================
+      write (*, *) '      ├── 「变量」dX = W*(yo-HXb),其维度为N*1，'
       yo = yo - HXb
-
+      deallocate (HXb)
       ! allocate(W(N/2,M))
       ! call readmatrix(W,N/2,M,'WT',2)
       ! dX(1:N/2) = matmul(W,yo)
@@ -124,6 +137,7 @@ contains
       call readmatrix(W, N, M, 'W', 1)
       dX = matmul(W, yo)
       deallocate (W)
+      deallocate (yo)
 
       !if (crt_bias) then
       !   bias = bias-rgamma*dX
@@ -135,31 +149,38 @@ contains
       !endif
 
       ! (7) get analysis
-      if ((maxval(dX(1:N/2)) > 10.0) .or. (minval(dX(1:N/2)) < -10.0)) then
-         write (*, *) '*** WARNING T increment is abnormal!'
-         write (*, *) '*** WARNING No observations assimilated!'
+      ! if ((maxval(dX(1:N/2)) > 10.0) .or. (minval(dX(1:N/2)) < -10.0)) then
+      write (*, *) '      ├── 「变量」Xa = Xb+dX，其维度为N*1，'
+      if ((maxval(dX(1:N)) > 10.0) .or. (minval(dX(1:N)) < -10.0)) then
+         write (*, *) '                *** WARNING increment is abnormal!'
+         write (*, *) '                *** WARNING No observations assimilated!'
          Xb = Xb
-      elseif ((maxval(dX(N/2 + 1:N)) > 5.0) .or. (minval(dX(N/2 + 1:N)) < -5.0)) then
-         write (*, *) '*** WARNING S increment is abnormal!'
-         write (*, *) '*** WARNING No observations assimilated!'
-         Xb = Xb
+      ! elseif ((maxval(dX(N/2 + 1:N)) > 5.0) .or. (minval(dX(N/2 + 1:N)) < -5.0)) then
+      !    write (*, *) '*** WARNING S increment is abnormal!'
+      !    write (*, *) '*** WARNING No observations assimilated!'
+      !    Xb = Xb
       else
          Xb = Xb + dX                  ! acutally Xb=Xa
       end if
       !call expand(tmp,sal,Xb)        ! analysis of tmp & sal
-      write (*, *) '*** SUCCESS Analysis is computed!'
+      write (*, *) '                *** SUCCESS Analysis is computed!'
 
       ! (8) save analysis as restart
+      write (*, *) '      ├── 「生成文件」',output_pth//'analysis'//tag//'.txt,'
       open (55, file=output_pth//'analysis'//tag//'.txt', status='new')
       do i = 1, N
          write (55, '(f8.3)') Xb(i)
       end do
       close (55)
-      write (*, *) '*** SUCCESS Analysis is saved!'
-
+      write (*, *) '                *** SUCCESS Analysis is saved!'
+      !
+      write (*, *) '      ├── 「cpu_time」finish'
       call cpu_time(finish)
-      print '("Time = ",f10.2," minutes.")', (finish - start)/60.0
-
+      write (*, *) '                    ',(finish - start),'seconds,'
+      write (*, *) '                    ',(finish - start)/60.0,'minutes,'
+      ! print '("Time = ",f10.2," minutes.")', (finish - start)/60.0
+      
+      write (*, *) '      ├── 「done」analysis(time)'
       return
    end subroutine analysis
 

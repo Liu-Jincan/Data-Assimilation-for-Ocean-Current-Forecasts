@@ -430,3 +430,98 @@ write (*, *)，
 
 nice～
 
+```
+DA_cycle.f90
+ ├──「读取文件」input/DA_time.txt
+ ├──「函数」analysis(time)
+       ├── 「cpu_time」start
+       ├── Preparing observational data...
+       ├── 「函数」W_matrix(M, time)，Computing gain matrix...
+              ├── 「函数」H_matrix(M), use 1D locations to compute H,HA,AHAT...
+                     ├── 「读取文件」input/Index1D.txt, 
+                                   Tindex1D,存储温度观测数据相对于背景场的位置，
+                                   假如有5个观测,则Tindex1D=(10 15 20 22 30 36),
+                                   其中10表示第一个观测最近的网格点的index为10,
+                                   Index1D(M)的输出,         898        1035        1036        1173        1174
+                     ├── 「函数」writematrix(H, M, N, “H”, 1),
+                                输出H二维矩阵到文本文件, 
+                                H大部分元素是0,稀疏,
+                                H其他元素为1,为1的个数与观测数一致,
+                                H的第一个维度是观测数量M,
+                                H的第二个维度是总共的网格点数N,
+                         「生成文件」ensemble/Hmatrix.txt,
+                                Writing matrix H(           5 ,        4819 ),
+                     ├── 「函数」readmatrix(A, N, NN, "A", 1),
+                                读取文本文件的A二维矩阵,
+                                A的第一个维度是总共的网格点数N,
+                                A的第二个维度是集合的尺寸NN,
+                         「读取文件」ensemble/Amatrix.txt,
+                                Reading matrix A(        4819 ,          20 ),
+                     ├── 「函数」writematrix(HA, M, NN, “HA”, 2),
+                                输出H*A二维矩阵到文本文件,
+                                HA的计算不应使用matmul,需考虑H的稀疏,
+                                HA的第一个维度是观测数量M,
+                                HA的第二个维度是集合的尺寸NN,
+                         「生成文件」ensemble/HAmatrix.txt,
+                                Writing matrix HA(           5 ,          20 ),
+                     ├── 「函数」writematrix(AHAT, N, M, "AHAT", 4),
+                                输出A*(HA)'二维矩阵到文本文件,
+                                AHAT的计算使用matmul,
+                                AHAT的第一个维度是总共的网格点数N,
+                                AHAT的第二个维度是观测数量M,
+                         「生成文件」ensemble/AHATmatrix.txt,
+                                Writing matrix AHAT(        4819 ,           5 ),
+                     ├── 「done」H_matrix(M), 
+              ├── 「函数」readmatrix(HA, M, NN, "HA", 2),
+                  「读取文件」ensemble/HAmatrix.txt,
+                         Reading matrix HA(           5 ,          20 ),
+              ├── 「变量」W0，为增益矩阵W中的H*B*(H)',
+                         W=BH'(alpha*HBH'+(NN-1)*R)^(-1),
+                         B=AA',这是ENOI与OI区别所在，
+              ├── 「变量」R，为增益矩阵W中的R,
+                         R是观测矩阵协防差矩阵，
+              ├── 「变量」W0，进行更新，加上缩放因子和R，
+                         FAQ：alpha，背景误差斜方差矩阵的缩放因子，
+                         FAQ：观测误差斜方差矩阵R前需乘以（NN-1），
+              ├── 「变量」W2，求逆矩阵，
+              ├── 「函数」readmatrix(AHAT, N, M, "AHAT", 4),
+                  「读取文件」ensemble/AHATmatrix.txt,
+                         Reading matrix AHAT(        4819 ,           5 ),
+              ├── 「函数」writematrix(W_wjc_ljc, N, M, "W", 1),
+                  「生成文件」ensemble/Wmatrix.txt,
+                         Writing matrix W(        4819 ,           5 ),
+              ├── 「done」W_matrix(M, time)
+       ├── Updating the background with observational data...
+       ├── 「读取文件」input/obs_data.txt,
+                     得到yo，其维度为M*1,
+                     *** SUCCESS Sorted observation is read in!
+       ├── 「读取文件」input/bg_data.txt,
+                     得到Xb，其维度为N*1,
+                      *** SUCCESS Sorted background is read in!
+       ├── 「函数」readmatrix(H, M, N, “H”, 1),
+           「读取文件」ensemble/Hmatrix.txt,
+                     Reading matrix H(           5 ,        4819 ),
+       ├── 「函数」writematrix(HXb, M, 1, "HXb", 3),
+           「生成文件」ensemble/HXbmatrix.txt,
+                     Writing matrix HXb(           5 ,           1 ),
+       ├── 「变量」dX = W*(yo-HXb),其维度为N*1，
+       ├── 「变量」Xa = Xb+dX，其维度为N*1，
+                 *** SUCCESS Analysis is computed!
+       ├── 「生成文件」output/analysis20080317.txt,
+                 *** SUCCESS Analysis is saved!
+       ├── 「cpu_time」finish
+                        7.08189979E-02 seconds,
+                        1.18031667E-03 minutes,
+```
+
+# input/Index1D.txt的生成
+
+# ensemble/Amatrix.txt的生成
+
+# input/obs_data.txt的生成
+
+# input/bg_data.txt的生成
+
+# FAQ：DA_cycle实现的是某一时刻同化，如何脚本自动实现多个时刻的同化？
+
+# FAQ：此程序是对某一时刻的同化，为什么不能对某一段连续时间段进行同行？

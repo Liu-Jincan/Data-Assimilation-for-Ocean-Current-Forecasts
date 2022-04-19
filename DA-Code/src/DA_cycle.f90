@@ -18,7 +18,7 @@ program DA_cycle
    write (*, *) '├──「函数」analysis(time)'
    call analysis(time)
 
-   write (*, *) 'dfdfdf'
+   ! write (*, *) 'dfdfdf'
 
    stop
 end program DA_cycle
