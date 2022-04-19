@@ -16,7 +16,7 @@ contains
         integer, intent(in) :: time(6)
 
         character :: tag*8
-        real, allocatable :: WT(:, :), WS(:, :), W_wjc(:, :)
+        real, allocatable :: WT(:, :), WS(:, :), W_wjc_ljc(:, :)
         real, allocatable :: AHAT(:, :)
         real, allocatable :: LHTT(:, :), LHSS(:, :)
 
@@ -29,14 +29,21 @@ contains
         call date(tag, time)
 
         ! (1) compute & write H, HA, LHT, HLHT, R
-        write (*, *) '             ├── 「函数」H_matrix(M), use 1D locations to compute H,HA,AHATT, AHASS...'
+        write (*, *) '             ├── 「函数」H_matrix(M), use 1D locations to compute H,HA,AHAT...'
         call H_matrix(M)                    ! H(M,N), use 1D locations to compute H,HA,AHATT, AHASS
         !call L_matrix(M2,M)                    ! LHT(N,M), use 3D locations to get LHTT, LHSS
         !call R_matrix(M,M)                    ! magnitude still needs to be determined
 
         ! (2) the second factor
+        write (*, *) '             ├── 「函数」readmatrix(HA, M, NN, "HA", 2),'
         call readmatrix(HA, M, NN, 'HA', 2)        ! HA(M,NN)
+        write (*, *) "                 「读取文件」"//'ensemble/HAmatrix.txt,'
+        write (*, *) "                        Reading matrix HA(",M,",",NN,"),"
+
         HAT = transpose(HA)                    ! HAT(NN,M)
+        write (*, *) "             ├── 「变量」W0，为增益矩阵W中的H*B*(H)',"
+        write (*, *) "                        W=BH'(alpha*HBH'+(NN-1)*R)^(-1),"
+        write (*, *) "                        B=AA',这是ENOI与OI区别所在，"
         W0 = matmul(HA, HAT)                    ! HA(M,NN) HAT(NN,M) --> W0(M,M)
 
         !if (localize) then
@@ -45,7 +52,8 @@ contains
         !endif
 
         !call readmatrix(R,M,M,'R',1)
-
+        write (*, *) "             ├── 「变量」R，为增益矩阵W中的R,"
+        write (*, *) "                        R是观测矩阵协防差矩阵，"
         R = 0
         do i = 1, M
             do j = 1, M
@@ -74,7 +82,12 @@ contains
         !close(33)                                                               !!
       !!========================================================================
 
+        write (*, *) "             ├── 「变量」W0，进行更新，加上缩放因子和R，"
+        write (*, *) "                        FAQ：alpha，背景误差斜方差矩阵的缩放因子，"
+        write (*, *) "                        FAQ：观测误差斜方差矩阵R前需乘以（NN-1），"
         W0 = alpha*W0 + (NN - 1)*R                 ! W0(M,M)
+
+        write (*, *) "             ├── 「变量」W2，求逆矩阵，"
         call inverse(W0, W2, M)                  ! W2(M,M)
 
         ! (3) the first factor
@@ -127,13 +140,22 @@ contains
         ! deallocate(WS)
 
      !!---wjc
-        allocate (W_wjc(N, M), AHAT(N, M))
-        call readmatrix(AHAT, N, M, 'AHAT', 4)
-        W_wjc = matmul(AHAT, W2)
-        call writematrix(W_wjc, N, M, 'W', 1)
-        deallocate (AHAT, W_wjc)
-     !!--------
+        allocate (W_wjc_ljc(N, M), AHAT(N, M))
 
+        write (*, *) '             ├── 「函数」readmatrix(AHAT, N, M, "AHAT", 4),'
+        call readmatrix(AHAT, N, M, 'AHAT', 4)
+        write (*, *) "                 「读取文件」"//'ensemble/AHATmatrix.txt,'
+        write (*, *) "                        Reading matrix AHAT(",N,",",M,"),"
+        W_wjc_ljc = matmul(AHAT, W2)
+
+        write (*, *) '             ├── 「函数」writematrix(W_wjc_ljc, N, M, "W", 1),'
+        call writematrix(W_wjc_ljc, N, M, 'W', 1)
+        write (*, *) '                 「生成文件」ensemble/Wmatrix.txt,'
+        write (*, *) "                        Writing matrix W(",N,",",M,"),"
+        deallocate (AHAT, W_wjc_ljc)
+     !!--------
+        
+        write (*, *) '             ├── 「done」W_matrix(M, time)'
         return
     end subroutine W_matrix
 

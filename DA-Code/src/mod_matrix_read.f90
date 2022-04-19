@@ -13,8 +13,8 @@ contains
         integer :: i, j
 
         ! mat_name=trim(adjustl(mat_name))
-
-        write (*, *) "*** Reading matrix "//mat_name//"..."
+        ! write (*, *) "***"//"「读取文件」"//'ensemble/'//mat_name//'matrix.txt,'
+        ! write (*, *) "              Reading matrix "//mat_name//"(",dim1,",",dim2,"),"
 
         ! open (unit=110, file='/home/wjc/wjc_work/DA_Code/ensemble/'//mat_name//'matrix.txt', status='old')
         open (unit=110, file='ensemble/'//mat_name//'matrix.txt', status='old')
@@ -27,7 +27,7 @@ contains
         ! endif
 110     close (110)
 
-        write (*, *) "    ...done."
+        ! write (*, *) "              done,"
 
         return
     end subroutine readmatrix

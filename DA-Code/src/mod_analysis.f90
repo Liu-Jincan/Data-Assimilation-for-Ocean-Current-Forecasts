@@ -42,7 +42,7 @@ contains
       call W_matrix(M, time)
 
       ! (3) read in observation
-      write (*, *) 'Updating the background with observational data...'
+      write (*, *) '      ├── Updating the background with observational data...'
 
       allocate (yo(M))
       ! open (55, file='/home/wjc/wjc_work/DA_Code/input/obs_data.txt', status='old')
