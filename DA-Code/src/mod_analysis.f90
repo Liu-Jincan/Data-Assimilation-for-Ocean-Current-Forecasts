@@ -1,5 +1,5 @@
 module mod_analysis
-   use mod_params, only: output_pth, input_pth, N, NN, NLVLS, sub_y, sub_x, crt_bias, rgamma
+   use mod_params, only: output_pth, input_pth, N, NN !, NLVLS, sub_y, sub_x, crt_bias, rgamma
    use mod_date
    ! use mod_read_data
    use mod_matrix_read
@@ -26,7 +26,6 @@ contains
       real :: start, finish
       write (*, *) '      ├── 「cpu_time」start'
       call cpu_time(start) ! start: 0.00205700006
-         
 
       ! (0) write date from observation time
       call date(tag, time) ! tag: '20080317'
@@ -85,16 +84,16 @@ contains
       write (*, *) '      ├── 「函数」readmatrix(H, M, N, “H”, 1),'
       call readmatrix(H, M, N, 'H', 1)
       write (*, *) '          「读取文件」ensemble/Hmatrix.txt,'
-      write (*, *) "                    Reading matrix H(",M,",",N,"),"
+      write (*, *) "                    Reading matrix H(", M, ",", N, "),"
 
       HXb = matmul(H, Xb)
 
       write (*, *) '      ├── 「函数」writematrix(HXb, M, 1, "HXb", 3),'
       call writematrix(HXb, M, 1, 'HXb', 3)
       write (*, *) '          「生成文件」ensemble/HXbmatrix.txt,'
-      write (*, *) "                    Writing matrix HXb(",M,",",1,"),"
+      write (*, *) "                    Writing matrix HXb(", M, ",", 1, "),"
       deallocate (H)
-      
+
       !!========================================================================
       ! IMPORTANT: find topography points in model output (=0.0): model topo points
       ! different from argo topo points
@@ -155,10 +154,10 @@ contains
          write (*, *) '                *** WARNING increment is abnormal!'
          write (*, *) '                *** WARNING No observations assimilated!'
          Xb = Xb
-      ! elseif ((maxval(dX(N/2 + 1:N)) > 5.0) .or. (minval(dX(N/2 + 1:N)) < -5.0)) then
-      !    write (*, *) '*** WARNING S increment is abnormal!'
-      !    write (*, *) '*** WARNING No observations assimilated!'
-      !    Xb = Xb
+         ! elseif ((maxval(dX(N/2 + 1:N)) > 5.0) .or. (minval(dX(N/2 + 1:N)) < -5.0)) then
+         !    write (*, *) '*** WARNING S increment is abnormal!'
+         !    write (*, *) '*** WARNING No observations assimilated!'
+         !    Xb = Xb
       else
          Xb = Xb + dX                  ! acutally Xb=Xa
       end if
@@ -166,7 +165,7 @@ contains
       write (*, *) '                *** SUCCESS Analysis is computed!'
 
       ! (8) save analysis as restart
-      write (*, *) '      ├── 「生成文件」',output_pth//'analysis'//tag//'.txt,'
+      write (*, *) '      ├── 「生成文件」', output_pth//'analysis'//tag//'.txt,'
       open (55, file=output_pth//'analysis'//tag//'.txt', status='new')
       do i = 1, N
          write (55, '(f8.3)') Xb(i)
@@ -176,66 +175,66 @@ contains
       !
       write (*, *) '      ├── 「cpu_time」finish'
       call cpu_time(finish)
-      write (*, *) '                    ',(finish - start),'seconds,'
-      write (*, *) '                    ',(finish - start)/60.0,'minutes,'
+      write (*, *) '                    ', (finish - start), 'seconds,'
+      write (*, *) '                    ', (finish - start)/60.0, 'minutes,'
       ! print '("Time = ",f10.2," minutes.")', (finish - start)/60.0
-      
+
       write (*, *) '      ├── 「done」analysis(time)'
       return
    end subroutine analysis
 
-   subroutine squeeze(var, var1, var2)
-      implicit none
-      real, intent(in)  :: var1(sub_x, sub_y, NLVLS), var2(sub_x, sub_y, NLVLS)
-      real, intent(out) :: var(N)
-      integer :: i, j, k, r
+   ! subroutine squeeze(var, var1, var2)
+   !    implicit none
+   !    real, intent(in)  :: var1(sub_x, sub_y, NLVLS), var2(sub_x, sub_y, NLVLS)
+   !    real, intent(out) :: var(N)
+   !    integer :: i, j, k, r
 
-      r = 0
-      do k = 1, NLVLS
-         do j = 1, sub_y
-            do i = 1, sub_x
-               r = r + 1
-               var(r) = var1(i, j, k)
-            end do
-         end do
-      end do
-      do k = 1, NLVLS
-         do j = 1, sub_y
-            do i = 1, sub_x
-               r = r + 1
-               var(r) = var2(i, j, k)
-            end do
-         end do
-      end do
+   !    r = 0
+   !    do k = 1, NLVLS
+   !       do j = 1, sub_y
+   !          do i = 1, sub_x
+   !             r = r + 1
+   !             var(r) = var1(i, j, k)
+   !          end do
+   !       end do
+   !    end do
+   !    do k = 1, NLVLS
+   !       do j = 1, sub_y
+   !          do i = 1, sub_x
+   !             r = r + 1
+   !             var(r) = var2(i, j, k)
+   !          end do
+   !       end do
+   !    end do
 
-      return
-   end subroutine squeeze
+   !    return
+   ! end subroutine squeeze
 
-   subroutine expand(var1, var2, var)
-      implicit none
-      real, intent(in)  :: var(N)
-      real, intent(out) :: var1(sub_x, sub_y, NLVLS), var2(sub_x, sub_y, NLVLS)
-      integer :: i, j, k, r
+   ! subroutine expand(var1, var2, var)
+   !    implicit none
+   !    real, intent(in)  :: var(N)
+   !    real, intent(out) :: var1(sub_x, sub_y, NLVLS), var2(sub_x, sub_y, NLVLS)
+   !    integer :: i, j, k, r
 
-      r = 0
-      do k = 1, NLVLS
-         do j = 1, sub_y
-            do i = 1, sub_x
-               r = r + 1
-               var1(i, j, k) = var(r)
-            end do
-         end do
-      end do
-      do k = 1, NLVLS
-         do j = 1, sub_y
-            do i = 1, sub_x
-               r = r + 1
-               var2(i, j, k) = var(r)
-            end do
-         end do
-      end do
+   !    r = 0
+   !    do k = 1, NLVLS
+   !       do j = 1, sub_y
+   !          do i = 1, sub_x
+   !             r = r + 1
+   !             var1(i, j, k) = var(r)
+   !          end do
+   !       end do
+   !    end do
+   !    do k = 1, NLVLS
+   !       do j = 1, sub_y
+   !          do i = 1, sub_x
+   !             r = r + 1
+   !             var2(i, j, k) = var(r)
+   !          end do
+   !       end do
+   !    end do
 
-      return
-   end subroutine expand
+   !    return
+   ! end subroutine expand
 
 end module mod_analysis

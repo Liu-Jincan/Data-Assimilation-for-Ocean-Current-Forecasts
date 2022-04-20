@@ -35,6 +35,8 @@ FFLAGS = -g -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
 runOBJS = $(RUN).o 
 comp: $(runOBJS)
 
+mod_matrix_A.o: mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_write.o
+
 mod_namelist.o: mod_params.o 
 
 mod_read_coor.o: mod_params.o  
@@ -49,7 +51,7 @@ mod_matrix_W.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_write.o mod
 
 mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o
 
-DA_cycle.o: mod_params.o mod_analysis.o
+DA_cycle.o: mod_params.o mod_analysis.o mod_matrix_A.o
 
 %.o:%.f90
 	$(FC) -c $(FFLAGS) $<
@@ -79,7 +81,8 @@ apps_makefile:
 	-rm -f $(APP_dir)/Makefile && touch -f $(APP_dir)/Makefile 
 	@-echo "all: clean run #gdb-debug" >> $(APP_dir)/Makefile
 	@-echo "clean:" >> $(APP_dir)/Makefile 
-	@-echo "	rm -f ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*" >> $(APP_dir)/Makefile
+	@-echo "	rm -f data/namelist.txt ensemble/coordinate.dta ensemble/ensemble_mean_tmp.dta ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*" >> $(APP_dir)/Makefile
+	@-echo "	rm -f ensemble/Amatrix.txt" >> $(APP_dir)/Makefile  
 	@-echo "run:" >> $(APP_dir)/Makefile  
 	@-echo "	./$(EXEC)" >> $(APP_dir)/Makefile 
 	@-echo ".PHONY: clean run" >> $(APP_dir)/Makefile

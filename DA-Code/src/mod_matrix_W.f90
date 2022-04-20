@@ -1,5 +1,5 @@
 module mod_matrix_W
-    use mod_params, only: N, NN, alpha, localize
+    use mod_params, only: N, NN, alpha !, localize
     use mod_date
     use mod_matrix_read
     use mod_matrix_write

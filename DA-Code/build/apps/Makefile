@@ -1,6 +1,7 @@
 all: clean run #gdb-debug
 clean:
-	rm -f ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*
+	rm -f data/namelist.txt ensemble/coordinate.dta ensemble/ensemble_mean_tmp.dta ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*
+	rm -f ensemble/Amatrix.txt
 run:
 	./DA_cycle
 .PHONY: clean run
