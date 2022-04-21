@@ -83,7 +83,7 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
                 buoy_table{1:size(data,1),2:14} = num2cell(data_other);
                 %
                 buoy_table_All = [buoy_table_All;buoy_table];
-                disp('                                 已导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
+                disp('                                 准备导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
             elseif(size(data,2)==16 & pagesource(3)== 'Y') %1999
                 % data 的改造
                 data_time = datetime([data(:,1:4) zeros(size(data,1),2)]);
@@ -93,7 +93,7 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
                 buoy_table{1:size(data,1),2:14} = num2cell(data_other);
                 %
                 buoy_table_All = [buoy_table_All;buoy_table];
-                disp('                                 已导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
+                disp('                                 准备导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
             elseif(size(data,2)==17) %2000-2004
                 % data 的改造
                 data_time = datetime([data(:,1:4) zeros(size(data,1),2)]);
@@ -103,7 +103,7 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
                 buoy_table{1:size(data,1),2:14} = num2cell(data_other);
                 %
                 buoy_table_All = [buoy_table_All;buoy_table];
-                disp('                                 已导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
+                disp('                                 准备导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
             elseif(size(data,2)==18) %2005-2020
                 % data 的改造
                 data_time = datetime([data(:,1:5) zeros(size(data,1),1)]);
@@ -113,7 +113,7 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
                 buoy_table{1:size(data,1),2:14} = num2cell(data_other);
                 %
                 buoy_table_All = [buoy_table_All;buoy_table];
-                disp('                                 已导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
+                disp('                                 准备导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
             else
                 warning('                               '+lower(ndbc_station_info_needed{i,1})+'h'+nian+'不符合一般的数据格式特点？i='+num2str(i)+',j='+num2str(j)+',tf='+num2str(tf)+',导入至'+temp_name+'的table失败。');
                 warning('                               若tf=0，那么str2num()出现问题，导致data=[]，根本原因可能是TIDE数据有缺失空白。')
@@ -138,9 +138,8 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
     
     end
     
-    disp('                   ├──「done」已提取浮标的 Standard Meterological 历史数据，生成station_historyData_SM/*相关文件!')
-    
     %% save
+    disp('                   ├──「done」已提取浮标的 Standard Meterological 历史数据，生成station_historyData_SM/*相关文件!')
     ndbc_station_download = ndbc_station_info_needed;
     %cd(path_save)
     %save ndbc_station_download ndbc_station_download %可能占用内存特别大；
