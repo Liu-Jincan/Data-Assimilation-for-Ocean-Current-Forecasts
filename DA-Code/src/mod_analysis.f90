@@ -4,7 +4,7 @@ module mod_analysis
    ! use mod_read_data
    use mod_matrix_read
    use mod_matrix_W
-   ! use mod_obs_sorting
+   use mod_obs_sorting
    implicit none
 
 contains
@@ -14,7 +14,7 @@ contains
 
       integer :: i, M
       ! integer, parameter :: NRECS = 1
-      character :: tag*8
+      character :: tag*12
       ! real :: tmp4D(sub_x,sub_y,NLVLS,NRECS), tmp(sub_x,sub_y,NLVLS)
       ! real :: sal4D(sub_x,sub_y,NLVLS,NRECS), sal(sub_x,sub_y,NLVLS)
       real, allocatable :: yo(:)
@@ -28,13 +28,14 @@ contains
       call cpu_time(start) ! start: 0.00205700006
 
       ! (0) write date from observation time
-      call date(tag, time) ! tag: '20080317'
+      call date_minute(tag, time) ! tag: '20080317'
+      write (*, *) '      ├── 「同化时间点」', tag
 
       ! (1) get the number of observations
-      write (*, *) '      ├── Preparing observational data...'
-      !call sort_obs(M2,time)
+      write (*, *) '      ├── 「NDBC浮标」Preparing observational data...'
+      call sort_obs_ndbc(M,time)
       !!obtain observation
-      M = 5
+      ! M = 5
 
       ! (2) compute gain matrix W
       write (*, *) '      ├── 「函数」W_matrix(M, time)，Computing gain matrix...'

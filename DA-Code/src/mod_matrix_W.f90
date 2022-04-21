@@ -15,7 +15,7 @@ contains
         integer, intent(in) :: M
         integer, intent(in) :: time(6)
 
-        character :: tag*8
+        ! character :: tag*8
         real, allocatable :: WT(:, :), WS(:, :), W_wjc_ljc(:, :)
         real, allocatable :: AHAT(:, :)
         real, allocatable :: LHTT(:, :), LHSS(:, :)
@@ -26,7 +26,7 @@ contains
         integer :: i, j  !!Tindex3D(M2(1),4), Sindex3D(M2(2),4)
 
         ! (0) write date from observation time
-        call date(tag, time)
+        ! call date(tag, time)
 
         ! (1) compute & write H, HA, LHT, HLHT, R
         write (*, *) '             ├── 「函数」H_matrix(M), use 1D locations to compute H,HA,AHAT...'

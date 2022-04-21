@@ -23,7 +23,8 @@ program DA_cycle
    write (*, *) '├──「函数」analysis(time)'
    call analysis(time)
 
-   write (*, *) '├──「FAQ」怎么生成Index1D.txt文件？'
+   write (*, *) '├──「FAQ」怎么生成Index1D.txt文件？sort_obs(M2, time)'
+   write (*, *) '├──「FAQ」温盐是每天同化一次？波高是每小时同化一次？'
    write (*, *) '├──「FAQ」这是一个时间点的同化，多个时间点？'
    write (*, *) '├──「FAQ」不同浮标的观测值并不都能同步观测到，怎么处理无法观测到时间点？'
    write (*, *) '          观测算子的维度需要变化？'

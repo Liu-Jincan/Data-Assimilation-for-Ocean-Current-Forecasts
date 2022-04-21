@@ -35,6 +35,10 @@ FFLAGS = -g -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
 runOBJS = $(RUN).o 
 comp: $(runOBJS)
 
+mod_obs_superobing.o: mod_params.o
+
+mod_obs_sorting.o: mod_params.o mod_obs_superobing.o
+
 mod_matrix_A.o: mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_write.o
 
 mod_namelist.o: mod_params.o 
@@ -49,7 +53,7 @@ mod_matrix_R.o: mod_params.o mod_matrix_write.o
 
 mod_matrix_W.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_write.o mod_matrix_H.o mod_matrix_R.o mod_matrix_inverse.o
 
-mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o
+mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o mod_obs_sorting.o
 
 DA_cycle.o: mod_params.o mod_analysis.o mod_matrix_A.o
 
