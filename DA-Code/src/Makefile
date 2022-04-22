@@ -23,7 +23,11 @@ FC = gfortran
 #FFLAGS = -g -C -O3 -mcmodel=medium -convert big_endian -I${NCDF_INC} -L${NCDF_LIB} -lnetcdf -lnetcdff
 #FFLAGS = -g -C -O3 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lnetcdf -lnetcdff -I /usr/include
 #FFLAGS = -g -C -O3
-FFLAGS = -g -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
+gdb_debug = -g
+netcdf = -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
+Matlab_mat_h = -I/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/extern/include -L/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/bin/glnxa64 -L/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/ -cpp 
+Matlab_mat_h2 = -lmat -lmx -lmex -lm -Wl,-rpath /home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/bin/glnxa64
+FFLAGS = $(gdb_debug) $(netcdf) #$(Matlab_mat_h) $(Matlab_mat_h2)
 #FFLAGS = -g -C -convert big_endian
 #FFLAGS = -g -check bounds -fpe0 -ftrapuv -debug semantic_stepping -debug variable_locations -fpp
 #FFLAGS = -O3 -ipo -no-prec-div
@@ -35,9 +39,9 @@ FFLAGS = -g -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
 runOBJS = $(RUN).o 
 comp: $(runOBJS)
 
-mod_obs_superobing.o: mod_params.o
+# mod_obs_superobing.o: mod_params.o
 
-mod_obs_sorting.o: mod_params.o mod_obs_superobing.o
+# mod_obs_sorting.o: mod_params.o mod_obs_superobing.o
 
 mod_matrix_A.o: mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_write.o
 
@@ -53,18 +57,18 @@ mod_matrix_R.o: mod_params.o mod_matrix_write.o
 
 mod_matrix_W.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_write.o mod_matrix_H.o mod_matrix_R.o mod_matrix_inverse.o
 
-mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o mod_obs_sorting.o
+mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o # mod_obs_sorting.o
 
 DA_cycle.o: mod_params.o mod_analysis.o mod_matrix_A.o
 
 %.o:%.f90
-	$(FC) -c $(FFLAGS) $<
+	$(FC) $(Matlab_mat_h) -c  $(FFLAGS) $<
 
 
 link:*.o
 	@echo "编译完成"
 	@#$(FC) $(FFLAGS) $(runOBJS) -o run
-	$(FC) *.o -o $(EXEC) $(FFLAGS) 
+	$(FC) *.o $(Matlab_mat_h) -o $(EXEC) $(FFLAGS) $(Matlab_mat_h2)
 	@echo "链接完成"
 
 clean:

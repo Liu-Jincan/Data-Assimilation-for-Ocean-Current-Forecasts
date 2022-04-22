@@ -50,7 +50,18 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
                 lower(ndbc_station_info_needed{i,1})+'h'+...
                 nian+'.txt.gz&dir=data/historical/stdmet/';
             %url = 'https://www.ndbc.noaa.gov/view_text_file.php?filename=41002h1976.txt.gz&dir=data/historical/stdmet/';
-            pagesource = webread(url,options); %pagesource(1:100)
+            % 
+            flag = 0; % 为了确保一定读取到网页内容～～
+            while flag==0
+                try
+                    pagesource = webread(url,options); %pagesource(1:100)
+                    flag = 1;
+                catch
+                    flag = 0;
+                end
+            end
+
+
             %temp=find(isstrprop(pagesource(1:200),'digit')==1);pagesource(1:temp(1));
             
             % 获取 pagesource 第一次出现数字的索引，从而通过str2num()得到数据矩阵
@@ -132,15 +143,19 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
         %
         temp = strcat(path_save,'station_historyData_SM/',num2str(i),'.mat');
         save(temp,'buoy_table_All','-v7') %v7，压缩程度最大，但是限制2GB
+        disp('                                 已成功导入'+lower(ndbc_station_info_needed{i,1})+'h'+nian+'数据到'+temp_name);
+        %
         ndbc_station_info_needed.station_historyData_SM{i,1} = strcat(num2str(size(buoy_table_All,1)),'x',num2str(size(buoy_table_All,2)),',station_historyData_SM/',num2str(i),'.mat');
         ndbc_station_info_needed.station_historyData_SM{i,2} = buoy_fail;
+        work_table = ndbc_station_info_needed;
+        save work_table.mat work_table
         disp('                              「work_table」在work_table中的station_historyData_SM属性中，'+lower(ndbc_station_info_needed{i,1})+'浮标会显示'+temp_name+'文件位置和缺少的年份信息。');
     
     end
     
     %% save
     disp('                   ├──「done」已提取浮标的 Standard Meterological 历史数据，生成station_historyData_SM/*相关文件!')
-    ndbc_station_download = ndbc_station_info_needed;
+    % ndbc_station_download = ndbc_station_info_needed;
     %cd(path_save)
     %save ndbc_station_download ndbc_station_download %可能占用内存特别大；
     

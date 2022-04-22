@@ -4,7 +4,7 @@ module mod_analysis
    ! use mod_read_data
    use mod_matrix_read
    use mod_matrix_W
-   use mod_obs_sorting
+   ! use mod_obs_sorting
    implicit none
 
 contains
@@ -33,9 +33,9 @@ contains
 
       ! (1) get the number of observations
       write (*, *) '      ├── 「NDBC浮标」Preparing observational data...'
-      call sort_obs_ndbc(M,time)
+      ! call sort_obs_ndbc(M,time)
       !!obtain observation
-      ! M = 5
+      M = 5
 
       ! (2) compute gain matrix W
       write (*, *) '      ├── 「函数」W_matrix(M, time)，Computing gain matrix...'

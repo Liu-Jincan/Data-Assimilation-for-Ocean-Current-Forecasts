@@ -1,4 +1,4 @@
-function [ndbc_station_download] = ndbc_station_download_NC(ndbc_station_download,station_tf_download,ncid,nclat,nclon,nctime,nc_WVHT,path_save)
+function [ndbc_station_download] = ndbc_station_download_NC(ndbc_station_download,station_tf_download,ncid,nclat,nclon,nctime,nc_WVHT,path_save,ncNameInTable)
 % author:
 %    liu jin can, UPC
 %
@@ -20,7 +20,7 @@ function [ndbc_station_download] = ndbc_station_download_NC(ndbc_station_downloa
 %ndbc_station_download_NC0 = table; %后面重新命名为ndbc_station_download_NC即可。
 
 %%
-disp('-----------------------ndbc_station_download_NC')
+% disp('-----------------------ndbc_station_download_NC')
 cd(path_save)
 
 %% 了解 nc 文件；
@@ -29,19 +29,36 @@ cd(path_save)
 %disp('了解 nc 文件！'); pause(1);
 
 %% 查找每个浮标对应NC文件的最近网格点经纬度（索引）
+fprintf('                   ├──「每个浮标对应%s中的最近网格点经纬度（索引）,在H观测矩阵的索引」\n',ncNameInTable)
+fprintf('                        每个浮标最近网格点经纬度索引的解释，如nclat(7)，指的是nclat序列的第7位数，不需要明确nclat是从小到大排列，还是从大到小,\n')
+fprintf('                        每个浮标在H观测矩阵的索引的解释,必须要求nclat和nclon是从小到大排列，才能满足同化中网格点（先是纬度、经度最小-->后经度从小到大-->后纬度变大一个分度值-->）排成一列的特点，代码中一进行验证，\n')
 %nclat = ncread(ncid,'latitude'); %查看纬度显示正常
 %nclon = ncread(ncid,'longitude'); %查看经度显示正常
+if(nclon(end)<nclon(1) | nclat(end)<nclat(1))
+    error('每个浮标在H观测矩阵的索引必须要求nclat和nclon是从小到大排列，才能满足同化中网格点（先是纬度、经度最小-->后经度从小到大-->后纬度变大一个分度值-->）排成一列的特点!!!')
+end
 for i=1:1:size(ndbc_station_download,1)
     % lat 最近网格点经纬度
-    [~,temp] = min(abs(nclat(:)-ndbc_station_download.lat(i,1))); 
-    ndbc_station_download.matchNC_lat{i,1} = nclat(temp);
-    ndbc_station_download.matchNC_lat{i,2} = temp; %索引位置
+    [~,temp1] = min(abs(nclat(:)-ndbc_station_download.lat(i,1))); 
+    % ndbc_station_download.matchNC_lat{i,1} = nclat(temp1);
+    eval(['ndbc_station_download.',ncNameInTable,'_matchNC_lat{i,1} = nclat(temp1);'])
+    % ndbc_station_download.matchNC_lat{i,2} = temp1; %索引位置
+    eval(['ndbc_station_download.',ncNameInTable,'_matchNC_lat{i,2} = temp1;'])
+
     % lon 最近网格点经纬度
-    [~,temp] = min(abs(nclon(:)-ndbc_station_download.lon(i,1))); % 
-    ndbc_station_download.matchNC_lon{i,1} = nclon(temp);
-    ndbc_station_download.matchNC_lon{i,2} = temp; %索引位置
+    [~,temp2] = min(abs(nclon(:)-ndbc_station_download.lon(i,1))); % 
+    % ndbc_station_download.matchNC_lon{i,1} = nclon(temp2);
+    eval(['ndbc_station_download.',ncNameInTable,'_matchNC_lon{i,1} = nclon(temp2);'])
+    % ndbc_station_download.matchNC_lon{i,2} = temp2; %索引位置
+    eval(['ndbc_station_download.',ncNameInTable,'_matchNC_lon{i,2} = temp2; '])
+    
+    % 在H矩阵的索引
+    eval(['ndbc_station_download.',ncNameInTable,'_IndexInHmatrix{i,1} = (temp1-1)*length(nclon)+temp2;'])
 end
-disp('已添加每个浮标对应NC文件的最近网格点经纬度、索引！'); pause(1);
+
+fprintf('                      「work_table」在work_table中的%s*属性中，记录了每个浮标对应%s中的最近网格点信息,\n',ncNameInTable,ncNameInTable)
+% disp('已添加每个浮标对应NC文件的最近网格点经纬度、索引！'); 
+pause(1);
 
 %% NC文件julian day转换为UT日期，datetime数据类型
 %ncdisp(ncid,'time');
@@ -58,7 +75,7 @@ disp('已添加每个浮标对应NC文件的最近网格点经纬度、索引！
 % datetime('1990-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss')+caldays(1)
 
 UTtime = datetime('1990-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss')+nctime;
-disp('已将NC文件julian day转换为UT日期，用到datetime数据类型！'); pause(1);
+disp('                   ├──「时间转化]已将NC文件julian day转换为UT日期，用到datetime数据类型！'); pause(1);
 
 
 
@@ -73,17 +90,16 @@ temp = nc_WVHT(:,:,1);       % 观察数据样子，与ncview()对比，可以�
 for i=station_tf_download%1:1:size(ndbc_station_download,1)
     nc_time_WVHT = table;
     nc_time_WVHT.YY_MM_DD_hh_mm_ss = UTtime;
-    temp = nc_WVHT(ndbc_station_download.matchNC_lon{i,2},ndbc_station_download.matchNC_lat{i,2},:);
+    % temp = nc_WVHT(ndbc_station_download.matchNC_lon{i,2},ndbc_station_download.matchNC_lat{i,2},:);
+    eval(['temp = nc_WVHT(ndbc_station_download.',ncNameInTable,'_matchNC_lon{i,2},ndbc_station_download.',ncNameInTable,'_matchNC_lat{i,2},:);'])
     nc_time_WVHT.WVHT = temp(:);
-    ndbc_station_download.nc_time_WVHT{i,1} = nc_time_WVHT;
+    % ndbc_station_download.nc_time_WVHT{i,1} = nc_time_WVHT;
+    eval(['ndbc_station_download.',ncNameInTable,'_nc_time_WVHT{i,1} = nc_time_WVHT; '])
 end
-disp('已提取nc中各浮标的时间-WVHT数据！'); pause(1);
+fprintf('                   ├──「已提取%s中对应各浮标的时间-WVHT数据到work_table的%s_nc_time_WVHT属性！」,\n',ncNameInTable,ncNameInTable); pause(1);
 
 %% save
-% ndbc_station_download_NC = ndbc_station_download;
-% save ndbc_station_download_NC ndbc_station_download_NC
+work_table = ndbc_station_download;
+save work_table.mat work_table
 
-%%
-%ndbc_station_download_NC_analyse = ndbc_station_download;
-%save ndbc_station_download_NC_analyse ndbc_station_download_NC_analyse
 end
