@@ -91,6 +91,9 @@ function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse(ndbc_stat
             disp(strcat('                       发现',ndbc_station_download_NC.station_ID{i},'匹配的数据不足3个'));pause(1);
             oooooo = strcat('发现',ndbc_station_download_NC.station_ID{i},'匹配的数据不足3个');
             eval(['ndbc_station_download_NC.',ncNameInTable,'_ndbc_nc_match_WVHT{i,1} = oooooo;'])
+            % save
+            work_table = ndbc_station_download_NC;
+            save work_table.mat work_table
         else
             % 时序图
             f = figure(1);
