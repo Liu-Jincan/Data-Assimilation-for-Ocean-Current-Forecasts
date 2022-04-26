@@ -1,4 +1,4 @@
-function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse(ndbc_station_download_NC,station_tf_download,path_save,ncNameInTable)
+function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse_HS(path_fig,path_ndbc_nc_match,path_Nc_time_Hs,ndbc_station_download_NC,station_tf_download,path_save,ncNameInTable)
     % author:
     %    liu jin can, UPC
     %
@@ -21,7 +21,7 @@ function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse(ndbc_stat
     %% 时间-WVHT数据，一个小时一个数据
     %-----------------------------
     %参数
-    path_fig = '.\fig\'; %%https://ww2.mathworks.cn/help/matlab/ref/savefig.html?s_tid=gn_loc_drop
+    %path_fig = './fig/'; %%https://ww2.mathworks.cn/help/matlab/ref/savefig.html?s_tid=gn_loc_drop
     %-----------------------------
     
     for i=station_tf_download%1:1:size(ndbc_station_download_NC,1)
@@ -94,14 +94,15 @@ function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse(ndbc_stat
             % save
             work_table = ndbc_station_download_NC;
             save work_table.mat work_table
+            disp(strcat('                       已在work_table保存相关信息'));
         else
             % 时序图
             f = figure(1);
             plot(ndbc_nc_match_WVHT.time,ndbc_nc_match_WVHT.ndbc);
             hold on; plot(ndbc_nc_match_WVHT.time,ndbc_nc_match_WVHT.nc);
             %close(f1)
-            savefig(f,strcat(path_fig,ndbc_station_download_NC.station_ID{i},'一小时时间-WVHT数据-时序图','.fig')); %https://ww2.mathworks.cn/help/matlab/ref/savefig.html?s_tid=gn_loc_drop
-            ndbc_nc_match_WVHT.TimeSeriesChart{1,1} = strcat('openfig("',path_fig,ndbc_station_download_NC.station_ID{i},'一小时时间-WVHT数据-时序图','.fig")');
+            savefig(f,strcat(path_fig,num2str(i),'-一小时时间-WVHT数据-时序图','.fig')); %https://ww2.mathworks.cn/help/matlab/ref/savefig.html?s_tid=gn_loc_drop
+            ndbc_nc_match_WVHT.TimeSeriesChart{1,1} = strcat('openfig("',path_fig,num2str(i),'-一小时时间-WVHT数据-时序图','.fig")');
             close(f)
             %openfig('1.fig');
             disp(strcat('                       已简单画出时序图，并保存;'));
@@ -127,17 +128,22 @@ function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse(ndbc_stat
             [f,de] = DensScat(ndbc_nc_match_WVHT.ndbc,ndbc_nc_match_WVHT.nc);
             colormap('Jet')
             hc = colorbar;
-            savefig(f,strcat(path_fig,ndbc_station_download_NC.station_ID{i},'一小时时间-WVHT数据-散点图','.fig'));
-            ndbc_nc_match_WVHT.ScatterChart{1,1} = strcat('openfig("',path_fig,ndbc_station_download_NC.station_ID{i},'一小时时间-WVHT数据-散点图','.fig")');
+            savefig(f,strcat(path_fig,num2str(i),'-一小时时间-WVHT数据-散点图','.fig'));
+            ndbc_nc_match_WVHT.ScatterChart{1,1} = strcat('openfig("',path_fig,num2str(i),'-一小时时间-WVHT数据-散点图','.fig")');
             close(f)
             disp(strcat('                       已简单画出散点图，并保存;'));
             
-            % 保存到总的table
-            eval(['ndbc_station_download_NC.',ncNameInTable,'_ndbc_nc_match_WVHT{i,1} = ndbc_nc_match_WVHT;'])
-
-            % save
+            % 保存到path_ndbc_nc_match
+            oooooo = strcat(path_ndbc_nc_match,num2str(i),'.mat');
+            save(oooooo,"ndbc_nc_match_WVHT");
+            disp(strcat('                       已保存到',path_ndbc_nc_match,'文件夹;'));
+            % 总的table做个记录，
+            oooooo2 = strcat('load("',oooooo,'");');
+            eval(['ndbc_station_download_NC.',ncNameInTable,'_ndbc_nc_match_WVHT{i,1} = oooooo2;'])
+                               
             work_table = ndbc_station_download_NC;
             save work_table.mat work_table
+            disp(strcat('                       已在work_table保存相关信息'));
         end
 
 
