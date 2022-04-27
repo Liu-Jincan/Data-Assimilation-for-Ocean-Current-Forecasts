@@ -3,8 +3,8 @@ OBJ_dir = $(Build)/objs##
 APP_dir = $(Build)/apps## 一般不改变，
 MOD_dir = $(Build)/mods#
 SRC_dir = $(Build)/../src#
-EXEC = DA_cycle#生成的可执行文件的名称，
-RUN = DA_cycle#所需跑的项目文件的名称，不包含.f90的扩展名
+EXEC = DA_cycle_NoWW3#生成的可执行文件的名称，
+RUN = DA_cycle_NoWW3#所需跑的项目文件的名称，不包含.f90的扩展名
 
 all : comp link trans clean apps_makefile # depend 
 
@@ -59,7 +59,7 @@ mod_matrix_W.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_write.o mod
 
 mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o # mod_obs_sorting.o
 
-DA_cycle.o: mod_params.o mod_analysis.o mod_matrix_A.o
+DA_cycle_NoWW3.o: mod_params.o mod_analysis.o mod_matrix_A.o mod_read_coor.o
 
 %.o:%.f90
 	$(FC) $(Matlab_mat_h) -c  $(FFLAGS) $<

@@ -56,4 +56,15 @@ contains
         return
     end subroutine check
 
+    subroutine checknc(status)
+        integer, intent(in) :: status
+
+        if (status /= nf90_noerr) then
+            print *, trim(nf90_strerror(status))
+            stop "Stopped"
+        end if
+
+        return
+    end subroutine checknc
+
 end module mod_read_coor

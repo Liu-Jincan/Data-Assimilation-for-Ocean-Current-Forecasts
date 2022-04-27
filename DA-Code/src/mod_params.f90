@@ -2,6 +2,13 @@ module mod_params
     implicit none
 
     !********************************* Data Assimilation Step Options *********************************
+    !
+    character(len=*), parameter :: program = 'work_eastUSA'     ! 数据同化的区域项目名称
+    character(len=*), parameter :: nc_pth = program//'/nc/'               ! 背景场数据所在文件夹
+    character(len=*), parameter :: nc_fileNameTxt = nc_pth//'nc.txt'      ! 背景场数据所在文件夹包含的文件名称，按时间顺序从先到后，
+    integer, parameter :: nc_fileNameNum = 2                              ! $(nc_fileNameTxt)的行数，即需要同化的背景场nc文件个数，
+    character(len=*), parameter :: nc_AttTimeName = 'time'
+    ! 
     character(len=*), parameter :: output_pth = 'output/'      ! analysis file，不能更改名称
     character(len=*), parameter :: input_pth = 'input/'       ! background file，不能更改名称
     character(len=*), parameter :: data_pth = 'data/'        ! ensemble files，不能更改名称
@@ -9,6 +16,7 @@ module mod_params
     character(len=*), parameter :: fname_var = '_T.nc'        ! suffix of ensemble files
 
     logical, parameter :: step = .true. ! .false.      ! .T. to construct ensemble
+    ! logical :: step = .true. 
     integer, parameter :: y_start = 2012       ! first year of ensemble data pool
     integer, parameter :: y_end = 2014       ! last year of ensemble data pool
     integer, parameter :: NN = 490      ! size of ensemble (5 days per month from 2-year)

@@ -1,4 +1,5 @@
-function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse_HS(path_fig,path_ndbc_nc_match,path_Nc_time_Hs,ndbc_station_download_NC,station_tf_download,path_save,ncNameInTable)
+function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse_HS(path_fig,path_ndbc_nc_match,...
+    path_Nc_time_Hs,ndbc_station_download_NC,station_tf_download,path_save,ncNameInTable)
     % author:
     %    liu jin can, UPC
     %
@@ -65,7 +66,11 @@ function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse_HS(path_f
         disp(strcat('                       已确定nc数据，一个小时一个数据；'));
         %% ndbc 和 nc 小时数据匹配；
         % 组合ndbc和nc的数据
-        eval(['temp = ndbc_station_download_NC.',ncNameInTable,'_nc_time_WVHT{i,1};'])
+        eval(['temp = ndbc_station_download_NC.',ncNameInTable,'_nc_time_WVHT{i,1};'])  
+        eval([temp])
+        temp = nc_time_WVHT;
+        clear nc_time_WVHT;
+        %
         ndbc_nc_time = [ndbc_time3;temp{:,1}]; %ndbc 和 nc的datetime数据组合
         ndbc_nc_WVHT = [ndbc_WVHT3;temp{:,2}]; %ndbc 和 nc的WVHT数据组合
         % 匹配
@@ -154,4 +159,4 @@ function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse_HS(path_f
     %ndbc_station_download_NC_analyse = ndbc_station_download_NC;
     %save ndbc_station_download_NC_analyse ndbc_station_download_NC_analyse
     
-    end
+    

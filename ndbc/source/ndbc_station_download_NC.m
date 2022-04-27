@@ -1,4 +1,6 @@
-function [ndbc_station_download] = ndbc_station_download_NC(ndbc_station_download,station_tf_download,ncid,nclat,nclon,nctime,nc_WVHT,path_save,ncNameInTable)
+function [ndbc_station_download] = ndbc_station_download_NC(ndbc_station_download,station_tf_download,ncid,nclat,...
+    nclon,nctime,nc_WVHT,path_save,ncNameInTable,...
+    path_Nc_time_Hs)
 % author:
 %    liu jin can, UPC
 %
@@ -74,9 +76,9 @@ pause(1);
 % caldays(1)
 % datetime('1990-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss')+caldays(1)
 
-UTtime = datetime('1990-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss')+nctime;
+    
 disp('                   ├──「时间转化]已将NC文件julian day转换为UT日期，用到datetime数据类型！'); pause(1);
-
+UTtime = datetime('1990-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss')+nctime;
 
 
 %% nc中的时间-WVHT数据
@@ -93,13 +95,20 @@ for i=station_tf_download%1:1:size(ndbc_station_download,1)
     % temp = nc_WVHT(ndbc_station_download.matchNC_lon{i,2},ndbc_station_download.matchNC_lat{i,2},:);
     eval(['temp = nc_WVHT(ndbc_station_download.',ncNameInTable,'_matchNC_lon{i,2},ndbc_station_download.',ncNameInTable,'_matchNC_lat{i,2},:);'])
     nc_time_WVHT.WVHT = temp(:);
+    %
+    oooooo = strcat(path_Nc_time_Hs,num2str(i),'.mat');
+    save(oooooo,"nc_time_WVHT");
+    %
+    % 总的table做个记录，
     % ndbc_station_download.nc_time_WVHT{i,1} = nc_time_WVHT;
-    eval(['ndbc_station_download.',ncNameInTable,'_nc_time_WVHT{i,1} = nc_time_WVHT; '])
-end
-fprintf('                   ├──「已提取%s中对应各浮标的时间-WVHT数据到work_table的%s_nc_time_WVHT属性！」,\n',ncNameInTable,ncNameInTable); pause(1);
+    oooooo2 = strcat('load("',oooooo,'");');
+    eval(['ndbc_station_download.',ncNameInTable,'_nc_time_WVHT{i,1} = oooooo2; '])
 
-%% save
-work_table = ndbc_station_download;
-save work_table.mat work_table
-
+    % save
+    work_table = ndbc_station_download;
+    save work_table.mat work_table
 end
+
+
+
+

@@ -16,7 +16,7 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
     
     %%
     cd(path_save)
-        %
+    %
     UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0';%如何查看火狐浏览器的useragent：https://blog.csdn.net/weixin_39892788/article/details/89875983
     options = weboptions('UserAgent',UserAgent,'Timeout',120); %针对自己的浏览器填写
     
@@ -25,7 +25,7 @@ function [ndbc_station_info_needed] = ndbc_station_download(ndbc_station_info_ne
     fprintf('                           ├──「存储文件夹」station_historyData_SM/ \n')
     fprintf('                                   每个浮标生成一个mat文件，mat里只有一个变量buoy_table_All,\n')
 
-    mkdir station_historyData_SM
+    % mkdir station_historyData_SM
     for i=station_tf_download%1:1:size(ndbc_station_info_needed,1) %浮标循环
         fprintf('                           ├──「浮标索引」%d \n',i)
         temp_name = strcat('station_historyData_SM/',num2str(i),'.mat');
