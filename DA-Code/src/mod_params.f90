@@ -1,14 +1,16 @@
 module mod_params
     implicit none
-
-    !********************************* Data Assimilation Step Options *********************************
-    !
-    character(len=*), parameter :: program = 'work_eastUSA'     ! 数据同化的区域项目名称
-    character(len=*), parameter :: nc_pth = program//'/nc/'               ! 背景场数据所在文件夹
+    !********************************* DA_cycle_NoWW3.f90  *********************************
+    ! 当前目录，/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/apps
+    character(len=*), parameter :: programs = 'work_eastUSA'     ! 数据同化的区域项目名称
+    character(len=*), parameter :: nc_pth = programs//'/nc/'               ! 背景场数据所在文件夹
     character(len=*), parameter :: nc_fileNameTxt = nc_pth//'nc.txt'      ! 背景场数据所在文件夹包含的文件名称，按时间顺序从先到后，
     integer, parameter :: nc_fileNameNum = 2                              ! $(nc_fileNameTxt)的行数，即需要同化的背景场nc文件个数，
-    character(len=*), parameter :: nc_AttTimeName = 'time'
-    ! 
+    character(len=*), parameter :: nc_AttTimeName = 'time'                ! nc文件中时间属性的名称，
+    ! 'Index.txt' ! 每个nc文件都会有一个Index
+    character(len=*), parameter :: ndbc_pth = '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/' 
+
+    !********************************* Data Assimilation Step Options *********************************
     character(len=*), parameter :: output_pth = 'output/'      ! analysis file，不能更改名称
     character(len=*), parameter :: input_pth = 'input/'       ! background file，不能更改名称
     character(len=*), parameter :: data_pth = 'data/'        ! ensemble files，不能更改名称

@@ -30,7 +30,7 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"name": "DA_cycle",
-			"program": "/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/apps/DA_cycle",
+			"program": "/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/apps/DA_cycle_NoWW3",
 			"args": [
 				"/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/objs/*.o"
 				"/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/DA-Code/build/../src/*.f90"

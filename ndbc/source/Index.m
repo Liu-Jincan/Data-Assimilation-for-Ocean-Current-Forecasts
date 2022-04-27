@@ -70,6 +70,8 @@ Index_filename = strcat(path_Index,'Index.txt');
 % save Index_filename -ascii Index 
 % save(Index_filename,'-ascii','Index')
 f = fopen(Index_filename,'w');
+fprintf(f,'%d\n',length(Index));
+fprintf(f,'\n');
 for i=1:length(Index)
     fprintf(f,'%d\n',Index(i));
 end

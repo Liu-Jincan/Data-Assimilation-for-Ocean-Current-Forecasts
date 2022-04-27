@@ -43,6 +43,10 @@ comp: $(runOBJS)
 
 # mod_obs_sorting.o: mod_params.o mod_obs_superobing.o
 
+mod_nctime2date.o: 
+
+mod_inIndex_flag.o: mod_params.o 
+
 mod_matrix_A.o: mod_namelist.o mod_read_coor.o mod_read_data.o mod_matrix_write.o
 
 mod_namelist.o: mod_params.o 
@@ -59,7 +63,7 @@ mod_matrix_W.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_write.o mod
 
 mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o # mod_obs_sorting.o
 
-DA_cycle_NoWW3.o: mod_params.o mod_analysis.o mod_matrix_A.o mod_read_coor.o
+DA_cycle_NoWW3.o: mod_params.o mod_analysis.o mod_matrix_A.o mod_read_coor.o mod_inIndex_flag.o mod_nctime2date.o
 
 %.o:%.f90
 	$(FC) $(Matlab_mat_h) -c  $(FFLAGS) $<
