@@ -1,13 +1,14 @@
 ! #include <fintrf.h>
 ! #include <mat.h>
 program DA_cycle
-   use mod_params, only: step, nc_fileNameTxt, nc_fileNameNum, nc_pth, nc_AttTimeName, ndbc_pth, programs
+   use mod_params, only: nc_fileNameTxt, nc_fileNameNum, nc_pth, &
+      &nc_AttTimeName, ndbc_pth, programs, ENOI, N, TMP_NAME
    use mod_analysis
-   use mod_matrix_A
    use netcdf
    use mod_read_coor, only: checknc  ! checknc和check是一样的程序
-   use mod_inIndex_flag, only: inIndex_flag,inIndex_flag2
-   use mod_nctime2date , only: nctime_day2date
+   use mod_inIndex_flag, only: inIndex_flag, inIndex_flag2
+   use mod_nctime2date, only: nctime_day2date
+   use mod_read_data
 
    implicit none
    integer :: yyyy, mm, dd, hh, ff, ss, time(6)
@@ -16,11 +17,12 @@ program DA_cycle
    integer :: xtype, ndims, dimids, natts, leng, j, flag, ii
    character*10 :: vname
    character*15 :: dimname
-   character*256 :: str, blank, blank2
+   character*256 :: str, blank, blank2, timechar
    ! integer, parameter :: DP = Selected_Real_Kind(r=10,p=10)
    ! real(kind=8), allocatable :: nc_time(:)
    real, allocatable :: nc_time(:)
    integer :: start, counts, stride
+   real :: Xb(N)
    include 'netcdf.inc'
 
    ! #include 'fintrf.h'
@@ -34,38 +36,43 @@ program DA_cycle
    write (*, *) 'DA_cycle.f90'
    blank = '----step.'
    !!
-   str = trim(blank)//'1.「函数」 A_matrix()，为了后面形成背景误差斜方差矩阵B'
-   write (*, *) str
-   if (step) then
-      ! call A_matrix()     ! A matrix: run only 1 time before DA cycles
-      ! step = .false.
-   end if
-
-   !!
-   str = trim(blank)//'2. 在..apps/$(program)/下创建ndbc/$(program)/nc文件夹的软链接，'//&
-      &'该文件夹包括：所有背景场nc文件，包含所有nc文件名称的txt文件（已按顺序）。'
+   str = trim(blank)//'1. 在..apps/$(program)/下创建ndbc/$(program)/nc文件夹的软链接，'//&
+      &'该文件夹包括：所有背景场nc文件，包含所有nc文件名称的txt文件（已按顺序）。'//&
+      &'nc_ENOI文件夹。'
    write (*, *) str
    call system('ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc')
    ! write (*,*) 'ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc'
+   call system('-mkdir '//programs//'/nc_ENOI')
    !
-   open (unit=FID1, file=nc_fileNameTxt)
+   
    do i = 1, nc_fileNameNum
       !!
-      str = trim(blank)//'3. 对于每个nc文件，在..apps/$(program)/下创建ndbc/$(program)/下'//&
-         & '所需文件的的软链接，包括：匹配的观测数据yo文件夹，匹配的Index1文件夹。'
+      write (*,*) 'i=',i
+      !!
+      str = trim(blank)//'2. 对于每个nc文件，在..apps/$(program)/下创建ndbc/$(program)/下'//&
+         & '所需文件的的软链接，包括：匹配的观测数据yo文件夹，匹配的Index1文件夹。'&
+         &//'创建保存Xb的临时文件夹Xb。'
       if (i .eq. 1) write (*, *) str
-      read (FID1, '(a)') nc_fileName
+      open (unit=FID1, file=nc_fileNameTxt)
+      do ii = 1, i
+         read (FID1, *) nc_fileName
+      end do
+      ! write (*,*) nc_fileName
+      close (FID1)
       str = '--------例如'//nc_pth//trim(nc_fileName)
       if (i .eq. 1) write (*, *) str
-      ii = index(nc_fileName,'.') ! . 在字符串的位置，
-      str = programs//'/'//nc_fileName(1:ii-1)//'_nc_Index1 '
-      call system('ln -snf '//ndbc_pth//str //str)
+      ii = index(nc_fileName, '.') ! . 在字符串的位置，
+      str = programs//'/'//nc_fileName(1:ii - 1)//'_nc_Index1 '
+      call system('ln -snf '//ndbc_pth//str//str)
       ! write (*,*) 'ln -snf '//ndbc_pth//str //str
-      str = programs//'/'//nc_fileName(1:ii-1)//'_nc_yo '
-      call system('ln -snf '//ndbc_pth//str //str)
+      str = programs//'/'//nc_fileName(1:ii - 1)//'_nc_yo '
+      call system('ln -snf '//ndbc_pth//str//str)
+      !
+      call system('-rm -rf '//programs//'/Xb')
+      call system('mkdir '//programs//'/Xb/')
 
       !!
-      str = trim(blank)//'4. 对于每个nc文件，读取time长度，存储在leng，'
+      str = trim(blank)//'3. 对于每个nc文件，读取time长度，存储在leng，'
       if (i .eq. 1) write (*, *) str
 
       call checknc(nf_open(nc_pth//trim(nc_fileName), nf90_nowrite, ncid))
@@ -90,47 +97,59 @@ program DA_cycle
       ! UTtime = datetime('1990-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss')+nc_time; % Malltb可以直接进行转换～～，故用matlab提供索引
       !!!!!!clear start, counts, stride
 
-
-
       do j = 1, 4 !leng
-         !! 每一个时间步都需要确定days since 1990-01-01 00:00:00
-         yyyy = 1990; mm = 1; dd = 1; hh = 0; ff = 0; ss = 0;
          !!
-         str = trim(blank)//'5. 对于每个nc文件的每个时间节点，'//&
+         write (*,*) 'j=',j
+         !! 每一个时间步都需要确定days since 1990-01-01 00:00:00
+         yyyy = 1990; mm = 1; dd = 1; hh = 0; ff = 0; ss = 0; 
+         !!
+         str = trim(blank)//'4. 对于每个nc文件的每个时间节点，'//&
             &'根据matlab给出的需要同化的时间索引数据Index.txt，判断是否同化.（不用这个方法）'
          if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
          ! call inIndex_flag(blank2, j, nc_fileName, flag)
          !!
-         str = trim(blank)//'5. 对于每个nc文件的每个时间节点，'//&
+         str = trim(blank)//'4. 对于每个nc文件的每个时间节点，'//&
             &'根据每个时间节点对应的nc_time的数字，'//& !! 例如7912.833，
             &'结合初始日期，算出目前日期。'//& !!例如days since 1990-01-01 00:00:00，
             &'从算出的日期，根据每个nc文件的Index1或yo文件夹下的文件，判断是否同化.'
          if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
-         blank2 = '----'//trim(blank)//'5.'
-         call nctime_day2date(blank2,i,j,nc_time(j),&
+         blank2 = '----'//trim(blank)//'4.'
+         call nctime_day2date(blank2, i, j, nc_time(j),&
             &yyyy, mm, dd, hh, ff, ss)
          ! write (*,*) yyyy,mm,dd,hh,ff,ss
-         call inIndex_flag2(blank2,i,j,nc_fileName,yyyy, mm, dd, hh, ff, ss,flag)
+         call inIndex_flag2(blank2, i, j, nc_fileName, yyyy, mm, dd, hh, ff, ss, flag, timechar)
          !!
-         str = trim(blank)//'6. 如果需要同化，需传递背景场数据xb和time给analysis()，得到xa.'
-         if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
-         if (flag .eq. 1) then
-            call analysis()
-         endif
+         if ((flag .eq. 1)) then
+            str = trim(blank)//'5. 如果需要同化，计算同化时刻的背景场数据Xb,'
+            if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
+            blank2 = '----'//trim(blank)//'5.'
+            call readdata_hs_xb(blank2,i,j,nc_fileName,Xb,ncid,leng)
+
+
+            if ((ENOI .eq. 1)) then
+               str = trim(blank)//'6. 如果需要同化，使用ENOI方法，传递时间字符串、文件名字符串、'&
+               &//'同化时刻的背景场数据Xb给analysis()'
+               if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
+               ! write (*,*) timechar
+               blank2 = '----'//trim(blank)//'6.'
+               call ENOI_analysis(blank2, i, j, nc_fileName, timechar,Xb)
+            end if
+
+         end if
          !!
          str = trim(blank)//'7. 如果不需要同化，背景场数据直接作为xa.'
-         if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str  
+         if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
          if (flag .eq. 0) then
-         endif
+         end if
          !!
          str = trim(blank)//'8. 对于每个nc文件，生成新的nc文件，'
-         if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str  
+         if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
 
       end do
       !!
-      deallocate(nc_time)
+      deallocate (nc_time)
+      call checknc(nf90_close(ncid))
    end do
-   close (FID1)
    stop
    !!
    ! write (*, *) '├──「读取文件」input/DA_time.txt'

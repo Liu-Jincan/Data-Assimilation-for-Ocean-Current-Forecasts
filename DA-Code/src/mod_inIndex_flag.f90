@@ -45,7 +45,7 @@ contains
  
    end subroutine inIndex_flag
 
-   subroutine inIndex_flag2(blank,iiii,jjjj,nc_fileName,yyyy, mm, dd, hh, ff, ss,flag)
+   subroutine inIndex_flag2(blank,iiii,jjjj,nc_fileName,yyyy, mm, dd, hh, ff, ss,flag,pth2)
       implicit none
       !!
       integer,intent(out) :: flag

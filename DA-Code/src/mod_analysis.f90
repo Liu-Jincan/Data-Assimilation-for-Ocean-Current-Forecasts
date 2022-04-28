@@ -1,6 +1,7 @@
 module mod_analysis
-   use mod_params, only: output_pth, input_pth, N, NN !, NLVLS, sub_y, sub_x, crt_bias, rgamma
+   use mod_params, only: output_pth, input_pth, N, NN, programs !, NLVLS, sub_y, sub_x, crt_bias, rgamma
    use mod_date
+   use mod_matrix_A, only: A_matrix
    ! use mod_read_data
    use mod_matrix_read
    use mod_matrix_W
@@ -8,67 +9,72 @@ module mod_analysis
    implicit none
 
 contains
-   subroutine analysis(time)
+   subroutine ENOI_analysis(blank, iiii, jjjj, nc_fileName, tag,Xb)
       implicit none
-      integer, intent(in) :: time(6)
+      integer :: iiii, jjjj
+      character*255 :: blank, tag, nc_fileName, str, str2, blank2
+      !! tmp
+      integer :: M, i, FID = 137
+      ! character ::
 
-      integer :: i, M
-      ! integer, parameter :: NRECS = 1
-      character :: tag*12
-      ! real :: tmp4D(sub_x,sub_y,NLVLS,NRECS), tmp(sub_x,sub_y,NLVLS)
-      ! real :: sal4D(sub_x,sub_y,NLVLS,NRECS), sal(sub_x,sub_y,NLVLS)
       real, allocatable :: yo(:)
       real, allocatable :: H(:, :), HXb(:), W(:, :)
       real :: Xb(N), dX(N), bias(N)
-
-      !  integer, allocatable :: Tindex3D(:,:), Sindex3D(:,:)
-
       real :: start, finish
-      write (*, *) '      ├── 「cpu_time」start'
+      !!
+      str = trim(blank)//'*. 记录开始时间，cpu_time(start)'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
       call cpu_time(start) ! start: 0.00205700006
 
-      ! (0) write date from observation time
-      call date_minute(tag, time) ! tag: '20080317'
-      write (*, *) '      ├── 「同化时间点」', tag
+      !!
+      str = trim(blank)//'1. 当下时刻的观测数量M，'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
+      i = index(nc_fileName, '.') ! . 在字符串的位置，
+      str2 = programs//'/'//nc_fileName(1:i - 1)//'_nc_yo/'//tag
+      ! write (*,*) str2
+      open (FID, file=str2)
+      M = GetFileN(FID)
+      ! write (*, *) M  ! 验证正确
+      close (FID)
 
-      ! (1) get the number of observations
-      write (*, *) '      ├── 「NDBC浮标」Preparing observational data...'
-      ! call sort_obs_ndbc(M,time)
-      !!obtain observation
-      M = 5
-
-      ! (2) compute gain matrix W
-      write (*, *) '      ├── 「函数」W_matrix(M, time)，Computing gain matrix...'
-      call W_matrix(M, time)
-
-      ! (3) read in observation
-      write (*, *) '      ├── Updating the background with observational data...'
-
+      !!
+      str = trim(blank)//'2. 观测值yo，M*1'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
       allocate (yo(M))
-      ! open (55, file='/home/wjc/wjc_work/DA_Code/input/obs_data.txt', status='old')
-      write (*, *) '      ├── 「读取文件」input/obs_data.txt,'
-      open (55, file='input/obs_data.txt', status='old')
-      read (55, *) yo
-      close (55)
-      write (*, *) '                    得到yo，其维度为M*1,'
-      write (*, *) '                    *** SUCCESS Sorted observation is read in!'
+      open (FID, file=str2, status='old')
+      read (FID, *) yo
+      close (FID)
+      ! write (*,*) yo ! 验证成功，
 
-      ! (4) read in background
-      !open(55,file=input_pth//'background.dta',form='unformatted')
-      !read(55) tmp4D, sal4D
-      !close(55)
-      !tmp = tmp4D(:,:,:,1); sal = sal4D(:,:,:,1)
-      !write(*,*) '*** SUCCESS Background is read in!'
+      !!
+      str = trim(blank)//'3. 生成ENOI中的A，（AA’）为背景误差斜方差B，ENOI中不需要明显表示B，'&
+         &//'A的生成只需要进行一次，good～，'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) then
+         blank2 = '----'//trim(blank)//'3.'
+         call A_matrix(blank2,iiii,jjjj)     ! A matrix: run only 1 time before DA cycles
+      end if
 
-      !call squeeze(Xb,tmp,sal)                       ! reshape tmp&sal to get Xb(N)
+      !!
+      str = trim(blank)//'4. 计算W=alpha*AHAT*(alpha*HA*HAT+R)^(-1)，alpha的解释'&
+          &//'https://liu-jincan.github.io/2022/01/01/yan-jiu-sheng-justtry-target/'&
+          &//'yan-yi-xia-gei-ding-qu-yu-ww3-shi-yan-tong-hua-bu-fen/#toc-heading-2'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
+      blank2 = '----'//trim(blank)//'4.'
+      call W_matrix(blank2,iiii,jjjj,M,nc_fileName,tag)
 
-      write (*, *) '      ├── 「读取文件」input/bg_data.txt,'
+
+      !!
+      str = trim(blank)//'5. 背景场Xb，N*1，之前从nc读取了～'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
+
+      ! write (*, *) '      ├── 「读取文件」input/bg_data.txt,'
       ! open (55, file='/home/wjc/wjc_work/DA_Code/input/bg_data.txt', status='old')
-      open (55, file='input/bg_data.txt', status='old')
-      read (55, *) Xb
-      close (55)
-      write (*, *) '                    得到Xb，其维度为N*1,'
-      write (*, *) '                     *** SUCCESS Sorted background is read in!'
+      ! open (55, file='input/bg_data.txt', status='old')
+      ! read (55, *) Xb
+      ! close (55)
+      ! write (*, *) '                    得到Xb，其维度为N*1,'
+      ! write (*, *) '                     *** SUCCESS Sorted background is read in!'
 
       ! (5) correct model bias
       ! if (crt_bias) then
@@ -80,19 +86,23 @@ contains
       !    Xb = Xb-bias
       ! endif
 
+
+      !!
+      str = trim(blank)//'6. 计算增量dX～'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
       ! (6) calculate increment
       allocate (H(M, N), HXb(M))
-      write (*, *) '      ├── 「函数」readmatrix(H, M, N, “H”, 1),'
-      call readmatrix(H, M, N, 'H', 1)
-      write (*, *) '          「读取文件」ensemble/Hmatrix.txt,'
-      write (*, *) "                    Reading matrix H(", M, ",", N, "),"
+      ! write (*, *) '      ├── 「函数」readmatrix(H, M, N, “H”, 1),'
+      call readmatrix_ENOI(H, M, N, 'H', 1)
+      ! write (*, *) '          「读取文件」ensemble/Hmatrix.txt,'
+      ! write (*, *) "                    Reading matrix H(", M, ",", N, "),"
 
       HXb = matmul(H, Xb)
 
-      write (*, *) '      ├── 「函数」writematrix(HXb, M, 1, "HXb", 3),'
-      call writematrix(HXb, M, 1, 'HXb', 3)
-      write (*, *) '          「生成文件」ensemble/HXbmatrix.txt,'
-      write (*, *) "                    Writing matrix HXb(", M, ",", 1, "),"
+      ! write (*, *) '      ├── 「函数」writematrix(HXb, M, 1, "HXb", 3),'
+      call writematrix_ENOI(HXb, M, 1, 'HXb', 3)
+      ! write (*, *) '          「生成文件」ensemble/HXbmatrix.txt,'
+      ! write (*, *) "                    Writing matrix HXb(", M, ",", 1, "),"
       deallocate (H)
 
       !!========================================================================
@@ -123,119 +133,68 @@ contains
       !close(33)                                                               !!
       !deallocate(Tindex3D, Sindex3D)                                          !!
       !!========================================================================
-      write (*, *) '      ├── 「变量」dX = W*(yo-HXb),其维度为N*1，'
+      ! write (*, *) '      ├── 「变量」dX = W*(yo-HXb),其维度为N*1，'
       yo = yo - HXb
       deallocate (HXb)
-      ! allocate(W(N/2,M))
-      ! call readmatrix(W,N/2,M,'WT',2)
-      ! dX(1:N/2) = matmul(W,yo)
-      ! call readmatrix(W,N/2,M,'WS',2)
-      ! dX(N/2+1:N) = matmul(W,yo)
-      ! deallocate(W)
-
       allocate (W(N, M))
-      call readmatrix(W, N, M, 'W', 1)
+      call readmatrix_ENOI(W, N, M, 'W', 1)
       dX = matmul(W, yo)
       deallocate (W)
       deallocate (yo)
-
-      !if (crt_bias) then
-      !   bias = bias-rgamma*dX
-
-      !   open(55,file=output_pth//'/bias/model_bias.dta',form='unformatted')
-      !   write(55) bias
-      !   close(55)
-      !   write(*,*) '*** SUCCESS Model bias is updated!'
-      !endif
-
+      
+      !!
+      str = trim(blank)//'7. 得到分析值，仍用Xb表示～'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
       ! (7) get analysis
       ! if ((maxval(dX(1:N/2)) > 10.0) .or. (minval(dX(1:N/2)) < -10.0)) then
-      write (*, *) '      ├── 「变量」Xa = Xb+dX，其维度为N*1，'
+      ! write (*, *) '      ├── 「变量」Xa = Xb+dX，其维度为N*1，'
       if ((maxval(dX(1:N)) > 10.0) .or. (minval(dX(1:N)) < -10.0)) then
-         write (*, *) '                *** WARNING increment is abnormal!'
-         write (*, *) '                *** WARNING No observations assimilated!'
+         ! write (*, *) '                *** WARNING increment is abnormal!'
+         ! write (*, *) '                *** WARNING No observations assimilated!'
          Xb = Xb
-         ! elseif ((maxval(dX(N/2 + 1:N)) > 5.0) .or. (minval(dX(N/2 + 1:N)) < -5.0)) then
-         !    write (*, *) '*** WARNING S increment is abnormal!'
-         !    write (*, *) '*** WARNING No observations assimilated!'
-         !    Xb = Xb
       else
          Xb = Xb + dX                  ! acutally Xb=Xa
       end if
       !call expand(tmp,sal,Xb)        ! analysis of tmp & sal
-      write (*, *) '                *** SUCCESS Analysis is computed!'
+      ! write (*, *) '                *** SUCCESS Analysis is computed!'
 
+      !!
+      str = trim(blank)//'8. 保存Xb～'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
       ! (8) save analysis as restart
-      write (*, *) '      ├── 「生成文件」', output_pth//'analysis'//tag//'.txt,'
-      open (55, file=output_pth//'analysis'//tag//'.txt', status='new')
+      str2 = programs//'/Xb/'//tag
+      open (55, file=str2, status='replace')
       do i = 1, N
          write (55, '(f8.3)') Xb(i)
       end do
       close (55)
-      write (*, *) '                *** SUCCESS Analysis is saved!'
-      !
-      write (*, *) '      ├── 「cpu_time」finish'
+      ! write (*, *) '                *** SUCCESS Analysis is saved!'
+      
+      !!
+      str = trim(blank)//'*. 计算时间，cpu_time(finish)～'
+      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
+      ! write (*, *) '      ├── 「cpu_time」finish'
       call cpu_time(finish)
       write (*, *) '                    ', (finish - start), 'seconds,'
       write (*, *) '                    ', (finish - start)/60.0, 'minutes,'
       ! print '("Time = ",f10.2," minutes.")', (finish - start)/60.0
 
-      write (*, *) '      ├── 「done」analysis(time)'
+      ! write (*, *) '      ├── 「done」analysis(time)'
       return
-   end subroutine analysis
+   end subroutine ENOI_analysis
 
-   ! subroutine squeeze(var, var1, var2)
-   !    implicit none
-   !    real, intent(in)  :: var1(sub_x, sub_y, NLVLS), var2(sub_x, sub_y, NLVLS)
-   !    real, intent(out) :: var(N)
-   !    integer :: i, j, k, r
-
-   !    r = 0
-   !    do k = 1, NLVLS
-   !       do j = 1, sub_y
-   !          do i = 1, sub_x
-   !             r = r + 1
-   !             var(r) = var1(i, j, k)
-   !          end do
-   !       end do
-   !    end do
-   !    do k = 1, NLVLS
-   !       do j = 1, sub_y
-   !          do i = 1, sub_x
-   !             r = r + 1
-   !             var(r) = var2(i, j, k)
-   !          end do
-   !       end do
-   !    end do
-
-   !    return
-   ! end subroutine squeeze
-
-   ! subroutine expand(var1, var2, var)
-   !    implicit none
-   !    real, intent(in)  :: var(N)
-   !    real, intent(out) :: var1(sub_x, sub_y, NLVLS), var2(sub_x, sub_y, NLVLS)
-   !    integer :: i, j, k, r
-
-   !    r = 0
-   !    do k = 1, NLVLS
-   !       do j = 1, sub_y
-   !          do i = 1, sub_x
-   !             r = r + 1
-   !             var1(i, j, k) = var(r)
-   !          end do
-   !       end do
-   !    end do
-   !    do k = 1, NLVLS
-   !       do j = 1, sub_y
-   !          do i = 1, sub_x
-   !             r = r + 1
-   !             var2(i, j, k) = var(r)
-   !          end do
-   !       end do
-   !    end do
-
-   !    return
-   ! end subroutine expand
+   Integer Function GetFileN(iFileUnit)
+      Implicit None
+      Integer, Intent(IN)::iFileUnit
+      Integer::ios
+      Character(Len=1)::cDummy
+      GetFileN = 0
+      Rewind (iFileUnit)
+      Do
+         Read (iFileUnit, *, ioStat=ioS) cDummy
+         if (ioS /= 0) Exit
+         GetFileN = GetFileN + 1
+      End Do
+   end function
 
 end module mod_analysis

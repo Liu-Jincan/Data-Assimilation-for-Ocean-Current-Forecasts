@@ -9,7 +9,7 @@ module mod_params
     character(len=*), parameter :: nc_AttTimeName = 'time'                ! nc文件中时间属性的名称，
     ! 'Index.txt' ! 每个nc文件都会有一个Index
     character(len=*), parameter :: ndbc_pth = '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/' 
-
+    integer, parameter :: ENOI = 1   ! 使用ENOI同化方法，1为使用, 0为不使用
     !********************************* Data Assimilation Step Options *********************************
     character(len=*), parameter :: output_pth = 'output/'      ! analysis file，不能更改名称
     character(len=*), parameter :: input_pth = 'input/'       ! background file，不能更改名称
@@ -17,17 +17,16 @@ module mod_params
     character(len=*), parameter :: emsemble_pth = 'emsemble/'        !  files, 不能更改名称
     character(len=*), parameter :: fname_var = '_T.nc'        ! suffix of ensemble files
 
-    logical, parameter :: step = .true. ! .false.      ! .T. to construct ensemble
+    ! logical, parameter :: step = .true. ! .false.      ! .T. to construct ensemble ！不需要用这个了，哈哈～
     ! logical :: step = .true. 
     integer, parameter :: y_start = 2012       ! first year of ensemble data pool
     integer, parameter :: y_end = 2014       ! last year of ensemble data pool
-    integer, parameter :: NN = 490      ! size of ensemble (5 days per month from 2-year)
-    integer, parameter :: NS = 2 ! 730       ! size of ensemble pool, 
+    integer, parameter :: NN = 50      ! size of ensemble (5 days per month from 2-year)
+    ! integer, parameter :: NS = 2 ! 730       ! size of ensemble pool, 
                                              ! mod_namelist.f90中会用到，NS过大会导致生成的data/namelist.txt为二进制文件，出错，
                                              
-    ! integer, parameter :: DN = 6       ! step interval to sample the ensemble pool
-                                        ! matrix_A 会用到，但也可以不用，
-
+    integer, parameter :: DN = 10       ! step interval to sample the ensemble pool, hour
+                                        
     ! logical, parameter :: localize = .false.      ! .T. for using localization
     ! logical, parameter :: loc_Lh = .true.      ! .T. for using horizontal localization
     ! logical, parameter :: loc_Lv = .true.      ! .T. for using vertical localization
