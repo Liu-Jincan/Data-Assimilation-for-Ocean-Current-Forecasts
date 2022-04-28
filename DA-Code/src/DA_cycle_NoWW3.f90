@@ -17,7 +17,7 @@ program DA_cycle
    integer :: xtype, ndims, dimids, natts, leng, j, flag, ii
    character*10 :: vname
    character*15 :: dimname
-   character*256 :: str, blank, blank2, timechar
+   character*256 :: str, blank, blank2, timechar,str2
    ! integer, parameter :: DP = Selected_Real_Kind(r=10,p=10)
    ! real(kind=8), allocatable :: nc_time(:)
    real, allocatable :: nc_time(:)
@@ -42,7 +42,7 @@ program DA_cycle
    write (*, *) str
    call system('ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc')
    ! write (*,*) 'ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc'
-   call system('-mkdir '//programs//'/nc_ENOI')
+   call system('mkdir '//programs//'/nc_ENOI')
    !
    
    do i = 1, nc_fileNameNum
@@ -124,8 +124,7 @@ program DA_cycle
             if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
             blank2 = '----'//trim(blank)//'5.'
             call readdata_hs_xb(blank2,i,j,nc_fileName,Xb,ncid,leng)
-
-
+            !!
             if ((ENOI .eq. 1)) then
                str = trim(blank)//'6. 如果需要同化，使用ENOI方法，传递时间字符串、文件名字符串、'&
                &//'同化时刻的背景场数据Xb给analysis()'
@@ -137,15 +136,23 @@ program DA_cycle
 
          end if
          !!
-         str = trim(blank)//'7. 如果不需要同化，背景场数据直接作为xa.'
+         str = trim(blank)//'7. 如果不需要同化，背景场数据Xb直接作为xa.'
          if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
          if (flag .eq. 0) then
+            blank2 = '----'//trim(blank)//'7.'
+            call readdata_hs_xb(blank2,i,j,nc_fileName,Xb,ncid,leng)
+            str2 = programs//'/Xb/'//timechar
+            open (55, file=str2, status='replace')
+            do ii = 1, N
+               write (55, '(f8.3)') Xb(ii)
+            end do
+            close (55)
          end if
-         !!
-         str = trim(blank)//'8. 对于每个nc文件，生成新的nc文件，'
-         if ((i .eq. 1) .AND. (j .eq. 1)) write (*, *) str
-
       end do
+      !!
+      str = trim(blank)//'8. 对于每个nc文件得到的Xb文件夹下的文件，生成新的nc文件，'
+      if (i .eq. 1) write (*, *) str
+      
       !!
       deallocate (nc_time)
       call checknc(nf90_close(ncid))
@@ -227,4 +234,7 @@ program DA_cycle
    !!
    write (*, *) '├──「FAQ，成功」查询文件夹是否存在'
    ! https://blog.csdn.net/lixingwang0913/article/details/119697962
+   !!
+   write (*, *) '├──「FAQ，」fortran生成netcdf文件，'
+   ! Fortran写nc文件&nbsp;f90&nbsp;netcdf, https://blog.csdn.net/ProMath/article/details/28272125?locationNum=14&fps=1
 end program DA_cycle
