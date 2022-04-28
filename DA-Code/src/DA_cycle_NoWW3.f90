@@ -68,7 +68,7 @@ program DA_cycle
       str = programs//'/'//nc_fileName(1:ii - 1)//'_nc_yo '
       call system('ln -snf '//ndbc_pth//str//str)
       !
-      call system('-rm -rf '//programs//'/Xb')
+      call system('rm -rf '//programs//'/Xb')
       call system('mkdir '//programs//'/Xb/')
 
       !!
