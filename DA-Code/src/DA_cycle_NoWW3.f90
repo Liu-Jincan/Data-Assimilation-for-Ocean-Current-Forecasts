@@ -42,10 +42,10 @@ program DA_cycle
    write (*, *) str
    call system('ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc')
    ! write (*,*) 'ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc'
-   call system('mkdir '//programs//'/nc_ENOI')
+   call system('mkdir -p '//programs//'/nc_ENOI')
    !
    
-   do i = 1, nc_fileNameNum
+   do i = 1 , nc_fileNameNum
       !!
       write (*,*) 'i=',i
       !!
@@ -97,7 +97,7 @@ program DA_cycle
       ! UTtime = datetime('1990-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss')+nc_time; % Malltb可以直接进行转换～～，故用matlab提供索引
       !!!!!!clear start, counts, stride
 
-      do j = 1, 4 !leng
+      do j = 1, leng
          !!
          write (*,*) 'j=',j
          !! 每一个时间步都需要确定days since 1990-01-01 00:00:00

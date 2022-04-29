@@ -73,7 +73,7 @@ contains
       !!
       str = trim(blank)//'3. 保存二维矩阵Ameans，即程序中tmps，在.apps/$(program)/ENOI/Ameans.txt'
       if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
-      call system("-mkdir -p "//programs//'/ENOI/')
+      call system("mkdir -p "//programs//'/ENOI/')
       str3 = programs//'/ENOI/Ameans.txt'
       open (unit=FID, file=str3, status='replace')
       do i = 1, sub_x

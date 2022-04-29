@@ -106,7 +106,7 @@ contains
       ! start = (/1, 1, 1/)
       call check(nf_get_vars_real(ncid, tmp_varid, (/1,1,1/),(/sub_x, sub_y,leng/),(/1,1,1/),tmp2))
       ! write (*,*) ncid, tmp_varid, jjjj, sub_x, sub_y, scale_factor
-      tmp = tmp2(sub_x, sub_y,jjjj)
+      tmp = tmp2(1:sub_x, 1:sub_y,jjjj)
       tmp = tmp*scale_factor;
       !!
       str = trim(blank)//'2. Xb二维矩阵变成一维数组，nclat和nclon是从小到大排列，'&
@@ -120,7 +120,7 @@ contains
             Xb(m) = tmp(j,i)
          end do
       end do
-      if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
+      ! if ((iiii .eq. 1) .AND. (jjjj .eq. 1)) write (*, *) str
       !!
       ! call check(nf_close(ncid)) ! 因为ncid作为参数过来了，所以这里不用close 
 
