@@ -137,6 +137,17 @@ contains
       return
    end subroutine check
 
+   subroutine checknc(status)
+      integer, intent(in) :: status
+
+      if (status /= nf90_noerr) then
+          print *, trim(nf90_strerror(status))
+          stop "Stopped"
+      end if
+
+      return
+  end subroutine checknc
+
    !    subroutine readdata_tmp_sal(tmp2, sal2, fname2)
 !       implicit none
 !       character(len=18), intent(in)  :: fname2

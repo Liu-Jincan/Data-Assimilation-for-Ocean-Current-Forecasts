@@ -2,7 +2,7 @@ module mod_matrix_A
    use mod_params, only: data_pth, sub_y, sub_x, N, programs, DN ! , NLVLS, DN, NN,
    ! use mod_namelist
    use mod_read_data, only: readdata_hs_dn_total
-   use mod_read_coor
+   ! use mod_read_coor
    ! use mod_matrix_read
    use mod_matrix_write
    implicit none

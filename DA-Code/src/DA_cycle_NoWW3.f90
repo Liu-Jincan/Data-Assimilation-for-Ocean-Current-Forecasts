@@ -5,10 +5,10 @@ program DA_cycle
       &nc_AttTimeName, ndbc_pth, programs, ENOI, N, TMP_NAME
    use mod_analysis
    use netcdf
-   use mod_read_coor, only: checknc  ! checknc和check是一样的程序
    use mod_inIndex_flag, only: inIndex_flag, inIndex_flag2
    use mod_nctime2date, only: nctime_day2date
-   use mod_read_data
+   use mod_read_data ! checknc和check是一样的程序
+   use mod_write_data
 
    implicit none
    integer :: yyyy, mm, dd, hh, ff, ss, time(6)
@@ -42,7 +42,9 @@ program DA_cycle
    write (*, *) str
    call system('ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc')
    ! write (*,*) 'ln -snf '//ndbc_pth//programs//'/nc '//programs//'/nc'
-   call system('mkdir -p '//programs//'/nc_ENOI')
+   call system('mkdir -p '//programs//'/nc_ENOI'); call system('mkdir -p '//ndbc_pth//programs//'/nc_ENOI');
+   call system('mv '//programs//'/nc_ENOI/* '//ndbc_pth//programs//'/nc_ENOI/ ') ! 创建软链接下的nc文件是不能读取的
+   ! write (*,*) 'ln -snf '//programs//'/nc_ENOI '//ndbc_pth//programs//'/nc_ENOI '
    !
    
    do i = 1 , nc_fileNameNum
@@ -150,9 +152,11 @@ program DA_cycle
          end if
       end do
       !!
-      str = trim(blank)//'8. 对于每个nc文件得到的Xb文件夹下的文件，生成新的nc文件，'
+      str = trim(blank)//'8. 对于每个nc文件得到的Xb文件夹下的文件，生成新的nc文件，在ndbc创建软链接'
       if (i .eq. 1) write (*, *) str
-      
+      blank2 = '----'//trim(blank)//'8.'
+      call writedata_hs_xb_ENOI(blank2, i, ncid,leng, nc_fileName)
+      call system('mv '//programs//'/nc_ENOI/* '//ndbc_pth//programs//'/nc_ENOI/ ') ! 创建软链接下的nc文件是不能读取的，只能转移
       !!
       deallocate (nc_time)
       call checknc(nf90_close(ncid))
@@ -237,4 +241,17 @@ program DA_cycle
    !!
    write (*, *) '├──「FAQ，」fortran生成netcdf文件，'
    ! Fortran写nc文件&nbsp;f90&nbsp;netcdf, https://blog.csdn.net/ProMath/article/details/28272125?locationNum=14&fps=1
+   ! wjc老师提供了一些文件，基于此得到的nc出现的问题：
+   !     1、ncview，无法看到陆地点，
+   !     2、ncview，通话后的HS数据可能出现负数，
+   !     3、用ndbc对生成的nc_ENOI/*.nc文件分析，与原来的nc/*.nc相比，匹配的数据减少了，原因是时间配对出现了问题，需要用原来nc文件的time数据，
+   !!
+   write (*, *) '├──「FAQ，」fortran读取某一文件夹下所有文件名称，'
+   ! 重定向思想，https://blog.csdn.net/weixin_35615322/article/details/112705757
+   ! bash, ls -1，一行一个，https://segmentfault.com/a/1190000023186477
+   ! bash, | wc -l，获取文件行数，https://www.cnblogs.com/dragkiss/p/5773060.html?ivk_sa=1024320u
+   !!
+   write (*, *) '├──「FAQ，」fortran nan 怎么赋值？，'
+   !!
 end program DA_cycle
+

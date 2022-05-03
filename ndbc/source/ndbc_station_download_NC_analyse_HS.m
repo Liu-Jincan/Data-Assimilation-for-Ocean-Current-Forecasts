@@ -63,7 +63,7 @@ function [ndbc_station_download_NC] = ndbc_station_download_NC_analyse_HS(path_f
         ndbc_WVHT3 = ndbc_WVHT2(tf6);
         disp(strcat('                       已实现ndbc数据，一个小时一个数据，（通过了unique(ndbc_time3)的检验）；'));
         %% nc 数据，一个小时一个数据；
-        disp(strcat('                       已确定nc数据，一个小时一个数据；'));
+        disp(strcat('                       已确定nc数据，一个小时一个数据；(ENOI生成的nc在这里出错了)'));
         %% ndbc 和 nc 小时数据匹配；
         % 组合ndbc和nc的数据
         eval(['temp = ndbc_station_download_NC.',ncNameInTable,'_nc_time_WVHT{i,1};'])  

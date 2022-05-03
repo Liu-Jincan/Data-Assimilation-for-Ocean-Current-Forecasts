@@ -1,0 +1,26 @@
+$ WAVEWATCH III Field preprocessor input file
+$ -------------------------------------------
+   'WND' 'LL' T T
+$
+$ Name of spatial dimensions------------------------------------------ $
+$ NB: time dimension is expected to be called 'time'
+$
+ lon lat
+$
+$ Variables to use --------------------------------------------------- $
+$
+  windu windv
+$
+$ Additional time input ---------------------------------------------- $
+$ If time flag is .FALSE., give time of field in yyyymmdd hhmmss format.
+$
+$   19680606 053000
+$
+$ Define data files -------------------------------------------------- $
+$ The input line identifies the filename using for the forcing field.
+$
+  'mywind1.nc'
+$
+$ -------------------------------------------------------------------- $
+$ End of input file                                                    $
+$ -------------------------------------------------------------------- $
