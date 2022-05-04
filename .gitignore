@@ -1,0 +1,23 @@
+######################### 主文件夹
+**/*
+!**/.gitignore
+!**/*.sh
+!**/*.md
+########################## DA-Code文件夹
+!**/DA-Code
+**/DA-Code/*
+!**/DA-Code/Readme.md
+########################## ndbc文件夹
+!**/ndbc
+**/ncbc/*
+!**/ndbc/source/   
+!**/ndbc/source/*
+!**/ndbc/Readme.md
+!**/ndbc/work_eastUSA/
+!**/ndbc/work_eastUSA/work_eastUSA.m
+!**/ndbc/work_eastUSA/Readme.md
+########################## TUTORIAL_GRIDGEN文件夹
+!**/TUTORIAL_GRIDGEN/
+**/TUTORIAL_GRIDGEN/*
+!**/TUTORIAL_GRIDGEN/area/
+!**/TUTORIAL_GRIDGEN/area/*.m
