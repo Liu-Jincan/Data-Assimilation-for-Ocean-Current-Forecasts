@@ -149,5 +149,5 @@ Loop through the wet cells to identify boundaries
  Completed 100 per cent
 Number of wet cells enclosing boundaries = 133
 Computing subgrid obstruction masks for these cells 
-Elapsed time is 21.117353 seconds.
+Elapsed time is 20.991468 seconds.
 [Warning: Closing open netCDF file handles.] 

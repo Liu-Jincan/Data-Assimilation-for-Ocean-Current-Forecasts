@@ -1,6 +1,6 @@
-## 
-## 
-programGo='work_eastUSA'   ## ～tag，新建文件需要修改～
+##
+##
+programGo='work_eastUSA' ## ～tag，新建文件需要修改～
 Usage: bannerSimple "my title" "*"
 function bannerSimple() {
     local msg="${2} ${1} ${2}"
@@ -13,11 +13,13 @@ function bannerSimple() {
 }
 bannerSimple "${programGo}" "*" # Usage: bannerSimple "my title" "*"
 # path
-pth_OceanForecast='/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/'  ## ～tag，新建文件需要修改～
+pth_OceanForecast='/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/' ## ～tag，新建文件需要修改～
 pth_matlab='/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/bin/matlab'
 # blank
 blank="----step."
-echo '----step.0 新建program或者修改program时，根据《～tag，新建文件需要修改～》检索需要修改的位置；VSC的整个文件的浏览拖动在修改时也很好用，但是需要绿色行；'
+echo '----step.0 新建program或者修改program时，①根据《～tag，新建文件需要修改～》检索需要修改的位置；'\
+    '②VSC的整个文件的浏览拖动在修改时也很好用，但是需要绿色行；'\
+    '③调试时，每一步的0/1（不运行/运行）设置需要打断点，这样很清晰的知道整个流程，起到了类似大纲的作用，而且提醒了哪些部分不许运行，nice~；'
 
 # 整型
 declare -i step #声明是整型
@@ -27,13 +29,18 @@ step=0
 ###########################################################################################################
 bannerSimple "grid create - Gridgen" "*"
 pth_Gridgen=${pth_OceanForecast}'TUTORIAL_GRIDGEN/'
+pth_WW3_regtest=${pth_OceanForecast}'WW3-6.07.1/regtests/'${programGo}
+mkdir -p ${pth_WW3_regtest}
+parm_WW3_input='input'      ## ～tag，新建文件需要修改～，input2?
+pth_WW3_regtest_input=${pth_WW3_regtest}"/${parm_WW3_input}/" 
+mkdir -p ${pth_WW3_regtest_input}
 echo pth_Gridgen
-declare -i Gridgen
-Gridgen=1  ## ～tag，新建文件需要修改～
-gridgen_objectGrid='east-USA_P25_3'   ## ～tag，新建文件需要修改～
+declare -i Gridgen  
+Gridgen=0                           ## ～tag，新建文件需要修改～
+gridgen_objectGrid='east-USA_P25_3' ## ～tag，新建文件需要修改～
 gridgen_objectGrid_nml="gridgen.${gridgen_objectGrid}.nml"
 gridgen_m=${programGo}".m"
-gridgen_baseGrid='east-USA_P25_4'   ## ～tag，新建文件需要修改～
+gridgen_baseGrid='east-USA_P25_4' ## ～tag，新建文件需要修改～
 gridgen_baseGrid_nml="gridgen.${gridgen_baseGrid}.nml"
 ##
 if ((Gridgen == 1)); then
@@ -267,8 +274,8 @@ OBSTR_OFFSET = 1
 /
 EOF
     ########################################################
-    echo "--------${blank}${step}.1.2 在area文件夹下创建program在gridgen对应的gridgen_m，并运行该m文件，"\
-        "运行完成后，create_grid()会在data文件夹生成5个文件（.bot、.mask_nobound、.meta、.obst、.nml），"\
+    echo "--------${blank}${step}.1.2 在area文件夹下创建program在gridgen对应的gridgen_m，并运行该m文件，" \
+        "运行完成后，create_grid()会在data文件夹生成5个文件（.bot、.mask_nobound、.meta、.obst、.nml），" \
         "个人使用sh附加在data文件夹生成.out文件记录m文件运行过程，"
     cd ${pth_Gridgen}'area'
     cat >${gridgen_m} <<EOF
@@ -276,14 +283,14 @@ EOF
 % disp(argument1)
 create_grid(pth_gridgen_objectGrid_nml)
 EOF
-    ${pth_matlab} -nodisplay -r  \
+    ${pth_matlab} -nodisplay -r \
         "argument1=10010; pth_gridgen_objectGrid_nml='${pth_Gridgen}namelist/${gridgen_objectGrid_nml}'; ${programGo}; exit;" \
         >${pth_Gridgen}'data/'${gridgen_objectGrid}'.out' 2>&1
     ########################################################
-    echo "--------${blank}${step}.1.3 在namelist文件夹下创建，基础网格对应的gridgen_baseGrid_nml，(～tag，新建文件需要修改～)，"\
-        "（为了在海陆掩码上增加活动边界，还需创建一个基础网格）。"  ##(～tag，新建文件需要修改～)
+    echo "--------${blank}${step}.1.3 在namelist文件夹下创建，基础网格对应的gridgen_baseGrid_nml，(～tag，新建文件需要修改～)，" \
+        "（为了在海陆掩码上增加活动边界，还需创建一个基础网格）。" ##(～tag，新建文件需要修改～)
     cd ${pth_Gridgen}'namelist'
-    cat >${gridgen_baseGrid_nml} <<EOF   
+    cat >${gridgen_baseGrid_nml} <<EOF
 $ a. Path to directories and file names-----------------------------------$
 
 &GRID_INIT
@@ -350,29 +357,405 @@ OBSTR_OFFSET = 1
 /
 EOF
     ####################################################
-    echo "--------${blank}${step}.1.4 重置在area文件夹下program对应的gridgen_m，基础网格，运行该m文件，"\
-        "运行完成后，create_grid()会在data文件夹生成5个文件（.bot、.mask_nobound、.meta、.obst、.nml），"\
+    echo "--------${blank}${step}.1.4 重置在area文件夹下program对应的gridgen_m，基础网格，运行该m文件，" \
+        "运行完成后，create_grid()会在data文件夹生成5个文件（.bot、.mask_nobound、.meta、.obst、.nml），" \
         "个人使用sh附加在data文件夹生成.out文件记录m文件运行过程，"
     cd ${pth_Gridgen}'area'
     cat >${gridgen_m} <<EOF
 create_grid(pth_gridgen_baseGrid_nml)
 EOF
-    ${pth_matlab} -nodisplay -r  \
+    ${pth_matlab} -nodisplay -r \
         "pth_gridgen_baseGrid_nml='${pth_Gridgen}namelist/${gridgen_baseGrid_nml}'; ${programGo}; exit;" \
         >${pth_Gridgen}'data/'${gridgen_baseGrid}'.out' 2>&1
     ####################################################
-    echo "----${blank}${step}.2 create_boundary()，重置在area文件夹下program对应的gridgen_m，运行该m文件，"\
-        "运行完成后，create_boundary()会在data文件夹生成3个文件（.fullbound、.bound、.mask），"\
+    echo "----${blank}${step}.2 create_boundary()，重置在area文件夹下program对应的gridgen_m，运行该m文件，" \
+        "运行完成后，create_boundary()会在data文件夹生成3个文件（.fullbound、.bound、.mask），" \
         "个人使用sh附加在data文件夹生成.out.create_boundary文件记录m文件运行过程，"
     cd ${pth_Gridgen}'area'
     cat >${gridgen_m} <<EOF
 create_boundary(pth_gridgen_objectGrid_nml)
 EOF
-    ${pth_matlab} -nodisplay -r  \
+    ${pth_matlab} -nodisplay -r \
         "pth_gridgen_objectGrid_nml='${pth_Gridgen}namelist/${gridgen_objectGrid_nml}'; ${programGo}; exit;" \
         >${pth_Gridgen}'data/'${gridgen_objectGrid}'.out.create_boundary' 2>&1
+
+    ####################################################
+    echo "----${blank}${step}.3 转移gridgen的data下生成的关于目标网格的重要文件至WW3的test的input文件夹，"
+    cp ${pth_Gridgen}'data/'${gridgen_objectGrid}'.bot' ${pth_WW3_regtest_input}
+    cp ${pth_Gridgen}'data/'${gridgen_objectGrid}'.mask' ${pth_WW3_regtest_input}
+    cp ${pth_Gridgen}'data/'${gridgen_objectGrid}'.obst' ${pth_WW3_regtest_input}
+    cp ${pth_Gridgen}'data/namelists_'${gridgen_objectGrid}'.nml' ${pth_WW3_regtest_input}
     ########################################################
 fi
+
+
+##########################################################################################################
+###########################################################################################################
+bannerSimple "ww3 run_test" "*"
+declare -i run_test
+run_test=0          ## ～tag，新建文件需要修改～
+if (( run_test == 1 )); then
+    step=step+1
+    ######################################################
+    echo "${blank}${step} ①复制run_test脚本到本项目，控制整个项目的ww3运行，只能复制一次，cp -i 防止覆盖，" \
+        "②复制switch文件到input文件夹，run_test运行需要，comp和link不需要复制～"
+    cd ${pth_WW3_regtest_input} && cd '..'
+    cp -i '../east-USA/run_test' .  # -i 参数是为了防止已存在并修改的run_test文件被覆盖，
+    chmod +x 'run_test'
+fi
+
+
+
+
+##########################################################################################################
+###########################################################################################################
+bannerSimple "grid preprocessor - ww3_grid_nml" "*"
+declare -i ww3_grid_nml
+ww3_grid_nml=0                           ## ～tag，新建文件需要修改～
+parm_WW3_work='work'                     ## ～tag，新建文件需要修改～
+pth_WW3_regtest_work=${pth_WW3_regtest}"/${parm_WW3_work}/" 
+mkdir -p ${pth_WW3_regtest_work}
+parm_WW3_comp='Gnu'                     ## ～tag，新建文件需要修改～，实际文件为comp.Gnu，位于model，
+parm_WW3_switch='Ifremer1'              ## ～tag，新建文件需要修改～，实际文件为switch_Ifremer1，位于input，
+##
+if (( ww3_grid_nml == 1 )); then
+    step=step+1
+    echo "${blank}${step} ww3_grid.nml，①整体制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-116"
+    ######################################################
+    echo "----${blank}${step}.1 创建ww3_grid.nml文件，①ww3_grid.nml的名称定了，" \
+        "觉得某个ww3_grid.nml文件有价值，就在input文件夹中另存，" ## ～tag，新建文件需要修改～ 
+    cd ${pth_WW3_regtest_input}
+    cat >'ww3_grid.nml' <<EOF          
+! -------------------------------------------------------------------- !
+! Define the spectrum parameterization via SPECTRUM_NML namelist
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     SPECTRUM%XFR         = 0.            ! frequency increment
+!     SPECTRUM%FREQ1       = 0.            ! first frequency (Hz)
+!     SPECTRUM%NK          = 0             ! number of frequencies (wavenumbers)
+!     SPECTRUM%NTH         = 0             ! number of direction bins
+!     SPECTRUM%THOFF       = 0.            ! relative offset of first direction [-0.5,0.5]
+! -------------------------------------------------------------------- !
+&SPECTRUM_NML
+  SPECTRUM%XFR           =  1.1
+  SPECTRUM%FREQ1         =  0.04118
+  SPECTRUM%NK            =  32
+  SPECTRUM%NTH           =  24
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define the run parameterization via RUN_NML namelist
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     RUN%FLDRY            = F             ! dry run (I/O only, no calculation)
+!     RUN%FLCX             = F             ! x-component of propagation
+!     RUN%FLCY             = F             ! y-component of propagation
+!     RUN%FLCTH            = F             ! direction shift
+!     RUN%FLCK             = F             ! wavenumber shift
+!     RUN%FLSOU            = F             ! source terms
+! -------------------------------------------------------------------- !
+&RUN_NML
+  RUN%FLCX            = T
+  RUN%FLCY            = T
+  RUN%FLCTH           = T
+  RUN%FLSOU           = T
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define the timesteps parameterization via TIMESTEPS_NML namelist
+!
+! * It is highly recommended to set up time steps which are multiple 
+!   between them. 
+!
+! * The first time step to calculate is the maximum CFL time step
+!   which depend on the lowest frequency FREQ1 previously set up and the
+!   lowest spatial grid resolution in meters DXY.
+!   reminder : 1 degree=60minutes // 1minute=1mile // 1mile=1.852km
+!   The formula for the CFL time is :
+!   Tcfl = DXY / (G / (FREQ1*4*Pi) ) with the constants Pi=3,14 and G=9.8m/s²;
+!   DTXY  ~= 90% Tcfl
+!   DTMAX ~= 3 * DTXY   (maximum global time step limit)
+！  在这个例子中：
+!   DXY=min(reslon * cosd(maxlat)*1852*60, reslon * cosd(minlat)*1852*60)
+!      其中，reslon=0.25, maxlat=46, minlat=36
+!      gridgen教程中附录算的是错的？？？
+!   Tcfl ~= 1000
+!   DTXY ~= 900
+！
+! * The refraction time step depends on how strong can be the current velocities
+!   on your grid :
+!   DTKTH ~= DTMAX / 2   ! in case of no or light current velocities
+!   DTKTH ~= DTMAX / 10  ! in case of strong current velocities
+!
+! * The source terms time step is usually defined between 5s and 60s.
+!   A common value is 10s.
+!   DTMIN ~= 10
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     TIMESTEPS%DTMAX      = 0.         ! maximum global time step (s)
+!     TIMESTEPS%DTXY       = 0.         ! maximum CFL time step for x-y (s)
+!     TIMESTEPS%DTKTH      = 0.         ! maximum CFL time step for k-th (s)
+!     TIMESTEPS%DTMIN      = 0.         ! minimum source term time step (s)
+! -------------------------------------------------------------------- !
+&TIMESTEPS_NML
+  TIMESTEPS%DTMAX         =   600.
+  TIMESTEPS%DTXY          =   200.
+  TIMESTEPS%DTKTH         =   300.
+  TIMESTEPS%DTMIN         =   10.
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define the grid to preprocess via GRID_NML namelist
+!
+! * the tunable parameters for source terms, propagation schemes, and 
+!    numerics are read using namelists. 
+! * Any namelist found in the folowing sections is temporarily written
+!   to param.scratch, and read from there if necessary. 
+! * The order of the namelists is immaterial.
+! * Namelists not needed for the given switch settings will be skipped
+!   automatically
+!
+! * grid type can be : 
+!    'RECT' : rectilinear
+!    'CURV' : curvilinear
+!    'UNST' : unstructured (triangle-based)
+!
+! * coordinate system can be : 
+!    'SPHE' : Spherical (degrees)
+!    'CART' : Cartesian (meters)
+!
+! * grid closure can only be applied in spherical coordinates
+!
+! * grid closure can be : 
+!    'NONE' : No closure is applied
+!    'SMPL' : Simple grid closure. Grid is periodic in the
+!           : i-index and wraps at i=NX+1. In other words,
+!           : (NX+1,J) => (1,J). A grid with simple closure
+!           : may be rectilinear or curvilinear.
+!    'TRPL' : Tripole grid closure : Grid is periodic in the
+!           : i-index and wraps at i=NX+1 and has closure at
+!           : j=NY+1. In other words, (NX+1,J<=NY) => (1,J)
+!           : and (I,NY+1) => (NX-I+1,NY). Tripole
+!           : grid closure requires that NX be even. A grid
+!           : with tripole closure must be curvilinear.
+!
+! * The coastline limit depth is the value which distinguish the sea 
+!   points to the land points. All the points with depth values (ZBIN)
+!   greater than this limit (ZLIM) will be considered as excluded points
+!   and will never be wet points, even if the water level grows over.
+!   It can only overwrite the status of a sea point to a land point.
+!   The value must have a negative value under the mean sea level
+!
+! * The minimum water depth allowed to compute the model is the absolute
+!   depth value (DMIN) used in the model if the input depth is lower to 
+!   avoid the model to blow up.
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     GRID%NAME             = 'unset'            ! grid name (30 char)
+!     GRID%NML              = 'namelists.nml'    ! namelists filename
+!     GRID%TYPE             = 'unset'            ! grid type
+!     GRID%COORD            = 'unset'            ! coordinate system
+!     GRID%CLOS             = 'unset'            ! grid closure
+!
+!     GRID%ZLIM             = 0.        ! coastline limit depth (m)
+!     GRID%DMIN             = 0.        ! abs. minimum water depth (m)
+!
+!  下面所有项，在gridgen中生成.meta中有，全部复制过来。
+! -------------------------------------------------------------------- !
+&GRID_NML
+  GRID%NAME              =  'east-USA_P25_3'
+  GRID%NML               =  'namelists_east-USA_P25_3.nml'
+  GRID%TYPE              =  'RECT'
+  GRID%COORD             =  'SPHE'
+  GRID%CLOS              =  'NONE'
+  GRID%ZLIM              =  -0.10
+  GRID%DMIN              =   2.50
+/
+
+
+&RECT_NML
+  RECT%NX                =  69
+  RECT%NY                =  41
+!
+  RECT%SX                =   0.250000000000
+  RECT%SY                =   0.250000000000
+  RECT%X0                =  -75.0000
+  RECT%Y0                =   36.0000
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define the depth to preprocess via DEPTH_NML namelist
+! - for RECT and CURV grids -
+!
+! * if no obstruction subgrid, need to set &MISC FLAGTR = 0
+!
+! * The depth value must have negative values under the mean sea level
+!
+! * value <= value_read * scale_fac
+!
+! * IDLA : Layout indicator :
+!                  1   : Read line-by-line bottom to top.  (default)
+!                  2   : Like 1, single read statement.
+!                  3   : Read line-by-line top to bottom.
+!                  4   : Like 3, single read statement.
+! * IDFM : format indicator :
+!                  1   : Free format.  (default)
+!                  2   : Fixed format.
+!                  3   : Unformatted.
+! * FORMAT : element format to read :
+!               '(....)'  : auto detected  (default)
+!               '(f10.6)' : float type
+!
+! * Example :
+!      IDF  SF     IDLA  IDFM   FORMAT    FILENAME
+!      50   0.001  1     1     '(....)'  'GLOB-30M.bot'
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     DEPTH%SF             = 1.       ! scale factor
+!     DEPTH%FILENAME       = 'unset'  ! filename
+!     DEPTH%IDF            = 50       ! file unit number
+!     DEPTH%IDLA           = 1        ! layout indicator
+!     DEPTH%IDFM           = 1        ! format indicator
+!     DEPTH%FORMAT         = '(....)' ! formatted read format
+!  下面所有项，在gridgen中生成.meta中有，全部复制过来。
+! -------------------------------------------------------------------- !
+
+&DEPTH_NML
+  DEPTH%SF             =  0.00
+  DEPTH%FILENAME       = 'east-USA_P25_3.bot'
+/
+
+&MASK_NML
+  MASK%FILENAME         = 'east-USA_P25_3.mask'
+/
+
+&OBST_NML
+  OBST%SF              =  0.01
+  OBST%FILENAME        = 'east-USA_P25_3.obst'
+/
+EOF
+    ######################################################
+    echo "----${blank}${step}.2 根据执行ww3_grid的run_test命令，配置相关文件并执行，" \
+        "运行完成后，会在work文件夹下生成或更新mapsta.ww3,mask.ww3,mod_def.ww3,ww3_grid.out等文件，"
+    cd ${pth_WW3_regtest_input} && cd '../../'
+    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+        -N -r ww3_grid -w ${parm_WW3_work} ../model ${programGo} \
+        >/dev/null
+    ######################################################
+fi
+
+
+
+
+
+##########################################################################################################
+###########################################################################################################
+bannerSimple "wind nc create - CCMP" "*"
+declare -i CCMP  
+CCMP=1          ## ～tag，新建文件需要修改～
+pth_CCMP=${pth_OceanForecast}'CCMP/'
+pth_CCMP_work=${pth_CCMP}${programGo}'/'  &&  mkdir -p ${pth_CCMP_work}
+
+if (( CCMP == 1 )); then
+    step=step+1
+    echo "${blank}${step} CCMP，①整体制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-20，"
+    ######################################################
+    echo "----${blank}${step}.1 生成下载CCMP数据的download_ccmp.m文件，运行.m文件，" \
+        "①下载的速度很慢呀，去对应下载地方可以看到单个文件下载时，文件大小的变化，" \
+        "②Windows 小飞机下下载的很快，用WPS云文档进行同步吧～～"   ## ～tag，新建文件需要修改～
+    cd ${pth_CCMP_work}
+    cat >'download_ccmp.m' <<EOF
+%% 说明
+% ccmp v02.0 数据下载网址：https://data.remss.com/ccmp/v02.0/
+%% L3.0数据下载
+filepath='/1t/ccmp/data_L3/'; %创建相应文件夹，下载的数据保存到此文件夹；(注意，路径的最后面必须为 / )；
+mkdir(filepath);   %权限不允许，修改文件夹的权限即可，
+% system(['echo 123456 | sudo -S mkdir -p','/1t/ccmp']);
+% system(['echo 123456 | sudo -S mkdir -p',filepath]);
+
+% url特点：需要3个通配符
+% https://data.remss.com/ccmp/v02.0/Y1990/M02/CCMP_Wind_Analysis_19900201_V02.0_L3.0_RSS.nc
+%                                    1987:1:2019
+%                                          01:1:12
+%                                                                          01:1:31
+
+% 最全的通配符
+% year = num2str([1987:1:2019]');  year(2,:); size(year);%通配符 year；
+% month = num2str([1:1:12]','%02d'); month(2,:); %通配符 month；
+% day = num2str([1:1:31]','%02d'); day(2,:); %通配符 day；
+
+% 应用中的通配符
+year = num2str([2011]'); %通配符 year；
+month = num2str([9:10]','%02d'); %通配符 month；
+day = num2str([1:31]','%02d'); %通配符 day；
+
+for i=1:1:size(year,1)
+    for j=1:1:size(month,1)
+        for k=1:1:size(day,1)
+            % 判断日期存不存在
+            ts = [year(i,:),'-',month(j,:),'-',day(k,:)];
+            try
+                tf = isdatetime(datetime(ts)); %不用try，这一行会报错。
+            catch
+                tf = 0;
+            end
+            
+            if(tf==1) %日期存在
+                %https://data.remss.com/ccmp/v02.0/Y1990/M02/CCMP_Wind_Analysis_19900201_V02.0_L3.0_RSS.nc
+                fullURL=['https://data.remss.com/ccmp/v02.0/Y',year(i,:), ...
+                    '/M',month(j,:), ...
+                    '/CCMP_Wind_Analysis_',year(i,:),month(j,:),day(k,:),'_V02.0_L3.0_RSS.nc']; %下载所需要的url
+                filename=[filepath,'CCMP_Wind_Analysis_',year(i,:),month(j,:),day(k,:),'_V02.0_L3.0_RSS.nc']; %保存的文件名
+                
+                tic % 记录下载的时间
+                [f,status]=urlwrite(fullURL,filename);%下载命令
+                if status==1 %下载成功
+                    t=toc;
+                    lst=dir(filename); %了解文件的大小
+                    xi=lst.bytes;
+                    disp(['CCMP_Wind_Analysis_',year(i,:),month(j,:),day(k,:),'_V02.0_L3.0_RSS.nc',...
+                        '下载成功，','文件大小为',num2str(xi/1024/1024),'M，',' 花费',num2str(t/60),'分钟。']);
+                else
+                    disp(['CCMP_Wind_Analysis_',year(i,:),month(j,:),day(k,:),'_V02.0_L3.0_RSS.nc','下载失败。']);
+                end
+            else
+                disp([ts,'日期不存在。']);
+            end
+            
+        end
+    end
+end
+
+%% L3.5数据下载
+% ...
+EOF
+    cd ${pth_CCMP_work}
+    ${pth_matlab} -nodisplay -r \
+        "download_ccmp; exit;" \
+        # >${pth_CCMP_work}'download_ccmp.out' 2>&1  #建议不要重定向～～
+    ########################################################
+
+    ######################################################
+fi
+
+
+
+
+
+
 
 ############################################################################################################
 ############################################################################################################
@@ -399,14 +782,6 @@ if ((DA_cycle_NoWW3_ENOI == 1)); then
     chmod +x 'DA_cycle_NoWW3_ENOI'
     ./'DA_cycle_NoWW3_ENOI' '----'${blank}${step}'.'
 fi
-
-
-
-
-
-
-
-
 
 ##
 echo '├──「FAQ，未完全完成，大纲」VScode书写shell，语法提示，格式化，错误提示，大纲，'
@@ -468,23 +843,36 @@ echo '├──「FAQ，OK」shell脚本一行太长，'
 # https://www.csdn.net/tags/OtTacg3sOTAxMC1ibG9n.html   shell脚本一行太长，使用\换行
 
 ##
-echo '├──「FAQ，???」git上传超过50Mb怎么解决？，'
+echo '├──「FAQ，艰难解决」git上传超过50Mb怎么解决？，删除仓库大文件，新建分支，分支只包含重要的代码；以后一次别添加太多文件到github；'
 # 放弃git托管大型项目，
 # 只用一个.gitignore吧，太多就太烦了，
 # https://blog.csdn.net/weixin_45574815/article/details/115231162   github如何删除项目中的文件
 # https://blog.csdn.net/qq_36551991/article/details/110405561   .gitignore文件怎么写
 # https://www.jianshu.com/p/82bbcfbb0ec9?from=singlemessage     git .ignore忽略文件夹中除了指定的文件外的其他所有文件
 #       1、.gitignore写起来很费劲
-
+# https://liu-jincan.github.io/2022/03/29/yan-jiu-sheng-justtry-function/fortran/02-win10-vscode-msys2-gfortran-fpm-git/#toc-heading-54
+#       1、介绍了新建分支
+#       2、https://www.it1352.com/2007198.html   git commit错误：pathspec'commit'与git已知的任何文件都不匹配
 
 ##
 echo '├──「FAQ，???」linux上wps能云同步吗？，'
 # 不能
 
 ##
-echo '├──「FAQ，成功」shell运行Matlab脚本？，' 
+echo '├──「FAQ，成功」shell运行Matlab脚本？，'
 # https://www.jianshu.com/p/a8d807949b7d    Linux shell 运行 matlab脚本参数
 
 ##
-echo '├──「FAQ，成功」shell重定向到文件，' 
-# https://blog.csdn.net/phone1126/article/details/118524677， 
+echo '├──「FAQ，成功」shell重定向到文件，'
+# https://blog.csdn.net/phone1126/article/details/118524677，
+
+
+##
+echo '├──「FAQ，成功」matlab调用shell，'
+# https://www.jianshu.com/p/d639893a6769    matlab传参调用shell
+# https://blog.csdn.net/weixin_34910922/article/details/120753957   shell指令自带sudo密码
+
+##
+echo '├──「FAQ，？？？」ubuntu更改文件夹的所有者，'
+# http://t.zoukankan.com/jsdy-p-12762409.html   ubuntu 更改文件夹权限所有者，
+#       sudo chown -R  user:user  filename
