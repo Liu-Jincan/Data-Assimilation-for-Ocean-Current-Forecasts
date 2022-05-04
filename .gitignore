@@ -5,8 +5,17 @@
 !**/*.md
 ########################## DA-Code文件夹
 !**/DA-Code
+#
 **/DA-Code/*
 !**/DA-Code/Readme.md
+#
+!**/DA-Code/src/
+!**/DA-Code/src/*
+#
+!**/DA-Code/build/
+!**/DA-Code/build/apps/
+!**/DA-Code/build/apps/DA_cycle_*
+!**/DA-Code/build/apps/Makefile
 ########################## ndbc文件夹
 !**/ndbc
 **/ncbc/*
@@ -16,8 +25,15 @@
 !**/ndbc/work_eastUSA/
 !**/ndbc/work_eastUSA/work_eastUSA.m
 !**/ndbc/work_eastUSA/Readme.md
+
 ########################## TUTORIAL_GRIDGEN文件夹
 !**/TUTORIAL_GRIDGEN/
 **/TUTORIAL_GRIDGEN/*
 !**/TUTORIAL_GRIDGEN/area/
 !**/TUTORIAL_GRIDGEN/area/*.m
+!**/TUTORIAL_GRIDGEN/data/
+!**/TUTORIAL_GRIDGEN/data/*
+!**/TUTORIAL_GRIDGEN/bin/
+!**/TUTORIAL_GRIDGEN/bin/*
+!**/TUTORIAL_GRIDGEN/namelist/
+!**/TUTORIAL_GRIDGEN/namelist/*

@@ -1,0 +1,10 @@
+drwxrwsr-t    2 ftp      ftp          4096 Jun 08  2021 .
+drwsrwsr-t    9 ftp      ftp          4096 Nov 13  2020 ..
+-rw-r--r--    1 ftp      ftp          7574 Jul 30  2018 gridgen.ARC-12K.nml
+-rw-r--r--    1 ftp      ftp          7583 Jul 30  2018 gridgen.BENG-3M.nml
+-rw-r--r--    1 ftp      ftp          7575 Jul 30  2018 gridgen.GLOB-15M.nml
+-rw-r--r--    1 ftp      ftp          7569 Jul 30  2018 gridgen.GLOB-30M_etopo2.nml
+-rw-r--r--    1 ftp      ftp          7583 Jul 30  2018 gridgen.GLOB-30M_gebco.nml
+-rw-r--r--    1 ftp      ftp          7577 Jul 30  2018 gridgen.NATL-1D.nml
+-rw-r--r--    1 ftp      ftp          7618 Jul 30  2018 gridgen.NORWAY-3M.nml
+-rw-r--r--    1 ftp      ftp          7590 Jul 30  2018 gridgen.ZA-7M.nml

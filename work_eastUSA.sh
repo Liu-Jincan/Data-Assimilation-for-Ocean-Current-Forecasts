@@ -474,6 +474,8 @@ echo '├──「FAQ，???」git上传超过50Mb怎么解决？，'
 # https://blog.csdn.net/weixin_45574815/article/details/115231162   github如何删除项目中的文件
 # https://blog.csdn.net/qq_36551991/article/details/110405561   .gitignore文件怎么写
 # https://www.jianshu.com/p/82bbcfbb0ec9?from=singlemessage     git .ignore忽略文件夹中除了指定的文件外的其他所有文件
+#       1、.gitignore写起来很费劲
+
 
 ##
 echo '├──「FAQ，???」linux上wps能云同步吗？，'
