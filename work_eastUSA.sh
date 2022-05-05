@@ -392,7 +392,7 @@ fi
 ###########################################################################################################
 bannerSimple "ww3 run_test" "*"
 declare -i run_test
-run_test=0 ## ～tag，新建文件需要修改～
+run_test=0                          ## ～tag，新建文件需要修改～
 if ((run_test == 1)); then
     step=step+1
     ######################################################
@@ -407,12 +407,12 @@ fi
 ###########################################################################################################
 bannerSimple "grid preprocessor - ww3_grid_nml" "*"
 declare -i ww3_grid_nml
-ww3_grid_nml=0       ## ～tag，新建文件需要修改～
+ww3_grid_nml=0              ## ～tag，新建文件需要修改～
 parm_WW3_work='work' ## ～tag，新建文件需要修改～
 pth_WW3_regtest_work=${pth_WW3_regtest}"/${parm_WW3_work}/"
 mkdir -p ${pth_WW3_regtest_work}
 parm_WW3_comp='Gnu'        ## ～tag，新建文件需要修改～，实际文件为comp.Gnu，位于model，
-parm_WW3_switch='Ifremer2' ## ～tag，新建文件需要修改～，实际文件为switch_Ifremer1，位于input，
+parm_WW3_switch='Ifremer1' ## ～tag，新建文件需要修改～，实际文件为switch_Ifremer1，位于input，
 ##
 if ((ww3_grid_nml == 1)); then
     step=step+1
@@ -657,11 +657,11 @@ fi
 ###########################################################################################################
 bannerSimple "wind nc create - CCMP" "*"
 declare -i CCMP
-CCMP=0 ## ～tag，新建文件需要修改～
+CCMP=0                               ## ～tag，新建文件需要修改～
 pth_CCMP=${pth_OceanForecast}'CCMP/'
 pth_CCMP_work=${pth_CCMP}${programGo}'/' && mkdir -p ${pth_CCMP_work}
 parm_CCMP_mergeBegin='20110901' ## ～tag，新建文件需要修改～
-parm_CCMP_mergeEnd='20110915'   ## ～tag，新建文件需要修改～
+parm_CCMP_mergeEnd='20110930'   ## ～tag，新建文件需要修改～
 # parm_CCMP_mergeName='ww3_ccmp_'${parm_CCMP_mergeBegin}'_'${parm_CCMP_mergeEnd}'.nc'
 parm_CCMP_mergeName='wind.nc'   ## 不能更改名称，否则ww3_prnc会出问题～
 
@@ -745,7 +745,8 @@ EOF
     ########################################################
     echo "----${blank}${step}.2 用merge_ccmp_ww3.m融合已下载的CCMP数据为一个文件，运行.m文件，" \
         "①需输入三个参数，融合的开始时间和结束时间，字符串形式19900101转换成数比大小即可，融合后的名称，为什么传递不了？clc,clear all了，呜呜～" \
-        "②融合后的nc文件所占内存变大了几乎2倍（相较于各个单个文件之和），不知道是为什么，解决方法，风场用完后删掉，"
+        "②融合后的nc文件所占内存变大了几乎2倍（相较于各个单个文件之和），不知道是为什么，解决方法，风场用完后删掉，" \
+        "③博客上的代码关于v10m保存类型出错，不能用NC_float，坑死我了～"
     cd ${pth_CCMP_work}
     cat >'merge_ccmp_ww3.m' <<EOF
 %%
@@ -877,18 +878,19 @@ varid4=netcdf.defVar(cid,'u10m','NC_DOUBLE',[dimlon dimlat dimtime]);
 netcdf.putAtt(cid,varid4,'standard_name','eastward_wind');
 netcdf.putAtt(cid,varid4,'long_name','u-wind vector component at 10 meters');
 netcdf.putAtt(cid,varid4,'units','m s-1');
-netcdf.putAtt(cid,varid4,'_Fillvalue',-9999);
+netcdf.putAtt(cid,varid4,'_FillValue',-9999);
+%netcdf.putAtt(cid,varid4,'_Fillvalue',-9999);
 netcdf.putAtt(cid,varid4,'coordinates','time latitude longitude')
 netcdf.putAtt(cid,varid4,'valid_min',min(uwind(:)));
 netcdf.putAtt(cid,varid4,'valid_max',max(uwind(:)));
 
 
-varid5=netcdf.defVar(cid,'v10m','NC_FLOAT',[dimlon dimlat dimtime]);
-%varid5=netcdf.defVar(cid,'v10m','NC_DOUBLE',[dimlon dimlat dimtime]);
+%varid5=netcdf.defVar(cid,'v10m','NC_FLOAT',[dimlon dimlat dimtime]);
+varid5=netcdf.defVar(cid,'v10m','NC_DOUBLE',[dimlon dimlat dimtime]);  
 netcdf.putAtt(cid,varid5,'standard_name','northward_wind');
 netcdf.putAtt(cid,varid5,'long_name','v-wind vector component at 10 meters');
 netcdf.putAtt(cid,varid5,'units','m s-1');
-netcdf.putAtt(cid,varid5,'_Fillvalue',-9999);
+netcdf.putAtt(cid,varid5,'_FillValue',-9999);
 netcdf.putAtt(cid,varid5,'coordinates','time latitude longitude')
 netcdf.putAtt(cid,varid5,'valid_min',min(vwind(:)));
 netcdf.putAtt(cid,varid5,'valid_max',max(vwind(:)));
@@ -923,6 +925,7 @@ EOF
     ####################################################
     echo "----${blank}${step}.3 转移CCMP的program下生成的某一时间段风场的nc文件，至WW3的test的input文件夹，ln -snf，"
     ln -snf ${pth_CCMP_work}'wind.nc' ${pth_WW3_regtest_input}
+    # mv ${pth_CCMP_work}'wind.nc' ${pth_WW3_regtest_input}
     ####################################################
 fi
 
@@ -930,7 +933,7 @@ fi
 ###########################################################################################################
 bannerSimple "wind nc preprocessor - ww3_prnc_nml" "*"
 declare -i ww3_prnc_nml
-ww3_prnc_nml=1 ## ～tag，新建文件需要修改～
+ww3_prnc_nml=0             ## ～tag，新建文件需要修改～
 
 ##
 if ((ww3_prnc_nml == 1)); then
@@ -1022,12 +1025,12 @@ if ((ww3_prnc_nml == 1)); then
 EOF
     ######################################################
     echo "----${blank}${step}.2 根据执行ww3_prnc的run_test命令，配置相关文件并执行，" \
-        "运行完成后，会在work文件夹下生成或更新mapsta.ww3,mask.ww3,mod_def.ww3,ww3_grid.out等文件，"
+        "运行完成后，会在work文件夹下生成或更新wind.ww3,ww3_prnc.out,ww3_prnc.nml.log等文件，"
     cd ${pth_WW3_regtest_input} && cd '../../'
     ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
         -N -r ww3_prnc -w ${parm_WW3_work} ../model ${programGo} \
-    #    >/dev/null
-    echo "`pwd`"
+        >/dev/null
+    # echo "`pwd`"
    
     ######################################################
 fi
@@ -1038,7 +1041,7 @@ bannerSimple "data assimilation" "*"
 pth_DA_Code=${pth_OceanForecast}'DA-Code/build/apps/'
 declare -i DA_cycle_NoWW3 DA_cycle_NoWW3_ENOI
 DA_cycle_NoWW3=0
-DA_cycle_NoWW3_ENOI=0
+DA_cycle_NoWW3_ENOI=0       ## ～tag，新建文件需要修改～
 
 ##
 if ((DA_cycle_NoWW3 == 1)); then
@@ -1059,7 +1062,7 @@ if ((DA_cycle_NoWW3_ENOI == 1)); then
 fi
 
 ##
-echo '├──「FAQ，未完全完成，大纲」VScode书写shell，语法提示，格式化，错误提示，大纲，'
+echo '├──「FAQ，完成，大纲」VScode书写shell，语法提示，格式化，错误提示，大纲，'
 # https://blog.csdn.net/csdn_huzeliang/article/details/105321420 【vs code】shell 语法提示，检查，运行调试，
 #       1、shellman: 语法提示，2、shell-format: 格式化，3、shellcheck: 语法错误检查
 #       https://marketplace.visualstudio.com/items?itemName=Remisa.shellman     shellman的market
@@ -1084,6 +1087,11 @@ echo '├──「FAQ，未完全完成，大纲」VScode书写shell，语法提
 # bannerSimple "1" "*"
 #       https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck    shellcheck的quickstart，
 # https://zhuanlan.zhihu.com/p/199187317?ivk_sa=1024320u    VS code 打造 shell脚本 IDE
+#
+# 大纲用书签替代～～，bookmarks，
+#       1、书签貌似不能同步？
+#       2、复制粘贴的文件，没有书签，所以书签不是针对具体某个文件的属性？
+#       3、书签内容不能自动更新吗？
 
 ##
 echo '├──「FAQ，成功」将变量从Shell脚本传递到Fortran 90程序 '
@@ -1130,7 +1138,7 @@ echo '├──「FAQ，艰难解决」git上传超过50Mb怎么解决？，删�
 #       2、https://www.it1352.com/2007198.html   git commit错误：pathspec'commit'与git已知的任何文件都不匹配
 
 ##
-echo '├──「FAQ，???」linux上wps能云同步吗？，'
+echo '├──「FAQ，失败」linux上wps能云同步文件夹吗？，'
 # 不能
 
 ##
@@ -1148,6 +1156,36 @@ echo '├──「FAQ，成功」matlab调用shell，'
 # https://blog.csdn.net/weixin_34910922/article/details/120753957   shell指令自带sudo密码
 
 ##
-echo '├──「FAQ，？？？」ubuntu更改文件夹的所有者，'
+echo '├──「FAQ，成功」ubuntu更改文件夹的所有者，'
 # http://t.zoukankan.com/jsdy-p-12762409.html   ubuntu 更改文件夹权限所有者，
 #       sudo chown -R  user:user  filename
+
+
+##
+echo '├──「FAQ，成功」ubuntu todesk，'
+# https://www.todesk.com/linux.html     官方安装，官方群，
+#
+
+
+##
+echo '├──「FAQ，成功」ww3_prnc问题，'
+# error，
+#        --------------------------------------------------------------------------
+#        MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+#        with errorcode 27.
+#
+#        NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+#        You may or may not see output from other processes, depending on
+#        exactly when Open MPI kills them.
+#        --------------------------------------------------------------------------
+# 思考，east-USA进行这个配置是没问题的，ww3_prnc无问题，
+#       1、将east-USA的wind.nc移动本项目，使用ifremer1的switch，成功运行ww3_prnc，
+#       2、比较east-USA和本项目的wind.nc文件的差异～，matlab，ncdisp,
+#           * _FillValue ?，变量只能是NC_double，不能是NC_float，否则只能用_Fillvalue，不能用_FillValue
+#               成功～～～
+#       3、nc版本的问题？去虚拟机上看看能不能进行合成，
+
+
+##
+echo '├──「FAQ，？？？」如何防止脚本运行另一个却没提醒错误，其实已经错了，～～'
+# 为了避免下一次的运行用的上一次的风场，需要用完风长后，在work删掉， ？？？
