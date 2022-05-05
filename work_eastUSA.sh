@@ -19,7 +19,8 @@ pth_matlab='/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R
 blank="----step."
 echo '----step.0 新建program或者修改program时，①根据《～tag，新建文件需要修改～》检索需要修改的位置；' \
     '②VSC的整个文件的浏览拖动在修改时也很好用，但是需要绿色行；' \
-    '③调试时，每一步的0/1（不运行/运行）设置需要打断点，这样很清晰的知道整个流程，起到了类似大纲的作用，而且提醒了哪些部分不许运行，nice~；'
+    '③调试时，每一步的0/1（不运行/运行）设置需要打断点，这样很清晰的知道整个流程，起到了类似大纲的作用，而且提醒了哪些部分不许运行，nice~；' \
+    "④bookmarks插件不错～～"
 
 # 整型
 declare -i step #声明是整型
@@ -408,7 +409,7 @@ fi
 bannerSimple "grid preprocessor - ww3_grid_nml" "*"
 declare -i ww3_grid_nml
 ww3_grid_nml=0              ## ～tag，新建文件需要修改～
-parm_WW3_work='work' ## ～tag，新建文件需要修改～
+parm_WW3_work='work'        ## ～tag，新建文件需要修改～           ## 测试时需要更换名字，
 pth_WW3_regtest_work=${pth_WW3_regtest}"/${parm_WW3_work}/"
 mkdir -p ${pth_WW3_regtest_work}
 parm_WW3_comp='Gnu'        ## ～tag，新建文件需要修改～，实际文件为comp.Gnu，位于model，
@@ -660,8 +661,8 @@ declare -i CCMP
 CCMP=0                               ## ～tag，新建文件需要修改～
 pth_CCMP=${pth_OceanForecast}'CCMP/'
 pth_CCMP_work=${pth_CCMP}${programGo}'/' && mkdir -p ${pth_CCMP_work}
-parm_CCMP_mergeBegin='20110901' ## ～tag，新建文件需要修改～
-parm_CCMP_mergeEnd='20110930'   ## ～tag，新建文件需要修改～
+parm_CCMP_mergeBegin='20110901' ## ～tag，新建文件需要修改～，只能是年月日，在ww3_shel.nml中会用到
+parm_CCMP_mergeEnd='20110930'   ## ～tag，新建文件需要修改～，只能是年月日，在ww3_shel.nml中会用到  ## 测试时Begin和End的时间相同即可，
 # parm_CCMP_mergeName='ww3_ccmp_'${parm_CCMP_mergeBegin}'_'${parm_CCMP_mergeEnd}'.nc'
 parm_CCMP_mergeName='wind.nc'   ## 不能更改名称，否则ww3_prnc会出问题～
 
@@ -929,6 +930,9 @@ EOF
     ####################################################
 fi
 
+
+
+
 ##########################################################################################################
 ###########################################################################################################
 bannerSimple "wind nc preprocessor - ww3_prnc_nml" "*"
@@ -1035,6 +1039,490 @@ EOF
     ######################################################
 fi
 
+
+
+
+
+
+
+##########################################################################################################
+###########################################################################################################
+bannerSimple "WAVEWATCH3 Running - ww3_shel_nml" "*"
+declare -i ww3_shel_nml
+ww3_shel_nml=0             ## ～tag，新建文件需要修改～
+
+##
+if ((ww3_shel_nml == 1)); then
+    step=step+1
+    echo "${blank}${step} ww3_shel_nml，①整体制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-116"
+    ######################################################
+    echo "----${blank}${step}.1 创建ww3_shel.nml文件，①ww3_shel.nml的名称定了，" \
+        "觉得某个ww3_shel.nml文件有价值，就在input文件夹中另存，" \
+        "②为什么结束时间的小时是18，因为得到的融合的nc文件的结束时间就是18，实际上，CCMP每天有4个数据，分别是0、6、12、18," \
+        "③带来了一个的问题，几个同化的时间点可能在一个wind.ww3中，「怎么切分同化？」，" \
+        "④ww3_shel的中间运行计算时间可以在.log和.out中查看，这个是在nml中&OUTPUT_DATE_NML设置的，「猜测这一个设置不会影响计算结果？」，" \
+        "⑤「restart.ww3文件是不是也是在这个过程创建的？」" \
+        "⑥运行一个月的时间 3092.47 s，"  ## ～tag，新建文件需要修改～
+    cd ${pth_WW3_regtest_input}
+    cat >'ww3_shel.nml' <<EOF
+! -------------------------------------------------------------------- !
+! WAVEWATCH III ww3_shel.nml - single-grid model                       !
+! -------------------------------------------------------------------- !
+
+
+! -------------------------------------------------------------------- !
+! Define top-level model parameters via DOMAIN_NML namelist
+!
+! * IOSTYP defines the output server mode for parallel implementation.
+!             0 : No data server processes, direct access output from
+!                 each process (requires true parallel file system).
+!             1 : No data server process. All output for each type 
+!                 performed by process that performs computations too.
+!             2 : Last process is reserved for all output, and does no
+!                 computing.
+!             3 : Multiple dedicated output processes.
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     DOMAIN%IOSTYP =  1                 ! Output server type
+!     DOMAIN%START  = '19680606 000000'  ! Start date for the entire model 
+!     DOMAIN%STOP   = '19680607 000000'  ! Stop date for the entire model
+!
+! &DOMAIN_NML
+! DOMAIN%START   = '20110902 000000'
+! DOMAIN%STOP    = '20110902 060000'
+! /
+! -------------------------------------------------------------------- !
+EOF
+    #############################################
+    echo "&DOMAIN_NML" >>'ww3_shel.nml'
+    echo "DOMAIN%START   = '${parm_CCMP_mergeBegin} 000000'" >>'ww3_shel.nml'
+    echo "DOMAIN%STOP   = '${parm_CCMP_mergeEnd} 180000'" >>'ww3_shel.nml'
+    echo "/" >>'ww3_shel.nml'
+    ############################################
+    cat >>'ww3_shel.nml' <<EOF
+! -------------------------------------------------------------------- !
+! Define each forcing via the INPUT_NML namelist
+!
+! * The FORCING flag can be  : F for "no forcing"
+!                              T for "external forcing file"
+!                              H for "homogenous forcing input"
+!                              C for "coupled forcing field"
+!
+! * homogeneous forcing is not available for ICE_CONC
+!
+! * The ASSIM flag can :  F for "no forcing"
+!                         T for "external forcing file"
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     INPUT%FORCING%WATER_LEVELS  = F
+!     INPUT%FORCING%CURRENTS      = F
+!     INPUT%FORCING%WINDS         = F
+!     INPUT%FORCING%ICE_CONC      = F
+!     INPUT%FORCING%ICE_PARAM1    = F
+!     INPUT%FORCING%ICE_PARAM2    = F
+!     INPUT%FORCING%ICE_PARAM3    = F
+!     INPUT%FORCING%ICE_PARAM4    = F
+!     INPUT%FORCING%ICE_PARAM5    = F
+!     INPUT%FORCING%MUD_DENSITY   = F
+!     INPUT%FORCING%MUD_THICKNESS = F
+!     INPUT%FORCING%MUD_VISCOSITY = F
+!     INPUT%ASSIM%MEAN            = F
+!     INPUT%ASSIM%SPEC1D          = F
+!     INPUT%ASSIM%SPEC2D          = F
+! -------------------------------------------------------------------- !
+&INPUT_NML
+INPUT%FORCING%WINDS = 'T' 
+/
+
+! -------------------------------------------------------------------- !
+! Define the output types point parameters via OUTPUT_TYPE_NML namelist
+!
+! * the point file is a space separated values per line : lon lat 'name'
+!
+! * the full list of field names is : 
+!  DPT CUR WND AST WLV ICE IBG D50 IC1 IC5 HS LM T02 T0M1 T01 FP DIR SPR
+!  DP HIG EF TH1M STH1M TH2M STH2M WN PHS PTP PLP PDIR PSPR PWS TWS PNR
+!  UST CHA CGE FAW TAW TWA WCC WCF WCH WCM SXY TWO BHD FOC TUS USS P2S
+!  USF P2L TWI FIC ABR UBR BED FBB TBB MSS MSC DTD FC CFX CFD CFK U1 U2 
+!
+! * output track file formatted (T) or unformated (F)
+!
+! * coupling fields exchanged list is :
+!   - Sent fields by ww3:
+!       - Ocean model : T0M1 OCHA OHS DIR BHD TWO UBR FOC TAW TUS USS LM DRY
+!       - Atmospheric model : ACHA AHS TP (or FP) FWS
+!       - Ice model : IC5 TWI
+!   - Received fields by ww3:
+!       - Ocean model : SSH CUR
+!       - Atmospheric model : WND
+!       - Ice model : ICE IC1 IC5
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     TYPE%FIELD%LIST         =  'unset'
+!     TYPE%POINT%FILE         =  'points.list'
+!     TYPE%TRACK%FORMAT       =  T
+!     TYPE%PARTITION%X0       =  0
+!     TYPE%PARTITION%XN       =  0
+!     TYPE%PARTITION%NX       =  0
+!     TYPE%PARTITION%Y0       =  0
+!     TYPE%PARTITION%YN       =  0
+!     TYPE%PARTITION%NY       =  0
+!     TYPE%PARTITION%FORMAT   =  T
+!     TYPE%COUPLING%SENT      = 'unset'
+!     TYPE%COUPLING%RECEIVED  = 'unset'
+!
+! TYPE%FIELD%LIST          = 'HS FP DIR DP CHA UST DPT CUR WND'
+! -------------------------------------------------------------------- !
+&OUTPUT_TYPE_NML
+TYPE%FIELD%LIST          = 'HS'
+/
+
+! -------------------------------------------------------------------- !
+! Define output dates via OUTPUT_DATE_NML namelist
+!
+! * start and stop times are with format 'yyyymmdd hhmmss'
+! * if time stride is equal '0', then output is disabled
+! * time stride is given in seconds
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     DATE%FIELD%START         =  '19680606 000000'
+!     DATE%FIELD%STRIDE        =  '0'
+!     DATE%FIELD%STOP          =  '19680607 000000'
+!     DATE%POINT%START         =  '19680606 000000'
+!     DATE%POINT%STRIDE        =  '0'
+!     DATE%POINT%STOP          =  '19680607 000000'
+!     DATE%TRACK%START         =  '19680606 000000'
+!     DATE%TRACK%STRIDE        =  '0'
+!     DATE%TRACK%STOP          =  '19680607 000000'
+!     DATE%RESTART%START       =  '19680606 000000'
+!     DATE%RESTART%STRIDE      =  '0'
+!     DATE%RESTART%STOP        =  '19680607 000000'
+!     DATE%BOUNDARY%START      =  '19680606 000000'
+!     DATE%BOUNDARY%STRIDE     =  '0'
+!     DATE%BOUNDARY%STOP       =  '19680607 000000'
+!     DATE%PARTITION%START     =  '19680606 000000'
+!     DATE%PARTITION%STRIDE    =  '0'
+!     DATE%PARTITION%STOP      =  '19680607 000000'
+!     DATE%COUPLING%START      =  '19680606 000000'
+!     DATE%COUPLING%STRIDE     =  '0'
+!     DATE%COUPLING%STOP       =  '19680607 000000'
+!
+!     DATE%RESTART             =  '19680606 000000' '0' '19680607 000000'
+! &OUTPUT_DATE_NML
+! DATE%FIELD          = '20110902 000000' '3600' '20110902 060000'
+! /
+! -------------------------------------------------------------------- !
+EOF
+    #############################################
+    echo "&OUTPUT_DATE_NML" >>'ww3_shel.nml'
+    echo "DATE%FIELD          = '${parm_CCMP_mergeBegin} 000000' '3600' '${parm_CCMP_mergeEnd} 180000'" >>'ww3_shel.nml'
+    echo "/" >>'ww3_shel.nml'
+    ############################################
+    cat >>'ww3_shel.nml' <<EOF
+! -------------------------------------------------------------------- !
+! Define homogeneous input via HOMOG_COUNT_NML and HOMOG_INPUT_NML namelist
+!
+! * the number of each homogeneous input is defined by HOMOG_COUNT
+! * the total number of homogeneous input is automatically calculated
+! * the homogeneous input must start from index 1 to N
+! * if VALUE1 is equal 0, then the homogeneous input is desactivated
+! * NAME can be IC1, IC2, IC3, IC4, IC5, MDN, MTH, MVS, LEV, CUR, WND, ICE, MOV
+! * each homogeneous input is defined over a maximum of 3 values detailled below :
+!     - IC1 is defined by thickness
+!     - IC2 is defined by viscosity
+!     - IC3 is defined by density
+!     - IC4 is defined by modulus
+!     - IC5 is defined by floe diameter
+!     - MDN is defined by density
+!     - MTH is defined by thickness
+!     - MVS is defined by viscosity
+!     - LEV is defined by height
+!     - CUR is defined by speed and direction
+!     - WND is defined by speed, direction and airseatemp
+!     - ICE is defined by concentration
+!     - MOV is defined by speed and direction
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     HOMOG_COUNT%N_IC1            =  0
+!     HOMOG_COUNT%N_IC2            =  0
+!     HOMOG_COUNT%N_IC3            =  0
+!     HOMOG_COUNT%N_IC4            =  0
+!     HOMOG_COUNT%N_IC5            =  0
+!     HOMOG_COUNT%N_MDN            =  0
+!     HOMOG_COUNT%N_MTH            =  0
+!     HOMOG_COUNT%N_MVS            =  0
+!     HOMOG_COUNT%N_LEV            =  0
+!     HOMOG_COUNT%N_CUR            =  0
+!     HOMOG_COUNT%N_WND            =  0
+!     HOMOG_COUNT%N_ICE            =  0
+!     HOMOG_COUNT%N_MOV            =  0
+!
+!     HOMOG_INPUT(I)%NAME           =  'unset'
+!     HOMOG_INPUT(I)%DATE           =  '19680606 000000'
+!     HOMOG_INPUT(I)%VALUE1         =  0
+!     HOMOG_INPUT(I)%VALUE2         =  0
+!     HOMOG_INPUT(I)%VALUE3         =  0
+! -------------------------------------------------------------------- !
+&HOMOG_COUNT_NML
+/
+
+&HOMOG_INPUT_NML
+/
+
+
+! -------------------------------------------------------------------- !
+! WAVEWATCH III - end of namelist                                      !
+! -------------------------------------------------------------------- !
+EOF
+    ######################################################
+    echo "----${blank}${step}.2 根据执行ww3_shel的run_test命令，配置相关文件并执行，" \
+        "运行完成后，会在work文件夹下生成或更新out_grd.ww3,ww3_shel.out,ww3_shel.nml.log,log.ww3等文件，"
+    cd ${pth_WW3_regtest_input} && cd '../../'
+    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+        -N -r ww3_shel -w ${parm_WW3_work} ../model ${programGo} \
+    #    >/dev/null
+    ######################################################
+fi
+
+
+
+
+
+
+##########################################################################################################
+###########################################################################################################
+bannerSimple "Grid output post-processing - ww3_ounf_nml" "*"
+declare -i ww3_ounf_nml
+ww3_ounf_nml=0             ## ～tag，新建文件需要修改～
+
+##
+if ((ww3_ounf_nml == 1)); then
+    step=step+1
+    echo "${blank}${step} ww3_ounf.nml，①整体制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-116"
+    ######################################################
+    echo "----${blank}${step}.1 创建ww3_ounf.nml文件，①ww3_ounf.nml的名称定了，" \
+        "觉得某个ww3_ounf.nml文件有价值，就在input文件夹中另存，" ## ～tag，新建文件需要修改～
+    cd ${pth_WW3_regtest_input}
+    cat >'ww3_ounf.nml' <<EOF
+! -------------------------------------------------------------------- !
+! WAVEWATCH III ww3_ounf.nml - Grid output post-processing             !
+! -------------------------------------------------------------------- !
+
+! -------------------------------------------------------------------- !
+! Define the output fields to postprocess via FIELD_NML namelist
+!
+! * the full list of field names FIELD%LIST is : 
+!  DPT CUR WND AST WLV ICE IBG D50 IC1 IC5 HS LM T02 T0M1 T01 FP DIR SPR
+!  DP HIG EF TH1M STH1M TH2M STH2M WN PHS PTP PLP PDIR PSPR PWS TWS PNR
+!  UST CHA CGE FAW TAW TWA WCC WCF WCH WCM SXY TWO BHD FOC TUS USS P2S
+!  USF P2L TWI FIC ABR UBR BED FBB TBB MSS MSC DTD FC CFX CFD CFK U1 U2 
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     FIELD%TIMESTART            = '19000101 000000'  ! Stop date for the output field
+!     FIELD%TIMESTRIDE           = '0'                ! Time stride for the output field
+!     FIELD%TIMESTOP             = '29001231 000000'  ! Stop date for the output field
+!     FIELD%TIMECOUNT            = '1000000000'       ! Number of time steps
+!     FIELD%TIMESPLIT            = 6                  ! [4(yearly),6(monthly),8(daily),10(hourly)]
+!     FIELD%LIST                 = 'unset'            ! List of output fields
+!     FIELD%PARTITION            = '0 1 2 3'          ! List of wave partitions ['0 1 2 3 4 5']
+!     FIELD%SAMEFILE             = T                  ! All the variables in the same file [T|F]
+!     FIELD%TYPE                 = 3                  ! [2 = SHORT, 3 = it depends , 4 = REAL]
+!
+!&FIELD_NML
+!  FIELD%TIMESTART        =  '20080310 000000'
+!  FIELD%TIMESTRIDE       =  '180'
+!  FIELD%TIMECOUNT        =  '100'
+!  FIELD%LIST             =  'HS FP DIR DP CHA UST DPT CUR WND'
+!  FIELD%PARTITION        =  '0'
+!/
+! -------------------------------------------------------------------- !
+&FIELD_NML
+  FIELD%TIMESTRIDE       =  '3600'
+  FIELD%LIST             =  'HS'
+  FIELD%TIMESPLIT        =   4
+/
+
+! -------------------------------------------------------------------- !
+! Define the content of the input file via FILE_NML namelist
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     FILE%PREFIX        = 'ww3.'            ! Prefix for output file name
+!     FILE%NETCDF        = 3                 ! Netcdf version [3|4]
+!     FILE%IX0           = 1                 ! First X-axis or node index
+!     FILE%IXN           = 1000000000        ! Last X-axis or node index
+!     FILE%IY0           = 1                 ! First Y-axis index
+!     FILE%IYN           = 1000000000        ! Last Y-axis index
+! -------------------------------------------------------------------- !
+&FILE_NML
+/
+
+
+! -------------------------------------------------------------------- !
+! Define the content of the output file via SMC_NML namelist
+!
+! * For SMC grids, IX0, IXN, IY0 and IYN from FILE_NML are not used.
+!   Two types of output are available:
+! *   TYPE=1: Flat 1D "seapoint" array of grid cells.
+! *   TYPE=2: Re-gridded regular grid with cell sizes being an integer
+! *           multiple of the smallest SMC grid cells size.
+!
+! * Note that the first/last longitudes and latitudes will be adjusted
+!  to snap to the underlying SMC grid edges. CELFAC is only used for
+!  type 2 output and defines the output cell sizes as an integer
+!  multiple of the smallest SMC Grid cell size. CELFAC should be a
+!  power of 2, e.g: 1,2,4,8,16, etc...
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     SMC%TYPE          = 1              ! SMC Grid type (1 or 2)
+!     SMC%SXO           = -999.9         ! First longitude
+!     SMC%EXO           = -999.9         ! Last longitude
+!     SMC%SYO           = -999.9         ! First latitude
+!     SMC%EYO           = -999.9         ! Last latitude
+!     SMC%CELFAC        = 1              ! Cell size factor (SMCTYPE=2 only)
+!     SMC%NOVAL         = UNDEF          ! Fill value for wet cells with no data
+! -------------------------------------------------------------------- !
+&SMC_NML
+/
+
+! -------------------------------------------------------------------- !
+! WAVEWATCH III - end of namelist                                      !
+! -------------------------------------------------------------------- !
+
+EOF
+    ######################################################
+    echo "----${blank}${step}.2 根据执行ww3_ounf的run_test命令，配置相关文件并执行，" \
+        "运行完成后，会在work文件夹下生成或更新ww3_ounf.out,ww3_ounf.nml.log,ww3..nc等文件，"
+    cd ${pth_WW3_regtest_input} && cd '../../'
+    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+        -N -r ww3_ounf -w ${parm_WW3_work} -o netcdf ../model ${programGo} \
+    #    >/dev/null
+    # echo "`pwd`"
+   
+    ######################################################
+fi
+
+
+
+
+
+
+##########################################################################################################
+###########################################################################################################
+bannerSimple "Data assimilation preparing && Background analysis - ndbc" "*"
+declare -i ndbc
+ndbc=0             ## ～tag，新建文件需要修改～
+
+##
+if ((ndbc == 1)); then
+    step=step+1
+    echo "${blank}${step} ndbc，①部分制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-116"
+    ######################################################
+    echo "----${blank}${step}.1 创建ww3_prnc.nml文件，" ## ～tag，新建文件需要修改～
+    cd ${pth_WW3_regtest_input}
+    cat >'ww3_prnc.nml' <<EOF
+   ! -------------------------------------------------------------------- !
+   ! WAVEWATCH III ww3_prnc.nml - Field preprocessor                      !
+   ! -------------------------------------------------------------------- !
+   
+   
+   ! -------------------------------------------------------------------- !
+   ! Define the forcing fields to preprocess via FORCING_NML namelist
+   !
+   ! * only one FORCING%FIELD can be set at true
+   ! * only one FORCING%grid can be set at true
+   ! * tidal constituents FORCING%tidal is only available on grid%asis with FIELD%level or FIELD%current
+   !
+   ! * namelist must be terminated with /
+   ! * definitions & defaults:
+   !     FORCING%TIMESTART            = '19000101 000000'  ! Start date for the forcing field
+   !     FORCING%TIMESTOP             = '29001231 000000'  ! Stop date for the forcing field
+   !
+   !     FORCING%FIELD%ICE_PARAM1     = F           ! Ice thickness                      (1-component)
+   !     FORCING%FIELD%ICE_PARAM2     = F           ! Ice viscosity                      (1-component)
+   !     FORCING%FIELD%ICE_PARAM3     = F           ! Ice density                        (1-component)
+   !     FORCING%FIELD%ICE_PARAM4     = F           ! Ice modulus                        (1-component)
+   !     FORCING%FIELD%ICE_PARAM5     = F           ! Ice floe mean diameter             (1-component)
+   !     FORCING%FIELD%MUD_DENSITY    = F           ! Mud density                        (1-component)
+   !     FORCING%FIELD%MUD_THICKNESS  = F           ! Mud thickness                      (1-component)
+   !     FORCING%FIELD%MUD_VISCOSITY  = F           ! Mud viscosity                      (1-component)
+   !     FORCING%FIELD%WATER_LEVELS   = F           ! Level                              (1-component)
+   !     FORCING%FIELD%CURRENTS       = F           ! Current                            (2-components)
+   !     FORCING%FIELD%WINDS          = F           ! Wind                               (2-components)
+   !     FORCING%FIELD%WIND_AST       = F           ! Wind and air-sea temp. dif.        (3-components)
+   !     FORCING%FIELD%ICE_CONC       = F           ! Ice concentration                  (1-component)
+   !     FORCING%FIELD%ICE_BERG       = F           ! Icebergs and sea ice concentration (2-components)
+   !     FORCING%FIELD%DATA_ASSIM     = F           ! Data for assimilation              (1-component)
+   !
+   !     FORCING%GRID%ASIS            = F           ! Transfert field 'as is' on the model grid
+   !     FORCING%GRID%LATLON          = F           ! Define field on regular lat/lon or cartesian grid
+   !
+   !     FORCING%TIDAL                = 'unset'     ! Set the tidal constituents [FAST | VFAST | 'M2 S2 N2']
+   ! -------------------------------------------------------------------- !
+   &FORCING_NML
+     FORCING%FIELD%WINDS          = T
+     FORCING%GRID%LATLON          = T
+   /
+   
+   ! -------------------------------------------------------------------- !
+   ! Define the content of the input file via FILE_NML namelist
+   !
+   ! * input file must respect netCDF format and CF conventions
+   ! * input file must contain :
+   !      -dimension : time, name expected to be called time
+   !      -dimension : longitude/latitude, names can defined in the namelist
+   !      -variable : time defined along time dimension
+   !      -attribute : time with attributes units written as ISO8601 convention
+   !      -attribute : time with attributes calendar set to standard as CF convention
+   !      -variable : longitude defined along longitude dimension
+   !      -variable : latitude defined along latitude dimension
+   !      -variable : field defined along time,latitude,longitude dimensions
+   ! * FILE%VAR(I) must be set for each field component
+   !
+   ! * namelist must be terminated with /
+   ! * definitions & defaults:
+   !     FILE%FILENAME      = 'unset'           ! relative path input file name
+   !     FILE%LONGITUDE     = 'unset'           ! longitude/x dimension name
+   !     FILE%LATITUDE      = 'unset'           ! latitude/y dimension name
+   !     FILE%VAR(I)        = 'unset'           ! field component
+   !     FILE%TIMESHIFT     = '00000000 000000' ! shift the time value to 'YYYYMMDD HHMMSS'
+   ! -------------------------------------------------------------------- !
+   &FILE_NML
+     FILE%FILENAME      = 'wind.nc'
+     FILE%LONGITUDE     = 'longitude'
+     FILE%LATITUDE      = 'latitude'
+     FILE%VAR(1)        = 'u10m'
+     FILE%VAR(2)        = 'v10m'
+   /
+   
+   
+   ! -------------------------------------------------------------------- !
+   ! WAVEWATCH III - end of namelist                                      !
+! -------------------------------------------------------------------- !
+EOF
+    ######################################################
+    echo "----${blank}${step}.2 根据执行ww3_prnc的run_test命令，配置相关文件并执行，" \
+        "运行完成后，会在work文件夹下生成或更新wind.ww3,ww3_prnc.out,ww3_prnc.nml.log等文件，"
+    cd ${pth_WW3_regtest_input} && cd '../../'
+    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+        -N -r ww3_prnc -w ${parm_WW3_work} ../model ${programGo} \
+        >/dev/null
+    # echo "`pwd`"
+   
+    ######################################################
+fi
+
+
+
+
+
 ############################################################################################################
 ############################################################################################################
 bannerSimple "data assimilation" "*"
@@ -1092,6 +1580,7 @@ echo '├──「FAQ，完成，大纲」VScode书写shell，语法提示，格
 #       1、书签貌似不能同步？
 #       2、复制粘贴的文件，没有书签，所以书签不是针对具体某个文件的属性？
 #       3、书签内容不能自动更新吗？
+#       4、优点，很方便对模块是否运行1/0进行修改～～，
 
 ##
 echo '├──「FAQ，成功」将变量从Shell脚本传递到Fortran 90程序 '
@@ -1189,3 +1678,14 @@ echo '├──「FAQ，成功」ww3_prnc问题，'
 ##
 echo '├──「FAQ，？？？」如何防止脚本运行另一个却没提醒错误，其实已经错了，～～'
 # 为了避免下一次的运行用的上一次的风场，需要用完风长后，在work删掉， ？？？
+# 软链接原文件名称改变，软链接失效，出现另一个名称相同的文件代替，软链接仍有效，～～
+
+
+##
+echo '├──「FAQ，？？？」restart.ww3在哪里生成的，～～'
+
+##
+echo '├──「FAQ，？？？」手册中的ww3_*你真的了解作用是什么了吗？，～～'
+
+##
+echo '├──「FAQ，？？？」手册模式的并行？，～～'
