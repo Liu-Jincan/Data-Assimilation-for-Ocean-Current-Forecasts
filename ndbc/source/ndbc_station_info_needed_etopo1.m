@@ -18,9 +18,9 @@ disp('-----------------------ndbc_station_info_needed_etopo1')
 cd(path_save)
 cd('..')
 %ncdisp('m_map\ETOPO1\etopo1.nc')
-lon = ncread('m_map\ETOPO1\etopo1.nc', 'lon');
-lat = ncread('m_map\ETOPO1\etopo1.nc', 'lat');
-water = ncread('m_map\ETOPO1\etopo1.nc', 'z');
+lon = ncread('m_map/ETOPO1/etopo1.nc', 'lon');
+lat = ncread('m_map/ETOPO1/etopo1.nc', 'lat');
+water = ncread('m_map/ETOPO1/etopo1.nc', 'z');
 
 %%%% 提取特定位置的水深 %%%%%
 % 经度范围是-180~180，变成0~360
@@ -42,7 +42,7 @@ for i=1:1:size(point_lon,1)
 end
 
 ndbc_station_info_needed.etopo1 = depth;
-
+disp('-----------------------ndbc_station_info_needed_etopo1,ok')
 %% 可以去 https://www.ndbc.noaa.gov/to_station.shtml 查找一些浮标的水深，验证etopo1的准确性
 
 

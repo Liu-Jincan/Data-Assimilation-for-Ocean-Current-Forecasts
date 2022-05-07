@@ -113,8 +113,8 @@ set(ax,'position',CM_position,...
 %% 添加map到ndbc_station_download_NC_analyse
 %load ndbc_station_download_NC_analyse
 mkdir fig
-savefig(F1,strcat(path_save,'fig\区域ndbc浮标图','.fig'));
-ndbc_station_info_needed.BuoyPointsMap{1,1} = strcat('cd(path_save); openfig(".\fig\区域ndbc浮标图','.fig")');
+savefig(F1,strcat(path_save,'fig/区域ndbc浮标图','.fig'));
+ndbc_station_info_needed.BuoyPointsMap{1,1} = strcat('cd(path_save); openfig("./fig/区域ndbc浮标图','.fig")');
 %ndbc_station_download_NC_analyse.BuoyPointsMap{1,1} = strcat('openfig(".\fig\区域ndbc浮标图','.fig")');
 close(F1)
 %save ndbc_station_download_NC_analyse ndbc_station_download_NC_analyse

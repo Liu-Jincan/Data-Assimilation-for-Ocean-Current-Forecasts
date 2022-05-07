@@ -7,12 +7,12 @@ function [ndbc_station_info] = ndbc_station_info(str,path_save)
 %    2022-02-19 second, function, path_save.
 
 %%
-disp('-----------------------ndbc_station_info')
+%disp('-----------------------ndbc_station_info')
 cd(path_save)
 
 %%
 if contains(str,'default')
-    load ndbc_station_info.mat
+    load ndbc_station_info.mat  %这里读取的是ndbc/source文件夹下的ndbc_station_info.mat文件，因为source文件夹被添加到了路径～
     save(strcat(path_save,'ndbc_station_info'),'ndbc_station_info')
 else
     %% webread 正常运行

@@ -13,7 +13,7 @@ function bannerSimple() {
 }
 bannerSimple "${programGo}" "*" # Usage: bannerSimple "my title" "*"
 # path
-pth_OceanForecast='/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/' ## ～tag，新建文件需要修改～
+pth_OceanForecast='/1t/Data-Assimilation-for-Ocean-Current-Forecasts/' ## ～tag，新建文件需要修改～
 pth_matlab='/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/bin/matlab'
 # blank
 blank="----step."
@@ -1418,137 +1418,901 @@ fi
 ###########################################################################################################
 bannerSimple "Data assimilation preparing && Background analysis - ndbc" "*"
 declare -i ndbc
-ndbc=0             ## ～tag，新建文件需要修改～
+ndbc=0                                ## ～tag，新建文件需要修改～
+parm_ndbc_station_downloadFlag=0      ## ～tag，新建文件需要修改～
+parm_ndbc_Index1_yo=0                 ## ～tag，新建文件需要修改～      用于同化
+parm_ndbc_create_new_work_table=0     ## ～tag，新建文件需要修改～      
+parm_ndbc_match=0                     ## ～tag，新建文件需要修改～      用于浮标与背景场的比较
+pth_ndbc=${pth_OceanForecast}'ndbc/'
+pth_ndbc_source=${pth_ndbc}'source/'
+pth_ndbc_mmap=${pth_ndbc}'m_map/'
+pth_ndbc_work=${pth_ndbc}${programGo}'/'  && mkdir -p ${pth_ndbc_work}
 
 ##
 if ((ndbc == 1)); then
     step=step+1
-    echo "${blank}${step} ndbc，①部分制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-116"
+    echo "${blank}${step} ndbc，①部分制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-116" \
+        "②在ENOI项目的实现的过程中，添加了关于H观测算子的索引Index1，及其对应的观测yo，"
     ######################################################
-    echo "----${blank}${step}.1 创建ww3_prnc.nml文件，" ## ～tag，新建文件需要修改～
-    cd ${pth_WW3_regtest_input}
-    cat >'ww3_prnc.nml' <<EOF
-   ! -------------------------------------------------------------------- !
-   ! WAVEWATCH III ww3_prnc.nml - Field preprocessor                      !
-   ! -------------------------------------------------------------------- !
-   
-   
-   ! -------------------------------------------------------------------- !
-   ! Define the forcing fields to preprocess via FORCING_NML namelist
-   !
-   ! * only one FORCING%FIELD can be set at true
-   ! * only one FORCING%grid can be set at true
-   ! * tidal constituents FORCING%tidal is only available on grid%asis with FIELD%level or FIELD%current
-   !
-   ! * namelist must be terminated with /
-   ! * definitions & defaults:
-   !     FORCING%TIMESTART            = '19000101 000000'  ! Start date for the forcing field
-   !     FORCING%TIMESTOP             = '29001231 000000'  ! Stop date for the forcing field
-   !
-   !     FORCING%FIELD%ICE_PARAM1     = F           ! Ice thickness                      (1-component)
-   !     FORCING%FIELD%ICE_PARAM2     = F           ! Ice viscosity                      (1-component)
-   !     FORCING%FIELD%ICE_PARAM3     = F           ! Ice density                        (1-component)
-   !     FORCING%FIELD%ICE_PARAM4     = F           ! Ice modulus                        (1-component)
-   !     FORCING%FIELD%ICE_PARAM5     = F           ! Ice floe mean diameter             (1-component)
-   !     FORCING%FIELD%MUD_DENSITY    = F           ! Mud density                        (1-component)
-   !     FORCING%FIELD%MUD_THICKNESS  = F           ! Mud thickness                      (1-component)
-   !     FORCING%FIELD%MUD_VISCOSITY  = F           ! Mud viscosity                      (1-component)
-   !     FORCING%FIELD%WATER_LEVELS   = F           ! Level                              (1-component)
-   !     FORCING%FIELD%CURRENTS       = F           ! Current                            (2-components)
-   !     FORCING%FIELD%WINDS          = F           ! Wind                               (2-components)
-   !     FORCING%FIELD%WIND_AST       = F           ! Wind and air-sea temp. dif.        (3-components)
-   !     FORCING%FIELD%ICE_CONC       = F           ! Ice concentration                  (1-component)
-   !     FORCING%FIELD%ICE_BERG       = F           ! Icebergs and sea ice concentration (2-components)
-   !     FORCING%FIELD%DATA_ASSIM     = F           ! Data for assimilation              (1-component)
-   !
-   !     FORCING%GRID%ASIS            = F           ! Transfert field 'as is' on the model grid
-   !     FORCING%GRID%LATLON          = F           ! Define field on regular lat/lon or cartesian grid
-   !
-   !     FORCING%TIDAL                = 'unset'     ! Set the tidal constituents [FAST | VFAST | 'M2 S2 N2']
-   ! -------------------------------------------------------------------- !
-   &FORCING_NML
-     FORCING%FIELD%WINDS          = T
-     FORCING%GRID%LATLON          = T
-   /
-   
-   ! -------------------------------------------------------------------- !
-   ! Define the content of the input file via FILE_NML namelist
-   !
-   ! * input file must respect netCDF format and CF conventions
-   ! * input file must contain :
-   !      -dimension : time, name expected to be called time
-   !      -dimension : longitude/latitude, names can defined in the namelist
-   !      -variable : time defined along time dimension
-   !      -attribute : time with attributes units written as ISO8601 convention
-   !      -attribute : time with attributes calendar set to standard as CF convention
-   !      -variable : longitude defined along longitude dimension
-   !      -variable : latitude defined along latitude dimension
-   !      -variable : field defined along time,latitude,longitude dimensions
-   ! * FILE%VAR(I) must be set for each field component
-   !
-   ! * namelist must be terminated with /
-   ! * definitions & defaults:
-   !     FILE%FILENAME      = 'unset'           ! relative path input file name
-   !     FILE%LONGITUDE     = 'unset'           ! longitude/x dimension name
-   !     FILE%LATITUDE      = 'unset'           ! latitude/y dimension name
-   !     FILE%VAR(I)        = 'unset'           ! field component
-   !     FILE%TIMESHIFT     = '00000000 000000' ! shift the time value to 'YYYYMMDD HHMMSS'
-   ! -------------------------------------------------------------------- !
-   &FILE_NML
-     FILE%FILENAME      = 'wind.nc'
-     FILE%LONGITUDE     = 'longitude'
-     FILE%LATITUDE      = 'latitude'
-     FILE%VAR(1)        = 'u10m'
-     FILE%VAR(2)        = 'v10m'
-   /
-   
-   
-   ! -------------------------------------------------------------------- !
-   ! WAVEWATCH III - end of namelist                                      !
-! -------------------------------------------------------------------- !
+    echo "----${blank}${step}.1 在ndbc项目创建关于program的文件夹，批量导入并重命名背景场nc文件到program文件夹下的nc/文件夹，①会删除nc/文件夹" ## ～tag，新建文件需要修改～
+    rm -rf ${pth_ndbc_work}'nc/'
+    mkdir -p ${pth_ndbc_work}'nc/'
+    for tmp in `cd ${pth_WW3_regtest_work} && ls ww3.*.nc`; do
+        cp ${pth_WW3_regtest_work}${tmp} ${pth_ndbc_work}'nc/'
+    done
+    cd ${pth_ndbc_work}'nc/'
+    rename -v 's/ww3./ww3_/g' *.nc  ## nice~~
+    
+    
+    ######################################################
+    echo "----${blank}${step}.2 创建该项目的.m文件，" ## ～tag，新建文件需要修改～
+    cd ${pth_ndbc_work}
+    cat >${programGo}'.m' <<EOF
+% author:
+%    liu jin can, UPC
+%
+% revison history
+%    2022-02-19 first verison.
+%
+% reference:
+%    https://blog.csdn.net/qq_35166974/article/details/96007377:警告: 未保存变量 'work_table'。对于大于 2GB 的变量，请使用 MAT 文件版本 7.3 或更高版本。 
+
+% begin~~~~
+fprintf('work_eastUSA.m \n')
+% path_save = '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/'; %work工作目录路径，最后必须是'/'
+path_save
+cd(path_save)
+fprintf('   「添加路径」source， \n')
+path_source
+% addpath '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/source'
+addpath(path_source)
+path_mmap
+addpath(path_mmap)
+%%
+create_new_work_table
+if(create_new_work_table==1)
+    fprintf('├──「创建work_table.mat，」\n')
+    work_table = table;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step1.从网站上爬取ndbc浮标站的信息，①会在table中生成station_ID、station_lat、station_lon、' ...
+        'station_historyYear_SM信息，②想爬取其他关于浮标的信息，需修改源代码，' ...
+        '③爬取的时间有些久，10点27开始...等不了了...，已爬取的站点信息可以保存在source文件下ndbc_station_info.mat以备用，' ...
+        '④运行完成后会在program文件夹下创建ndbc_station_info.mat，\n' ])
+    %[work_table] = ndbc_station_info('',path_save); %运行需要时间比较久；
+    [work_table] = ndbc_station_info('default',path_save); %调用之前已保存的ndbc_station_info.mat数据；
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step2.选取特定区域需要的站点，剔除年份为nan的站点，在program文件夹下创建ndbc_station_info_needed.mat，\n' ])
+    lat_max = 46;  % 纬度为负数，表示南纬
+    lat_min = 36;
+    lon_max = -58; % 经度为负数，表示西经
+    lon_min = -75;
+    [work_table] = ndbc_station_info_needed(work_table,lat_max,lat_min,lon_max,lon_min,path_save);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step3.特定区域站点的plot，在program/fig文件夹下创建<区域ndbc浮标图.fig>，table生成对应fig的打开命令，\n' ])
+    [work_table] = ndbc_station_info_needed_plot(work_table,lat_max,lat_min,lon_max,lon_min,path_save);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step4.特定区域站点的水深，在table中生成，\n' ])
+    [work_table] = ndbc_station_info_needed_etopo1(work_table,path_save);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    cd(path_save)
+    save work_table work_table
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ndbc_station_downloadFlag
+    if(ndbc_station_downloadFlag==1)
+        fprintf('       ├──Step5.「函数」下载特定区域的ndbc浮标数据，更改work_table中的station_historyData_SM属性，下载完数据此步骤可省略，\n')
+        station_tf_download = [1:size(work_table,1)];                                                 %要下载的浮标在work_table的索引
+        path_station_historyData_SM = strcat(path_save,'station_historyData_SM/');
+        mkdir(path_station_historyData_SM);
+        [work_table] = ndbc_station_download(work_table,station_tf_download,path_save);%运行需要时间比较久；第一次是必须运行的； %%
+        clear station_tf_download path_station_historyData_SM;
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
+%%
+match_Index1_yo
+if(match_Index1_yo==1)  
+    fprintf('├──「加载work_table.mat」\n')
+    load work_table.mat
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf('       ├──Step*. 循环nc文件，为同化做准备，且能对背景场数据和nc进行简单对比分析，\n')
+    fprintf('           ├──Step1. 循环nc，\n')
+    path_nc = strcat(path_save,'nc/');
+    fileFolder = fullfile(path_nc);
+    dirOutput = dir(fullfile(fileFolder,'*.nc'));
+    fileNames = {dirOutput.name}'; % 20x1 cell, relative path, 
+    wildcards = strcat(path_nc,fileNames); % 20x1 cell, wildcards, absolute path,
+    clear fileFolder dirOutput path_nc; 
+    for i=1:length(fileNames)
+        tic
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        fprintf('           ├──Step2 「重要参数」，\n')
+        % 
+        station_tf_download = [1:size(work_table,1)];           %work_table中的，选取需要添加数据的浮标索引，
+        ncNameInTable = strcat(fileNames{i}(1:end-3),'_nc');    %work_table中的，显示的关于此nc文件的属性名称前缀，不能有. 
+                                                                %'ww3_2011_nc';
+        %
+        ncid = wildcards{i};                                    %'ww3_2011.nc'; %绝对路径，
+        nclat = ncread(ncid,'latitude');                        %填写纬度名称
+        nclon = ncread(ncid,'longitude');                       %填写经度名称
+        nctime = ncread(ncid,'time');                           %填写时间名称
+        nc_WVHT = ncread(ncid,'hs');                            %填写有效波高名称
+        % clear ncid;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        fprintf('           ├──Step3「函数」每个浮标与网格点匹配，\n')
+        fprintf('                            每个浮标在H观测矩阵的索引，\n')
+        fprintf('                            每个浮标在nc文件的时间-HS数据，保存至.mat文件，\n')
+        path_Nc_time_Hs = strcat(path_save,ncNameInTable,'_Nc_time_Hs/');
+        mkdir(path_Nc_time_Hs);
+        
+        [work_table] = ndbc_station_download_NC(work_table,station_tf_download,ncid,nclat,nclon,nctime,nc_WVHT,...
+            path_save,ncNameInTable,...
+            path_Nc_time_Hs);
+        % clear path_Nc_time_Hs;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % station_tf_download = [1:112];
+        fprintf('           ├──Step4「函数」在work_table中的添加$(ncNameInT)_ndbc_nc_match_WVHT,\n')
+        path_Ndbc_nc_match_Hs_Fig = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs_Fig/');
+        path_Ndbc_nc_match_Hs = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs/');
+        mkdir(path_Ndbc_nc_match_Hs_Fig);
+        mkdir(path_Ndbc_nc_match_Hs);
+        [work_table] = ndbc_station_download_NC_analyse_HS(path_Ndbc_nc_match_Hs_Fig,path_Ndbc_nc_match_Hs,...
+            path_Nc_time_Hs,work_table,station_tf_download,path_save,ncNameInTable);  %很早被定义过的...
+        clear path_Ndbc_nc_match_Hs_Fig;
+        path_Ndbc_nc_match = path_Ndbc_nc_match_Hs;
+        clear path_Ndbc_nc_match_Hs;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %fprintf('           ├──Step5「函数」根据$(path_Ndbc_nc_match) 下的所有文件生成每个所需同化时刻的Index1和yo文件txt,\n')
+        %path_Index1 = strcat(path_save,ncNameInTable,'_Index1/');
+        %path_yo = strcat(path_save,ncNameInTable,'_yo/');
+        %mkdir(path_Index1); % rmdir(path_Index1,'s')
+        %mkdir(path_yo); % rmdir(path_yo,'s')
+        %[work_table] = Index1_And_yo(path_Index1,path_yo,...
+        %    path_Ndbc_nc_match,path_save,work_table,ncNameInTable); %很早被定义过的...
+        %clear path_Index1;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % toc
+        %fprintf('           ├──Step6「函数」根据$(path_yo) 下的所有文件的名称，得到所有需要同化的时刻，求出所有时刻在nc的索引，保存在Index.txt,\n')
+        %path_Index = strcat(path_save,ncNameInTable,'_Index/');
+        %mkdir(path_Index);
+        %[work_table] = Index(path_Index,...
+        %    work_table,nctime,path_yo); %很早被定义过的...
+        %clear path_Index;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+    end
+end 
+%%
+Index1_yo
+if(Index1_yo==1)
+    cd(path_save)
+    system('rm -rf Index1')
+    system('rm -rf yo')
+    mkdir('Index1')
+    mkdir('yo')
+    fprintf('├──「加载work_table.mat」\n')
+    load work_table.mat
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf('           ├──Step1「函数」每个浮标与网格点匹配，\n')
+    fprintf('                         每个浮标在H观测矩阵的索引，\n')
+    path_nc = strcat(path_save,'nc/');
+    fileFolder = fullfile(path_nc);
+    dirOutput = dir(fullfile(fileFolder,'*.nc'));
+    fileNames = {dirOutput.name}'; % 20x1 cell, relative path, 
+    wildcards = strcat(path_nc,fileNames); % 20x1 cell, wildcards, absolute path,
+    clear fileFolder dirOutput path_nc fileNames; 
+    ncid = wildcards{1};                                    %'ww3_2011.nc'; %绝对路径，
+    nclat = ncread(ncid,'latitude');                        %填写纬度名称
+    nclon = ncread(ncid,'longitude');                       %填写经度名称
+    for i=1:1:size(work_table,1)
+        % lat 最近网格点经纬度
+        [~,temp1] = min(abs(nclat(:)-work_table.lat(i,1))); 
+        work_table.matchNC_lat{i,1} = nclat(temp1);
+        work_table.matchNC_lat{i,2} = temp1; %索引位置
+
+        % lon 最近网格点经纬度
+        [~,temp2] = min(abs(nclon(:)-work_table.lon(i,1))); % 
+        work_table.matchNC_lon{i,1} = nclon(temp2);
+        work_table.matchNC_lon{i,2} = temp2; %索引位置
+        
+        % 在H矩阵的索引
+        work_table.IndexInHmatrix{i,1} = (temp1-1)*length(nclon)+temp2;
+    end
+    clear ncid nclat nclon wildcards;
+    %%
+    cd(path_save)
+    save work_table work_table
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf('           ├──Step2 循环每个浮标的.mat，实现每个浮标一个小时一个Hs，是有效的Hs，就生成每个所需同化时刻的Index1和yo文件txt，\n')
+    cd(path_save)
+    
+    for i=1:1:size(work_table,1)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 实现每个浮标一个小时一个Hs
+        %% 去除ndbc数据table无效数据所在行
+        temp = strcat(path_save,'station_historyData_SM/',num2str(i),'.mat');
+        load(temp); % temp 中仅有 buoy_table_All 变量；
+        ndbc_table = buoy_table_All;
+        ndbc_WVHT1 = cell2mat(ndbc_table.WVHT(:)); %double
+        ndbc_time1 = ndbc_table.YY_MM_DD_hh_mm; % datetime
+        tf1 = find( ndbc_WVHT1>=0 & ndbc_WVHT1<99 );
+        
+        ndbc_time2 = ndbc_time1(tf1);
+        ndbc_WVHT2 = ndbc_WVHT1(tf1);
+        disp(strcat('                       已去除ndbc数据table无效数据所在行；'));
+        %% ndbc数据，一个小时一个数据
+        % 超过30分钟，进一个小时
+        tf2 = find( ndbc_time2.Minute>=30 & ndbc_time2.Minute<60 ); % case1, 秒数都是0，因为ndbc不包含秒数信息；
+        temp = ndbc_time2(tf2); temp.Minute = 0; temp.Hour = temp.Hour+1;
+        ndbc_time2(tf2) = temp;
+        % 少于30分钟，小时不变
+        tf3 = find( ndbc_time2.Minute>0 & ndbc_time2.Minute<30 ); % case2；
+        temp = ndbc_time2(tf3); temp.Minute = 0;
+        ndbc_time2(tf3) = temp;
+        % 年、月、日、时相等的datetime处理：
+        count = tabulate(ndbc_time2); % 统计数列中每个元素出现的次数
+        tf4 = find(cell2mat(count(:,2))>1); % 元素次数超过1次
+        for j=1:1:size(tf4,1) %元素次数超过1次的元素进行平均化处理
+            temp = datetime(count{tf4(j),1});
+            tf5 = find(ndbc_time2==temp);
+            ndbc_WVHT2(tf5(1)) = mean(ndbc_WVHT2(tf5)); %平均化处理
+            ndbc_WVHT2(tf5(2:end)) = 99; %无效数据
+            % ndbc_WVHT2(tf5)
+        end
+        tf6 = find( ndbc_WVHT2>=0 & ndbc_WVHT2<99 );
+        ndbc_time3 = ndbc_time2(tf6); % unique(ndbc_time3); %通过维数不变，发现每一个元素都是唯一的;
+        ndbc_WVHT3 = ndbc_WVHT2(tf6);
+        disp(strcat('                     已实现ndbc数据，一个小时一个数据，（通过了unique(ndbc_time3)的检验）；'));
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 是有效的Hs，就生成每个所需同化时刻的Index1和yo文件txt
+        for j=1:1:size(ndbc_time3,1)
+            %
+            time = ndbc_time3(j);
+            time_str = datestr(time,'yyyymmddTHHMMSS');
+            if(str2num(time_str(1:4))>2010 && str2num(time_str(1:4))<2012)
+                Index1_filename = strcat(path_save,'Index1/',time_str,'.txt');
+                yo_filename = strcat(path_save,'yo/',time_str,'.txt');
+                if ~exist(Index1_filename)
+                    f = fopen(Index1_filename,'w');
+                    fclose(f);
+                    f = fopen(yo_filename,'w');
+                    fclose(f);
+                    clear f;
+                end
+                clear time time_str;
+                %
+                Index1 = work_table.IndexInHmatrix(i); Index1 = cell2mat(Index1);
+                f = fopen(Index1_filename,'a');
+                fprintf(f,'%d\n',Index1);
+                fclose(f);
+                clear str f;
+                yo = ndbc_WVHT3(j);
+                f = fopen(yo_filename,'a');
+                fprintf(f,'%f\n',yo);
+                fclose(f);
+                clear f;
+            end
+            
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    end
+    
+end
+%%
 EOF
     ######################################################
-    echo "----${blank}${step}.2 根据执行ww3_prnc的run_test命令，配置相关文件并执行，" \
-        "运行完成后，会在work文件夹下生成或更新wind.ww3,ww3_prnc.out,ww3_prnc.nml.log等文件，"
-    cd ${pth_WW3_regtest_input} && cd '../../'
-    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
-        -N -r ww3_prnc -w ${parm_WW3_work} ../model ${programGo} \
-        >/dev/null
-    # echo "`pwd`"
-   
+    echo "----${blank}${step}.3 运行该m文件，①matlab需要安装Text Analytics Toolbox，②create_new_work_table=1运行会在program文件夹下" \
+        "创建ndbc_station_info.mat、ndbc_station_info_needed.mat、" \
+        "、work_table.mat、fig/区域ndbc浮标图，work_table.mat包含所需浮标ID、经纬度、SM数据年份、区域浮标fig命令、etopo1水深属性，" \
+        "③ndbc_station_downloadFlag=1运行会在program文件夹下创建station_historyData_SM/*.mat，table中还会记录每个浮标数据导入.mat失败对应的txt，" \
+        "这个创建耗费时间很长，如果已经创建，需设置为0，" \
+        "④match_Index1_yo=1运行会对nc/中的每个nc创建_Index1,_Nc_time_Hs,Ndbc_nc_match_Hs,Ndbc_nc_match_Hs_Fig,_yo文件夹，耗费时间长，建议放弃～～" \
+        "⑤Index1_yo=1运行，生成Index1和yo文件夹，(测试年2011年),时间长了，也很耗时间，但是是长时间同化最好的方式，一次足矣～～"
+    cd ${pth_ndbc_work} 
+    ${pth_matlab} -nodisplay -r "path_save='${pth_ndbc_work}'; path_source='${pth_ndbc_source}'; path_mmap='${pth_ndbc_mmap}'; create_new_work_table=${parm_ndbc_create_new_work_table};ndbc_station_downloadFlag=${parm_ndbc_station_downloadFlag};match_Index1_yo=${parm_ndbc_match};Index1_yo=${parm_ndbc_Index1_yo};${programGo};exit;" \
+    #    >${pth_ndbc_work}'.out.create_work_table' 2>&1
     ######################################################
+
 fi
 
 
+##
+echo '├──「FAQ，OK」另一个角度来看ndbc中创建的match_Index1_yo，Index1_yo一定需要match才能生成？' \
+    '不是的，可以按浮标一个一个来，例如，对于某个浮标A，其某一个数据时刻Hs数据有效，则在Index1和yo文件夹下对应小时时刻的文件添加数据即可，' \
+    "哇塞诶，感觉这样不需要浪费很多时间进行配对～～～配对的目的是进行浮标数据的对比，同化不需要这么配对～～～" \
+    "开干～"
+
+
+##
+echo '├──「FAQ，？？？」nc文件的样式改变，则ndbc必须重新运行一遍？work_table一定需要覆盖～～'
+
+
+##
+echo '├──「FAQ，bug」Index1和yo中30分钟的数据没有处理，～～'
+# =30分钟的按照+1 hour来看吧
+
+
+
 
 
 
 ############################################################################################################
 ############################################################################################################
-bannerSimple "data assimilation" "*"
-pth_DA_Code=${pth_OceanForecast}'DA-Code/build/apps/'
-declare -i DA_cycle_NoWW3 DA_cycle_NoWW3_ENOI
-DA_cycle_NoWW3=0
+bannerSimple "Data assimilation without WavaWatch3 - NoWW3_ENOI" "*"
+declare -i DA_cycle_NoWW3_ENOI
 DA_cycle_NoWW3_ENOI=0       ## ～tag，新建文件需要修改～
 
 ##
-if ((DA_cycle_NoWW3 == 1)); then
+if ((DA_cycle_NoWW3_ENOI == 1)); then
+    pth_DA_Code_src=${pth_OceanForecast}'DA-Code/src_NoWW3_ENOI/'       ## ～tag，新建文件需要修改～
+    pth_DA_Code_build=${pth_OceanForecast}'DA-Code/build/'              ## ～tag，新建文件需要修改～
+    pth_DA_Code_apps=${pth_DA_Code_build}'apps3/'                       ## ～tag，新建文件需要修改～
+    pth_DA_Code_objs=${pth_DA_Code_build}'objs3/'                       ## ～tag，新建文件需要修改～
+    pth_DA_Code_mods=${pth_DA_Code_build}'mods3/'                       ## ～tag，新建文件需要修改～
+    parm_DA_Code_ww3InputNc='nc_30days'                  ## ～tag，新建文件需要修改～，所需同化背景场nc所在的文件夹名称，不能为nc
+    parm_DA_Code_daOuputNc='nc_NoWW3_ENOI_30days'        ## ～tag，新建文件需要修改～，同化后nc所在的文件夹名称和文件前缀，
+    #####################################################
     step=step+1
-    echo "${blank}${step} 使用DA_cycle_NoWW3进行同化"
-    cd ${pth_DA_Code}
-    chmod +x 'DA_cycle_NoWW3'
-    ./'DA_cycle_NoWW3'
+    echo "${blank}${step} 使用DA_cycle_NoWW3_ENOI进行同化，源码在"
+    #####################################################
+    echo "----${blank}${step}.1 ①创建所需同化背景场nc的nc.txt，nc文件数目，②创建ENOI中形成A的nc/nc_ENOI_Amatrix.txt，" ## ～tag，新建文件需要修改～
+    rm -rf ${pth_ndbc_work}'nc'
+    cp -r ${pth_ndbc_work}${parm_DA_Code_ww3InputNc}  ${pth_ndbc_work}'nc'  #
+    cd ${pth_ndbc_work}'nc/'
+    ls -1 *.nc >'nc.txt'  ##重定向，-1按列，
+    nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个
+    ls -1 *.nc >'nc_ENOI_Amatrix.txt'  ##重定向，-1按列，
+    ######################################################
+    echo "----${blank}${step}.2 mod_params.f90的设置，"   ## ～tag，新建文件需要修改～
+    cd ${pth_DA_Code_src}
+    cat >'mod_params.f90' <<EOF
+module mod_params
+    implicit none
+    !********************************* Path setting  *********************************
+    ! 生成的可执行文件位于，$pth_DA_Code_apps
+    character(len=*), parameter :: programs = '$programGo'              ! 数据同化的区域项目名称
+    character(len=*), parameter :: ndbc_pth = '$pth_ndbc' 
+    
+    !********************************* ENOI Step Options *********************************
+    integer, parameter :: ENOI = 1      ! 使用ENOI同化方法，1为使用, 0为不使用
+    integer :: NN = 0       ! size of ensemble，这个需要运行完                                     
+    integer, parameter :: DN = 10       ! step interval to sample the ensemble pool, hour       
+    real, parameter    :: alpha = 1     ! scaling parameter of matrix B
+    integer :: generateAmatriax = 1     ! 1表示生成，0表示不生成，
+
+
+    !*********************************** Info on input NetCdf file *************************************
+    character(len=*), parameter :: nc_pth = programs//'/nc/'              ! 背景场数据所在文件夹
+    character(len=*), parameter :: nc_fileNameTxt = nc_pth//'nc.txt'      ! 背景场数据所在文件夹包含的文件名称，按时间顺序从先到后，
+    integer, parameter :: nc_fileNameNum = $nc_fileNameNum                ! nc_fileNameTxt的行数，即需要同化的背景场nc文件个数，
+    character(len=*), parameter :: nc_AttTimeName = 'time'                ! nc文件中时间属性的名称，
+    character(len=*), parameter :: LAT_NAME = 'latitude'                    ! 
+    character(len=*), parameter :: LON_NAME = 'longitude'                   ! 
+    character(len=*), parameter :: TMP_NAME = 'hs'                          ! readdata会用到
+
+
+    !*********************************** Info on output NetCdf file *************************************
+    character(len=*), parameter :: nc_daOut = '$parm_DA_Code_daOuputNc'     ! 输出同化nc文件所在文件夹名称
+
+    !************************************* DA Subdomain Setting ***************************************
+    integer, parameter :: sub_xy(4) = (/1, 1, 69, 41/)                      ! readdata会用到,
+    integer, parameter :: sub_x = 69, sub_y = 41                            ! x 对应的经度，y 对应的是纬度，readdata会用到,
+    integer, parameter :: N = 41*69                                         ! number of model grid points , NLATS * NLONS
+    integer, parameter :: NLATS = 41, NLONS = 69                            ! 
+end module mod_params
+
+EOF
+    ######################################################
+    echo "----${blank}${step}.3 编译的makefile设置，然后make,①makefile中的有$()，EOF需要加上双引号，"   ## ～tag，新建文件需要修改～
+    cd ${pth_DA_Code_src}
+    cat >'Makefile' << EOF
+Build = $pth_DA_Code_build#../build 不能用相对路径# 当前路径为 makefile 所在路径, 一般不改变
+OBJ_dir = $pth_DA_Code_objs##
+APP_dir = $pth_DA_Code_apps## 一般不改变，
+MOD_dir = $#
+SRC_dir = $pth_DA_Code_src#
+EOF
+    cat >>'Makefile' <<"EOF"
+EXEC = DA_cycle_NoWW3_ENOI#生成的可执行文件的名称，
+RUN = DA_cycle_NoWW3_ENOI#所需跑的项目文件的名称，不包含.f90的扩展名
+
+all : comp link trans clean apps_makefile # depend 
+
+# Portland Group Compiler
+#FC = pgf90
+#FFLAGS = -g -C
+
+# GNU Compiler
+#FC = gfortran
+#FFLAGS = -g -C -mcmodel=medium -fbackslash -fconvert=big-endian
+#FFLAGS = -g -C
+
+# Intel Compiler
+FC = gfortran
+#FFLAGS = -g -C -shared-intel -convert big_endian -I${NFDIR}/include -L${NFDIR}/lib -lnetcdff
+#FFLAGS = -g -C -O3 -mcmodel=medium -convert big_endian -I${NCDF_INC} -L${NCDF_LIB} -lnetcdf -lnetcdff
+#FFLAGS = -g -C -O3 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lnetcdf -lnetcdff -I /usr/include
+#FFLAGS = -g -C -O3
+gdb_debug = -g
+netcdf = -I/usr/include  -L/usr/lib/x86_64-linux-gnu -lnetcdff
+Matlab_mat_h = -I/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/extern/include -L/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/bin/glnxa64 -L/home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/ -cpp 
+Matlab_mat_h2 = -lmat -lmx -lmex -lm -Wl,-rpath /home/jincanliu/BaiduNetdiskWorkspace/Program_SetupPosition/matlab/R2021b/bin/glnxa64
+FFLAGS = $(gdb_debug) $(netcdf) #$(Matlab_mat_h) $(Matlab_mat_h2)
+#FFLAGS = -g -C -convert big_endian
+#FFLAGS = -g -check bounds -fpe0 -ftrapuv -debug semantic_stepping -debug variable_locations -fpp
+#FFLAGS = -O3 -ipo -no-prec-div
+
+#SOURCES = mod_params.f90 mod_date.f90  mod_namelist.f90 mod_matrix_read.f90 mod_matrix_write.f90 mod_matrix_H.f90 mod_matrix_R.f90 mod_matrix_inverse.f90 mod_matrix_W.f90 mod_analysis.f90 DA_cycle.f90
+
+#runOBJS = mod_params.o mod_date.o  mod_namelist.o mod_matrix_read.o mod_matrix_write.o mod_matrix_H.o mod_matrix_R.o mod_matrix_inverse.o mod_matrix_W.o mod_analysis.o DA_cycle.o
+
+runOBJS = $(RUN).o 
+comp: $(runOBJS)
+
+# mod_obs_superobing.o: mod_params.o
+
+# mod_obs_sorting.o: mod_params.o mod_obs_superobing.o
+
+mod_nctime2date.o: 
+
+mod_write_data.o: 
+
+mod_matrix_read.o: mod_params.o 
+
+mod_inIndex_flag.o: mod_params.o 
+
+mod_read_data.o: mod_params.o
+
+mod_write_data.o: mod_params.o
+
+mod_matrix_A.o: mod_read_coor.o mod_read_data.o mod_matrix_write.o 
+
+mod_namelist.o: mod_params.o 
+
+# mod_read_coor.o: mod_params.o  
+
+mod_matrix_H.o: mod_params.o mod_matrix_read.o mod_matrix_write.o
+
+# mod_matrix_L.o: mod_params.o mod_matrix_write.o mod_matrix_read.o
+
+# mod_matrix_R.o: mod_params.o mod_matrix_write.o
+
+mod_matrix_W.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_write.o mod_matrix_H.o mod_matrix_R.o mod_matrix_inverse.o
+
+mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o mod_matrix_A.o  # mod_obs_sorting.o
+
+DA_cycle_NoWW3_ENOI.o: mod_params.o mod_analysis.o mod_read_coor.o mod_inIndex_flag.o mod_nctime2date.o mod_read_data.o mod_write_data.o
+
+%.o:%.f90
+	$(FC) $(Matlab_mat_h) -c  $(FFLAGS) $<
+
+
+link:*.o
+	@echo "编译完成"
+	@#$(FC) $(FFLAGS) $(runOBJS) -o run
+	$(FC) *.o $(Matlab_mat_h) -o $(EXEC) $(FFLAGS) $(Matlab_mat_h2)
+	@echo "链接完成"
+
+clean:
+	@#rm  ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*
+	rm -f *.mod *.o $(EXEC) *.d
+	@echo "清理完毕" 
+
+trans:
+	@-mkdir -p $(OBJ_dir) $(MOD_dir) $(APP_dir)  #在 mkdir 命令前加一个减号，可以避免文件夹已生成而报错。
+	@-mv -f *.o $(OBJ_dir)						#在 mv 命令前加一个减号，可以避免无文件而报错。
+	@-mv -f *.mod $(MOD_dir)
+	@-mv -f $(EXEC) $(APP_dir)/
+	@#-cp -f * $(APP_dir)/						# 为了在$(APP_dir)调试(废弃了)
+	@#-cp -f $(OBJ_dir)/* $(APP_dir)/				# 为了在$(APP_dir)调试（废弃了）
+	@echo "「目标文件转移到了$(OBJ_dir) ，可执行文件转移到了$(APP_dir)，MOD文件转移到了$(MOD_dir)」"
+
+apps_makefile:
+	-rm -f $(APP_dir)/Makefile && touch -f $(APP_dir)/Makefile 
+	@-echo "all: clean run #gdb-debug" >> $(APP_dir)/Makefile
+	@-echo "clean:" >> $(APP_dir)/Makefile 
+	@-echo "	rm -f data/namelist.txt ensemble/coordinate.dta ensemble/ensemble_mean_tmp.dta ensemble/R* ensemble/W* ensemble/H* ensemble/L* ensemble/AH* output/ana*" >> $(APP_dir)/Makefile
+	@-echo "	rm -f ensemble/Amatrix.txt" >> $(APP_dir)/Makefile  
+	@-echo "run:" >> $(APP_dir)/Makefile  
+	@-echo "	./$(EXEC)" >> $(APP_dir)/Makefile 
+	@-echo ".PHONY: clean run" >> $(APP_dir)/Makefile
+
+	@-echo "gdb-debug-launch:" >> $(APP_dir)/Makefile
+	@-echo "		{" >> $(APP_dir)/Makefile
+	@-echo '			"type": "cppdbg",' >> $(APP_dir)/Makefile
+	@-echo '			"request": "launch",' >> $(APP_dir)/Makefile
+	@-echo '			"name": "$(EXEC)",' >> $(APP_dir)/Makefile
+	@-echo '			"program": "$(APP_dir)/DA_cycle",' >> $(APP_dir)/Makefile
+	@-echo '			"args": [' >> $(APP_dir)/Makefile
+	@-echo '				"$(OBJ_dir)/*.o"' >> $(APP_dir)/Makefile
+	@-echo '				"$(SRC_dir)/*.f90"' >> $(APP_dir)/Makefile
+	@-echo '			],' >> $(APP_dir)/Makefile
+	@-echo '			"cwd": "$(APP_dir)/"' >> $(APP_dir)/Makefile
+	@-echo "		}," >> $(APP_dir)/Makefile
+
+	@-echo "debug-gdb:" >> $(APP_dir)/Makefile
+	@-echo "	@make clean" >> $(APP_dir)/Makefile
+	@-echo "	@cd $(SRC_dir) && make" >> $(APP_dir)/Makefile  # 为了方便调试
+	@-echo "	# 在选择对应的调试项目，F5" >> $(APP_dir)/Makefile
+	@echo "「已为apps生成makefile」"
+
+
+
+.PHONY: clean trans 
+# depend:
+# 	sfmakedepend $(SOURCES)
+
+# DO NOT DELETE THIS LINE - used by make depend
+
+mod_namelist.o: mod_params.o 
+
+mod_read_coor.o: mod_params.o  
+
+mod_matrix_H.o: mod_params.o mod_matrix_read.o mod_matrix_write.o
+
+mod_matrix_L.o: mod_params.o mod_matrix_write.o mod_matrix_read.o
+
+mod_matrix_R.o: mod_params.o mod_matrix_write.o
+
+mod_matrix_W.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_write.o mod_matrix_H.o mod_matrix_R.o mod_matrix_inverse.o
+
+mod_analysis.o: mod_params.o mod_date.o mod_matrix_read.o mod_matrix_W.o
+
+DA_cycle.o: mod_params.o mod_analysis.o
+EOF
+    ######################################################
+    make
+    ######################################################
+    echo "----${blank}${step}.4 执行可执行文件，"   ## ～tag，新建文件需要修改～
+    cd ${pth_DA_Code_apps}
+    chmod +x 'DA_cycle_NoWW3_ENOI'
+    ./'DA_cycle_NoWW3_ENOI' '--------'${blank}${step}'.4.'
+    ######################################################
 fi
+
+
+
+############################################
+##
+echo '├──「FAQ，bug，已解决」work_eastUSA/yo/20110831T240000.txt应该是20110901T000000，导致未同化，'
+# 源程序
+
+
+
+############################################
+##
+echo '├──「FAQ，bug，已解决」Amatrix的生成问题，NN打断点都不出来，NN怎么变化？'
+
+
+############################################
+##
+echo '├──「FAQ，bug，解决」Netcdf的陆点数据的波高应该是缺失的，不能是具体数值，负数也不行，实际影响不大，'
+# 思路，nf_copy_var()
+
+
+
+############################################
+##
+echo '├──「FAQ，bug」Netcdf同化后的wet grid波高可能是负数，重新赋值为0吧～'
+
+
+############################################
+##
+echo '├──「FAQ，转移」把整个项目放到1t，大的存储空间位置～'
+
+
+############################################
+##
+echo '├──「FAQ，bug，已解决，出问题了」fortran创建新的Netcdf，与原来Netcdf时间对应不上呀，How to solve?使用nf_copy_var()'
+# https://blog.csdn.net/qwe123oo/article/details/121553212      创建一个nc文件并添加其他nc文件的数据
+# https://docs.unidata.ucar.edu/netcdf-fortran/current/f90-attributes.html#f90-copy-attribute-from-one-netcdf-to-another-nf90_copy_att
+# mod_write_data.f90, call check(nf_copy_var(ncid,tmp_varid,new_ncid))
+#           思路1：nc 文件的问题？，NO
+#           思路2：https://www.unidata.ucar.edu/mailing_lists/archives/netcdfgroup/2012/msg00357.html，解决
+#                   1、需放在enddef后
+#                   2、需要定义dim，但是不能定义var，
+#                   3、check(nf90_def_dim(new_ncid,"hs",NF90_UNLIMITED,hs_dimid))？？？
+# scale_factor,
+
+
+############################################
+##
+echo '├──「FAQ，增加设置」WW3InputNc，daOutputNc～'
+# VSC 右键，find all references，good ？？NO，无法实现～
+# 只能调试更改～～
+
+
+
+
+############################################################################################################
+############################################################################################################
+bannerSimple "Data assimilation analysis - ndbc_NoWW3_ENOI " "*"
+declare -i ndbc_NoWW3_ENOI_ana
+ndbc_NoWW3_ENOI_ana=1       ## ～tag，新建文件需要修改～
+
+if (( ndbc_NoWW3_ENOI_ana == 1 )); then
+    parm_DA_Code_daOuputNc='nc_NoWW3_ENOI_30days'  ## ～tag，新建文件需要修改～
+    parm_ndbc_station_downloadFlag=0      ## ～tag，新建文件需要修改～
+    parm_ndbc_Index1_yo=0                 ## ～tag，新建文件需要修改～      用于同化
+    parm_ndbc_create_new_work_table=0     ## ～tag，新建文件需要修改～      
+    parm_ndbc_match=0                     ## ～tag，新建文件需要修改～      用于浮标与背景场的比较
+    pth_ndbc=${pth_OceanForecast}'ndbc/'
+    pth_ndbc_source=${pth_ndbc}'source/'
+    pth_ndbc_mmap=${pth_ndbc}'m_map/'
+    pth_ndbc_work=${pth_ndbc}${programGo}'/'  && mkdir -p ${pth_ndbc_work}
+    #########################################################
+    rm -rf ${pth_ndbc_work}'nc/'
+    cp -r ${pth_ndbc_work}${parm_DA_Code_daOuputNc}  ${pth_ndbc_work}'nc'
+    ##########################################################
+    cd ${pth_ndbc_work}
+    cat >${programGo}'.m' <<EOF
+% author:
+%    liu jin can, UPC
+%
+% revison history
+%    2022-02-19 first verison.
+%
+% reference:
+%    https://blog.csdn.net/qq_35166974/article/details/96007377:警告: 未保存变量 'work_table'。对于大于 2GB 的变量，请使用 MAT 文件版本 7.3 或更高版本。 
+
+% begin~~~~
+fprintf('work_eastUSA.m \n')
+% path_save = '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/'; %work工作目录路径，最后必须是'/'
+path_save
+cd(path_save)
+fprintf('   「添加路径」source， \n')
+path_source
+% addpath '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/source'
+addpath(path_source)
+path_mmap
+addpath(path_mmap)
+%%
+create_new_work_table
+if(create_new_work_table==1)
+    fprintf('├──「创建work_table.mat，」\n')
+    work_table = table;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step1.从网站上爬取ndbc浮标站的信息，①会在table中生成station_ID、station_lat、station_lon、' ...
+        'station_historyYear_SM信息，②想爬取其他关于浮标的信息，需修改源代码，' ...
+        '③爬取的时间有些久，10点27开始...等不了了...，已爬取的站点信息可以保存在source文件下ndbc_station_info.mat以备用，' ...
+        '④运行完成后会在program文件夹下创建ndbc_station_info.mat，\n' ])
+    %[work_table] = ndbc_station_info('',path_save); %运行需要时间比较久；
+    [work_table] = ndbc_station_info('default',path_save); %调用之前已保存的ndbc_station_info.mat数据；
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step2.选取特定区域需要的站点，剔除年份为nan的站点，在program文件夹下创建ndbc_station_info_needed.mat，\n' ])
+    lat_max = 46;  % 纬度为负数，表示南纬
+    lat_min = 36;
+    lon_max = -58; % 经度为负数，表示西经
+    lon_min = -75;
+    [work_table] = ndbc_station_info_needed(work_table,lat_max,lat_min,lon_max,lon_min,path_save);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step3.特定区域站点的plot，在program/fig文件夹下创建<区域ndbc浮标图.fig>，table生成对应fig的打开命令，\n' ])
+    [work_table] = ndbc_station_info_needed_plot(work_table,lat_max,lat_min,lon_max,lon_min,path_save);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(['       ├──Step4.特定区域站点的水深，在table中生成，\n' ])
+    [work_table] = ndbc_station_info_needed_etopo1(work_table,path_save);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    cd(path_save)
+    save work_table work_table
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ndbc_station_downloadFlag
+    if(ndbc_station_downloadFlag==1)
+        fprintf('       ├──Step5.「函数」下载特定区域的ndbc浮标数据，更改work_table中的station_historyData_SM属性，下载完数据此步骤可省略，\n')
+        station_tf_download = [1:size(work_table,1)];                                                 %要下载的浮标在work_table的索引
+        path_station_historyData_SM = strcat(path_save,'station_historyData_SM/');
+        mkdir(path_station_historyData_SM);
+        [work_table] = ndbc_station_download(work_table,station_tf_download,path_save);%运行需要时间比较久；第一次是必须运行的； %%
+        clear station_tf_download path_station_historyData_SM;
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
+%%
+match_Index1_yo
+if(match_Index1_yo==1)  
+    fprintf('├──「加载work_table.mat」\n')
+    load work_table.mat
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf('       ├──Step*. 循环nc文件，为同化做准备，且能对背景场数据和nc进行简单对比分析，\n')
+    fprintf('           ├──Step1. 循环nc，\n')
+    path_nc = strcat(path_save,'nc/');
+    fileFolder = fullfile(path_nc);
+    dirOutput = dir(fullfile(fileFolder,'*.nc'));
+    fileNames = {dirOutput.name}'; % 20x1 cell, relative path, 
+    wildcards = strcat(path_nc,fileNames); % 20x1 cell, wildcards, absolute path,
+    clear fileFolder dirOutput path_nc; 
+    for i=1:length(fileNames)
+        tic
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        fprintf('           ├──Step2 「重要参数」，\n')
+        % 
+        station_tf_download = [1:size(work_table,1)];           %work_table中的，选取需要添加数据的浮标索引，
+        ncNameInTable = strcat(fileNames{i}(1:end-3),'_nc');    %work_table中的，显示的关于此nc文件的属性名称前缀，不能有. 
+                                                                %'ww3_2011_nc';
+        %
+        ncid = wildcards{i};                                    %'ww3_2011.nc'; %绝对路径，
+        nclat = ncread(ncid,'latitude');                        %填写纬度名称
+        nclon = ncread(ncid,'longitude');                       %填写经度名称
+        nctime = ncread(ncid,'time');                           %填写时间名称
+        nc_WVHT = ncread(ncid,'hs');                            %填写有效波高名称
+        % clear ncid;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        fprintf('           ├──Step3「函数」每个浮标与网格点匹配，\n')
+        fprintf('                            每个浮标在H观测矩阵的索引，\n')
+        fprintf('                            每个浮标在nc文件的时间-HS数据，保存至.mat文件，\n')
+        path_Nc_time_Hs = strcat(path_save,ncNameInTable,'_Nc_time_Hs/');
+        mkdir(path_Nc_time_Hs);
+        
+        [work_table] = ndbc_station_download_NC(work_table,station_tf_download,ncid,nclat,nclon,nctime,nc_WVHT,...
+            path_save,ncNameInTable,...
+            path_Nc_time_Hs);
+        % clear path_Nc_time_Hs;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % station_tf_download = [1:112];
+        fprintf('           ├──Step4「函数」在work_table中的添加$(ncNameInT)_ndbc_nc_match_WVHT,\n')
+        path_Ndbc_nc_match_Hs_Fig = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs_Fig/');
+        path_Ndbc_nc_match_Hs = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs/');
+        mkdir(path_Ndbc_nc_match_Hs_Fig);
+        mkdir(path_Ndbc_nc_match_Hs);
+        [work_table] = ndbc_station_download_NC_analyse_HS(path_Ndbc_nc_match_Hs_Fig,path_Ndbc_nc_match_Hs,...
+            path_Nc_time_Hs,work_table,station_tf_download,path_save,ncNameInTable);  %很早被定义过的...
+        clear path_Ndbc_nc_match_Hs_Fig;
+        path_Ndbc_nc_match = path_Ndbc_nc_match_Hs;
+        clear path_Ndbc_nc_match_Hs;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %fprintf('           ├──Step5「函数」根据$(path_Ndbc_nc_match) 下的所有文件生成每个所需同化时刻的Index1和yo文件txt,\n')
+        %path_Index1 = strcat(path_save,ncNameInTable,'_Index1/');
+        %path_yo = strcat(path_save,ncNameInTable,'_yo/');
+        %mkdir(path_Index1); % rmdir(path_Index1,'s')
+        %mkdir(path_yo); % rmdir(path_yo,'s')
+        %[work_table] = Index1_And_yo(path_Index1,path_yo,...
+        %    path_Ndbc_nc_match,path_save,work_table,ncNameInTable); %很早被定义过的...
+        %clear path_Index1;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % toc
+        %fprintf('           ├──Step6「函数」根据$(path_yo) 下的所有文件的名称，得到所有需要同化的时刻，求出所有时刻在nc的索引，保存在Index.txt,\n')
+        %path_Index = strcat(path_save,ncNameInTable,'_Index/');
+        %mkdir(path_Index);
+        %[work_table] = Index(path_Index,...
+        %    work_table,nctime,path_yo); %很早被定义过的...
+        %clear path_Index;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+    end
+end 
+%%
+Index1_yo
+if(Index1_yo==1)
+    cd(path_save)
+    system('rm -rf Index1')
+    system('rm -rf yo')
+    mkdir('Index1')
+    mkdir('yo')
+    fprintf('├──「加载work_table.mat」\n')
+    load work_table.mat
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf('           ├──Step1「函数」每个浮标与网格点匹配，\n')
+    fprintf('                         每个浮标在H观测矩阵的索引，\n')
+    path_nc = strcat(path_save,'nc/');
+    fileFolder = fullfile(path_nc);
+    dirOutput = dir(fullfile(fileFolder,'*.nc'));
+    fileNames = {dirOutput.name}'; % 20x1 cell, relative path, 
+    wildcards = strcat(path_nc,fileNames); % 20x1 cell, wildcards, absolute path,
+    clear fileFolder dirOutput path_nc fileNames; 
+    ncid = wildcards{1};                                    %'ww3_2011.nc'; %绝对路径，
+    nclat = ncread(ncid,'latitude');                        %填写纬度名称
+    nclon = ncread(ncid,'longitude');                       %填写经度名称
+    for i=1:1:size(work_table,1)
+        % lat 最近网格点经纬度
+        [~,temp1] = min(abs(nclat(:)-work_table.lat(i,1))); 
+        work_table.matchNC_lat{i,1} = nclat(temp1);
+        work_table.matchNC_lat{i,2} = temp1; %索引位置
+
+        % lon 最近网格点经纬度
+        [~,temp2] = min(abs(nclon(:)-work_table.lon(i,1))); % 
+        work_table.matchNC_lon{i,1} = nclon(temp2);
+        work_table.matchNC_lon{i,2} = temp2; %索引位置
+        
+        % 在H矩阵的索引
+        work_table.IndexInHmatrix{i,1} = (temp1-1)*length(nclon)+temp2;
+    end
+    clear ncid nclat nclon wildcards;
+    %%
+    cd(path_save)
+    save work_table work_table
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf('           ├──Step2 循环每个浮标的.mat，实现每个浮标一个小时一个Hs，是有效的Hs，就生成每个所需同化时刻的Index1和yo文件txt，\n')
+    cd(path_save)
+    
+    for i=1:1:size(work_table,1)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 实现每个浮标一个小时一个Hs
+        %% 去除ndbc数据table无效数据所在行
+        temp = strcat(path_save,'station_historyData_SM/',num2str(i),'.mat');
+        load(temp); % temp 中仅有 buoy_table_All 变量；
+        ndbc_table = buoy_table_All;
+        ndbc_WVHT1 = cell2mat(ndbc_table.WVHT(:)); %double
+        ndbc_time1 = ndbc_table.YY_MM_DD_hh_mm; % datetime
+        tf1 = find( ndbc_WVHT1>=0 & ndbc_WVHT1<99 );
+        
+        ndbc_time2 = ndbc_time1(tf1);
+        ndbc_WVHT2 = ndbc_WVHT1(tf1);
+        disp(strcat('                       已去除ndbc数据table无效数据所在行；'));
+        %% ndbc数据，一个小时一个数据
+        % 超过30分钟，进一个小时
+        tf2 = find( ndbc_time2.Minute>=30 & ndbc_time2.Minute<60 ); % case1, 秒数都是0，因为ndbc不包含秒数信息；
+        temp = ndbc_time2(tf2); temp.Minute = 0; temp.Hour = temp.Hour+1;
+        ndbc_time2(tf2) = temp;
+        % 少于30分钟，小时不变
+        tf3 = find( ndbc_time2.Minute>0 & ndbc_time2.Minute<30 ); % case2；
+        temp = ndbc_time2(tf3); temp.Minute = 0;
+        ndbc_time2(tf3) = temp;
+        % 年、月、日、时相等的datetime处理：
+        count = tabulate(ndbc_time2); % 统计数列中每个元素出现的次数
+        tf4 = find(cell2mat(count(:,2))>1); % 元素次数超过1次
+        for j=1:1:size(tf4,1) %元素次数超过1次的元素进行平均化处理
+            temp = datetime(count{tf4(j),1});
+            tf5 = find(ndbc_time2==temp);
+            ndbc_WVHT2(tf5(1)) = mean(ndbc_WVHT2(tf5)); %平均化处理
+            ndbc_WVHT2(tf5(2:end)) = 99; %无效数据
+            % ndbc_WVHT2(tf5)
+        end
+        tf6 = find( ndbc_WVHT2>=0 & ndbc_WVHT2<99 );
+        ndbc_time3 = ndbc_time2(tf6); % unique(ndbc_time3); %通过维数不变，发现每一个元素都是唯一的;
+        ndbc_WVHT3 = ndbc_WVHT2(tf6);
+        disp(strcat('                     已实现ndbc数据，一个小时一个数据，（通过了unique(ndbc_time3)的检验）；'));
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 是有效的Hs，就生成每个所需同化时刻的Index1和yo文件txt
+        for j=1:1:size(ndbc_time3,1)
+            %
+            time = ndbc_time3(j);
+            time_str = datestr(time,'yyyymmddTHHMMSS');
+            if(str2num(time_str(1:4))>2010 && str2num(time_str(1:4))<2012)
+                Index1_filename = strcat(path_save,'Index1/',time_str,'.txt');
+                yo_filename = strcat(path_save,'yo/',time_str,'.txt');
+                if ~exist(Index1_filename)
+                    f = fopen(Index1_filename,'w');
+                    fclose(f);
+                    f = fopen(yo_filename,'w');
+                    fclose(f);
+                    clear f;
+                end
+                clear time time_str;
+                %
+                Index1 = work_table.IndexInHmatrix(i); Index1 = cell2mat(Index1);
+                f = fopen(Index1_filename,'a');
+                fprintf(f,'%d\n',Index1);
+                fclose(f);
+                clear str f;
+                yo = ndbc_WVHT3(j);
+                f = fopen(yo_filename,'a');
+                fprintf(f,'%f\n',yo);
+                fclose(f);
+                clear f;
+            end
+            
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    end
+    
+end
+%%
+EOF
+    ##########################################################
+    cd ${pth_ndbc_work} 
+    ${pth_matlab} -nodisplay -r "path_save='${pth_ndbc_work}'; path_source='${pth_ndbc_source}'; path_mmap='${pth_ndbc_mmap}'; create_new_work_table=0;ndbc_station_downloadFlag=0;match_Index1_yo=1;Index1_yo=0;${programGo};exit;" \
+    
+fi
+
+
 
 ##
-if ((DA_cycle_NoWW3_ENOI == 1)); then
-    step=step+1
-    echo "${blank}${step} 使用DA_cycle_NoWW3_ENOI进行同化"
-    cd ${pth_DA_Code}
-    chmod +x 'DA_cycle_NoWW3_ENOI'
-    ./'DA_cycle_NoWW3_ENOI' '----'${blank}${step}'.'
-fi
+echo '├──「FAQ，bug，」VSC在/1t下运行ndbc乱码，导致时序图没了'
 
+##
+echo '├──「FAQ，bug，」ndbc_station_download_NC_analyse_HS函数太长，导致无法被调用，创建了个analyse_HS和它一样，'
+
+
+
+############################################################################################################
+############################################################################################################
+bannerSimple "FAQ" "*"
 ##
 echo '├──「FAQ，完成，大纲」VScode书写shell，语法提示，格式化，错误提示，大纲，'
 # https://blog.csdn.net/csdn_huzeliang/article/details/105321420 【vs code】shell 语法提示，检查，运行调试，
@@ -1689,3 +2453,54 @@ echo '├──「FAQ，？？？」手册中的ww3_*你真的了解作用是什
 
 ##
 echo '├──「FAQ，？？？」手册模式的并行？，～～'
+
+##
+echo '├──「FAQ，？？？」ndbc work.m 过程碰到的问题'
+# fprintf('work_eastUSA.m \n')
+# fprintf('├──「FAQ」VScode中编辑matlab（代码高亮、语言检查、代码补全），运行matlab， \n')
+# fprintf('   「解决方法一」在VSCode中编写和运行Matlab脚本VScode中关于matlab的扩展， https://zhuanlan.zhihu.com/p/409708835 \n')
+# fprintf('           ├──「安装扩展Matlab」完全按照操作，成功，setting.json设置的是R2021b的版本 \n')
+# fprintf('              「FAQ」每次保存.m文件，VScode会跳出来一个MATLAB图像 \n')
+# fprintf('           ├──「安装扩展Matlab Interactive Terminal 」完全按照操作，成功， \n')
+# fprintf('              「FAQ」运行很久的程序，在运行过程中交互终端一直不显示输出，不会是在最后统一输出吗？ \n')
+# fprintf('   「解决方法二」使用vscode编辑并运行matlab脚本， https://zhuanlan.zhihu.com/p/395486395 \n')
+# fprintf('           ├──「安装扩展Matlab formatter」，\n')
+# fprintf('├──「FAQ，失败」Fortran读取mat文件， \n')
+# fprintf('   「解决方法？，难搞」帮助中心，外部语言接口，https://ww2.mathworks.cn/help/matlab/external-language-interfaces.html?s_tid=CRUX_lftnav，\n')
+# fprintf('               从 Fortran 调用 MATLAB, https://ww2.mathworks.cn/help/matlab/matlab-api-for-fortran.html ,\n ')
+# fprintf('               用于读取 MAT 文件数据的 MATLAB Fortran API, https://ww2.mathworks.cn/help/matlab/Fortran-applications-to-read-mat-file-data.html ,\n ')
+# fprintf('               一个例子，http://matlab.izmiran.ru/help/techdoc/matlab_external/ch01in12.html')
+# fprintf('   「解决方法？」matlab 文件打开方式,mex文件和mat文件打开方式，https://blog.csdn.net/weixin_42527178/article/details/116437390?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~aggregatepage~first_rank_ecpm_v1~rank_v31_ecpm-11-116437390.pc_agg_new_rank&utm_term=fortran%E8%AF%BB%E5%8F%96mat%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B&spm=1000.2123.3001.4430')
+# fprintf('   「解决方法？」大型数据，用netcdf格式传递数据，https://tieba.baidu.com/p/2751695821,\n')
+# fprintf('   「解决方法？」C++读写.mat文件, https://blog.csdn.net/left_la/article/details/8206645  ,\n')
+# fprintf('              C程序读取.mat格式的Matlab数据文件,https://blog.csdn.net/CGeorge003/article/details/52415101  ,\n')
+# % http://www.uwenku.com/question/p-uwaunarh-xc.html
+# fprintf('├──「工作目录」/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/\n')
+# fprintf('├──「FAQ」H矩阵的生成，背景场数据，观测数据怎么作为输入给到ENOI？ \n')
+
+
+##
+echo '├──「FAQ，OK」Shell编程--通配符[ * ? () [] {} \]'
+# https://blog.csdn.net/qq_26129413/article/details/111334369?spm=1001.2101.3001.6650.4&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-4-111334369-blog-106429247.pc_relevant_default&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-4-111334369-blog-106429247.pc_relevant_default&utm_relevant_index=5    ,,
+# 
+
+##
+echo '├──「FAQ，成功」Shell编程--批处理转移重新命名'
+# https://blog.csdn.net/mrqingyu/article/details/112626802      shell命令行下批量重命名文件, 批量修改文件名, 批量替换文件名, command（推荐第三种）
+# https://blog.csdn.net/weixin_34792402/article/details/116883926       linux shell rename
+# https://blog.csdn.net/weixin_33695450/article/details/85671341?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0.pc_relevant_antiscanv2&spm=1001.2101.3001.4242.1&utm_relevant_index=3,       
+
+
+##
+echo '├──「FAQ，成功」Linux：结合cat和EOF输出到文本文件'
+# https://blog.csdn.net/liangbilin/article/details/108585395
+# https://www.cnblogs.com/sanduzxcvbnm/p/14638070.html,  shell下cat EOF中变量$处理
+
+##
+echo '├──「FAQ，成功」linux一列的形式查看文件,linux shell ls -1 列显示文件'
+# https://blog.csdn.net/weixin_30358181/article/details/116690773   -1
+
+
+##
+echo '├──「FAQ，成功」shell统计当前文件夹下的文件个数、目录个数'
+# https://blog.csdn.net/W_E_DAY/article/details/122140364
