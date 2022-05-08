@@ -10,16 +10,16 @@
 % begin~~~~
 fprintf('work_eastUSA.m \n')
 % path_save = '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/'; %work工作目录路径，最后必须是'/'
-path_save='/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/'
+path_save
 cd(path_save)
 fprintf('   「添加路径」source， \n')
-path_source='/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/source/'
+path_source
 % addpath '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/source'
 addpath(path_source)
-path_mmap='/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/m_map/'
+path_mmap
 addpath(path_mmap)
 %%
-create_new_work_table=0
+create_new_work_table
 if(create_new_work_table==1)
     fprintf('├──「创建work_table.mat，」\n')
     work_table = table;
@@ -59,7 +59,7 @@ if(create_new_work_table==1)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 %%
-match_Index1_yo=1
+match_Index1_yo
 if(match_Index1_yo==1)  
     fprintf('├──「加载work_table.mat」\n')
     load work_table.mat
@@ -132,7 +132,7 @@ if(match_Index1_yo==1)
     end
 end 
 %%
-Index1_yo=0
+Index1_yo
 if(Index1_yo==1)
     cd(path_save)
     system('rm -rf Index1')
