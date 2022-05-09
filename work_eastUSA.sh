@@ -2117,6 +2117,7 @@ if (( DA_cycle_WithWW3_ENOI == 1 )); then
     # ls -1 ${pth_ndbc_work}'yo/'  # https://blog.csdn.net/u014046192/article/details/50414606/     cut函数截取文件
     cat >${parm_DA_cycle_timeTxt} <<EOF
 20110901T010000.txt
+20110901T020000.txt
 EOF
     
     #########################################################
@@ -2425,17 +2426,17 @@ $           individual spectra; the map is used to determine the weighting
 $           surfaces.
 $           Expected input: the Analysis field, grbtxt format and the
 $           functions(frq,theta) of the update to be applied.
-   UPD2
+   UPD3
 $
 $ PRCNTG is input for option 1 and it is the percentage of correction
 $applied  to all the gridpoints (e.g. 1.)
 $
-   0.6754
+   1
 $
 $ PRCNTG_CAP is global input for option UPD2 and UPD3 and it is a cap on the 
 $ maximun correction applied to all the gridpoints (e.g. 0.5)
 $
-  0.333
+  100
 $
 $ Name of the file with the SWH analysis from the DA system            $
 $ suffix .grbtxt for text out of grib2 file.                           $
@@ -2468,8 +2469,140 @@ EOF
     ##
     cd ${pth_ndbc_work}${parm_DA_Code_daOuputNc}
     cat >'merge_ndbc.m' <<EOF
+clc, clear all
+
+filename='$pth_ndbc_work$parm_DA_Code_daOuputNc/ww3.2011.nc';
+
+% clc, clear all
+% datadir='/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/nc_WithWW3_ENOI_30days/';
+% filename='/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/nc_WithWW3_ENOI_30days/ww3.2011.nc';
+str = strcat('rm',32,filename)
+system(str)
+datadir='$pth_ndbc_work$parm_DA_Code_daOuputNc/';
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+filelist=dir([datadir,'*.nc']); 
+% the total numbers of netcdf files to be processed.
+filenumber=size(filelist,1); %全部nc文件的数量
+
+% batch reading from the netcdf file
+for i=1:filenumber
+    % 查阅nc相关信息
+    %ncdisp(strcat(datadir,filelist(i).name),'/','min')
+    %ncdisp(strcat(datadir,filelist(i).name),'/','full')
+    
+    % batch reading the variable to another arrays.
+    ncid2=[datadir,filelist(i).name];
+    
+    latitude0=ncread(ncid2,'latitude'); %0.25间隔
+    longitude0=ncread(ncid2,'longitude'); %0.25间隔
+    tmp=ncread(ncid2,'time');
+    time(i)=ncread(ncid2,'time');       % 增加了数组维数，保留信息
+    tmp=ncread(ncid2,'hs'); 
+    hs0(:,:,i)=ncread(ncid2,'hs'); % 增加了数组维数，保留信息。
+    
+    %区域纬度的选择
+    latitude=latitude0;
+    longitude=longitude0;
+    hs=hs0;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+str = strcat('cp',32,ncid2,32,filename)
+system(str)
+cid=netcdf.open(filename,'WRITE');
+netcdf.reDef(cid)
+
+%define global attributes
+% netcdf.putAtt(cid,netcdf.getConstant('NC_GLOBAL'),'WAVEWATCH_III_version_number','6.07'); 
+
+
+%define the variable dimension
+% dimlon=netcdf.defDim(cid,'longitude',size(longitude,1));
+dimlon=netcdf.inqDimID(cid,'longitude');
+% dimlat=netcdf.defDim(cid,'latitude',size(latitude,1));
+dimlat=netcdf.inqDimID(cid,'latitude');
+% dimtime=netcdf.defDim(cid,'time',filenumber); 
+tmp=netcdf.inqDimID(cid,'time');
+netcdf.renameDim(cid,tmp,'time_nouse'); netcdf.inqDim(cid,tmp)
+tmp=netcdf.inqVarID(cid,'time');
+netcdf.renameVar(cid,tmp,'time_nouse'); netcdf.inqVar(cid,tmp)
+dimtime=netcdf.defDim(cid,'time',filenumber); 
+%
+tmp=netcdf.inqVarID(cid,'hs');
+netcdf.renameVar(cid,tmp,'hs_nouse'); netcdf.inqVar(cid,tmp)
+
+
+%define the variable tybe
+cid_varid_time=netcdf.defVar(cid,'time','NC_DOUBLE',dimtime); % help netcdf.defVar
+% cid_varid_latitude=netcdf.defVar(cid,'latitude','NC_DOUBLE',dimlat); % NC_DOUBLE 要求的内存，基本是 NC_FLOAT 的2倍
+% cid_varid_longitude=netcdf.defVar(cid,'longitude','NC_DOUBLE',dimlon);
+cid_varid_hs=netcdf.defVar(cid,'hs','NC_DOUBLE',[dimlon dimlat dimtime]);
+
+%define the variable attributes
+netcdf.putAtt(cid,cid_varid_time,'long_name','julian day (UT)');
+netcdf.putAtt(cid,cid_varid_time,'standard_name','time');
+netcdf.putAtt(cid,cid_varid_time,'calendar','standard');
+netcdf.putAtt(cid,cid_varid_time,'units','days since 1990-01-01 00:00:00');
+netcdf.putAtt(cid,cid_varid_time,'conventions','relative julian days with decimal part (as parts of the day )');
+netcdf.putAtt(cid,cid_varid_time,'axis','T');
+
+% netcdf.putAtt(cid,cid_varid_latitude,'units','degree_north');
+% netcdf.putAtt(cid,cid_varid_latitude,'long_name','latitude');
+% netcdf.putAtt(cid,cid_varid_latitude,'standard_name','latitude');
+% netcdf.putAtt(cid,cid_varid_latitude,'axis','Y');
+
+% netcdf.putAtt(cid,cid_varid_longitude,'units','degree_east');
+% netcdf.putAtt(cid,cid_varid_longitude,'long_name','longitude');
+% netcdf.putAtt(cid,cid_varid_longitude,'standard_name','longitude');
+% netcdf.putAtt(cid,cid_varid_longitude,'axis','X');
+
+netcdf.putAtt(cid,cid_varid_hs,'units','m');
+netcdf.putAtt(cid,cid_varid_hs,'long_name','significant height of wind and swell waves');
+netcdf.putAtt(cid,cid_varid_hs,'standard_name','sea_surface_wave_significant_height');
+netcdf.putAtt(cid,cid_varid_hs,'globwave_name','significant_wave_height');
+netcdf.putAtt(cid,cid_varid_hs,'_FillValue',-32767);
+% netcdf.putAtt(cid,cid_varid_hs,'scale_factor',0.002);
+netcdf.putAtt(cid,cid_varid_hs,'add_offset',0);
+netcdf.putAtt(cid,cid_varid_hs,'valid_min',min(hs(:)));
+netcdf.putAtt(cid,cid_varid_hs,'valid_max',max(hs(:)));
+
+
+
+
+
+%end define the varible and attributes
+netcdf.endDef(cid);
+
+
+%write variables value to merged netcdf file
+netcdf.putVar(cid,cid_varid_time,time);
+% netcdf.putVar(cid,cid_varid_latitude,latitude);
+% netcdf.putVar(cid,cid_varid_longitude,longitude);
+% netcdf.putVar(cid,cid_varid_hs,hs*0.002);
+netcdf.putVar(cid,cid_varid_hs,hs);
+
+
+% 添加存储空间属性
+netcdf.reDef(cid); %data mode 不能进行使用 putAtt，故进入 def mode；
+lst=dir(filename); xi=lst.bytes;
+netcdf.putAtt(cid,netcdf.getConstant('NC_GLOBAL'),'space size',strcat(num2str(xi/1024/1024),'Mb'));
+%ncdisp(filename,'/','full');
+
+% end %%%%%%%%%%
+netcdf.close(cid);
+
+
+
+%%%%
+% a=ncread('ww3.2011.nc','hs')
+% b=ncread('ww3.20110901T00Z.nc','hs')
+% c=ncread('ww3.20110901T01Z.nc','hs')
 
 EOF
+    ${pth_matlab} -nodisplay -r "merge_ndbc; exit;" \
+
     #########################################################
 fi
 
@@ -2480,14 +2613,18 @@ echo '├──「FAQ，解决，手册上的」WDA流程，'
 
 
 ##
-echo '├──「FAQ，？？？」怎么写ww3_uprstr.inp？验证方法，NOWW3和WithWW3有一个同化时刻是相同的～'
+echo '├──「FAQ，？？？」怎么写ww3_uprstr.inp？'
 # 手册
 #       1、WDA流程图，
 # 看老师的文件，看不了，是2进制文件；
 # 看regtest，
 #       1、进regtest，搜索ww3_uprstr.inp，ok！！，位于ww3_ta1，
 #       2、run_test中有吗？有～
-#       
+#       3、寻求解决05-10，
+# 验证方法，NOWW3和WithWW3有一个同化时刻是相同的～
+#       2、ww3_uprstr.inp？后得到的第二时刻nc文件，与Xb.grbtxt数据相差很多～～？？？？？？？？？？？？？？？？？？？？？
+#               原因可能是还需要再运行下一次同化的shel，这样改变的restart.ww3才能生成同化后的nc，
+#       1、以第二时刻为同化时刻，Xb.grbtxt数据和NOWW3得到的第二时刻数据极其相近，通过此验证，
 
 
 ##
@@ -2495,7 +2632,9 @@ echo '├──「FAQ，解决，txt存储」ENOI的NN怎么搞？？'
 
 
 ## 
-echo '├──「FAQ，？？？」nc 文件合并，？？'
+echo '├──「FAQ，？？？」WW3小时nc 文件合并，？？'
+# 思路1：从原来文件复制粘贴，改变维度？失败
+# 思路2：完全重新，超界限，NAN导致的？..，ok
 
 
 
