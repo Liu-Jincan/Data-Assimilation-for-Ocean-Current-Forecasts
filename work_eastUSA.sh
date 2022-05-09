@@ -2086,41 +2086,54 @@ if (( DA_cycle_WithWW3_ENOI == 1 )); then
     parm_DA_cycle_WithWW3_Begin=${parm_CCMP_mergeBegin}    ## ～tag，新建文件需要修改～
     parm_DA_cycle_WithWW3_End=${parm_CCMP_mergeEnd}        ## ～tag，新建文件需要修改～
     parm_DA_cycle_timeTxt='da_time.txt'                    ## ～tag，新建文件需要修改～
-    ########################################################
+    ######################################################## 删除work中的文档
     cd ${pth_WW3_regtest_work}
     rm `ls restart*`
     rm `ls *.nc`
-    # mv 'restart001.ww3' 'restart.ww3'
+    rm `ls out_grd.ww3`
     #########################################################
     step=step+1
     echo "${blank}${step} 使用DA_cycle_WithWW3_ENOI进行同化，源码在src_WithWW3_ENOI，" \
     #########################################################
-    echo "----${blank}${step}.1 明确背景场时间段，制作对应时间段的CCMP风场，生成wind.ww3，明确时间段内所需同化的时刻保存至da_time.txt，" \
+    echo "----${blank}${step}.1 明确背景场时间段，制作对应时间段的CCMP风场，生成wind.ww3；明确时间段内所需同化的时刻保存至da_time.txt；" \
+         "明确生成ENOI中的A矩阵所需的背景场数据nc文件夹；"
     ## CCMP=1 运行一次，会生成wind.nc，并ln -snf，至WW3的test的input文件夹，
     ## ww3_prnc_nml=1 运行一次，生成wind.ww3，
     ## 
-    cd ${pth_WW3_regtest_input}
-    # ls -1 ${pth_ndbc_work}'yo/'  # https://blog.csdn.net/u014046192/article/details/50414606/     cut函数截取文件
     #
     # FAQ：第一个同化时刻是ww3_shel.nml的开始时刻可以吗？可以～～，在da_time.txt添加该时刻后，
     #      shel不会生成restrat001.ww3文件，但是ounf可以生成小时的nc文件，包含了陆地信息（NAN），时间也对上了，
+    #      之前可以，现在又不行了？？？？？？？？？
     #
+    ##
+    rm -rf ${pth_ndbc_work}'nc'
+    cp -r ${pth_ndbc_work}${parm_DA_Code_ww3InputNc}  ${pth_ndbc_work}'nc'  #
+    cd ${pth_ndbc_work}'nc/'
+    ls -1 *.nc >'nc.txt'  ##重定向，-1按列，
+    nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个
+    ls -1 *.nc >'nc_ENOI_Amatrix.txt'  ##重定向，-1按列，
+    ##
+    cd ${pth_WW3_regtest_input}
+    # ls -1 ${pth_ndbc_work}'yo/'  # https://blog.csdn.net/u014046192/article/details/50414606/     cut函数截取文件
     cat >${parm_DA_cycle_timeTxt} <<EOF
-20110901T000000.txt
-20110901T040000.txt
-20110901T050000.txt
+20110901T010000.txt
 EOF
     
     #########################################################
     echo "----${blank}${step}.2 循环da_time.txt，对于每一个同化时刻，①制作ww3_shell.nml文件，" \
         "运行得到同化时刻的restart001.ww3，②制作ww3_ounf_nml文件，运行得到nc小时文件；" \
-        "③读取同化时刻的背景场nc小时信息，配合观测进行同化，输出分析场信息，Xb；④⑤ww3_uprstr更新重命名为restart.ww3文件，"
+        "③读取同化时刻的背景场nc小时信息，配合观测进行同化，输出分析场信息，Xb.grbtxt；"\
+        "④制作ww3_uprstr.inp，运行得到restart001.ww3，重命名为restart.ww3文件，"
     LastTime="${parm_DA_cycle_WithWW3_Begin} 000000"
+    declare -i DA_tmp
+    DA_tmp=1          #编译执行一次，A矩阵的生成执行一次，
     while read -r line
     do
-        echo $line
+        # echo $line
         ThisTime="`echo $line | cut -b 1-8`"" ""`echo $line | cut -b 10-15`"
-        ######################################################ww3_shel.nml
+        ThisNCfile="ww3.""`echo $line | cut -b 1-8`""T""`echo $line | cut -b 10-11`""Z.nc"
+        # echo $ThisNCfile
+        ######################################################ww3_shel.nml，生成restart001.ww3，
         cd ${pth_WW3_regtest_input}
         cat >'ww3_shel.nml' <<EOF
 ! -------------------------------------------------------------------- !
@@ -2177,15 +2190,16 @@ EOF
         cd ${pth_WW3_regtest_input} && cd '../../'
         ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
             -N -r ww3_ounf -w ${parm_WW3_work} -o netcdf ../model ${programGo} \
-        #########################################################单一时刻同化的mod_params.f90
-        rm -rf ${pth_ndbc_work}'nc'
-        cp -r ${pth_ndbc_work}${parm_DA_Code_ww3InputNc}  ${pth_ndbc_work}'nc'  #
-        cd ${pth_ndbc_work}'nc/'
-        ls -1 *.nc >'nc.txt'  ##重定向，-1按列，
-        nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个
-        ls -1 *.nc >'nc_ENOI_Amatrix.txt'  ##重定向，-1按列，
-        cd ${pth_DA_Code_src}
-        cat >'mod_params.f90' <<EOF
+        #########################################################单一时刻同化的nc.txt，nc_ENOI_Amatrix.txt，mod_params.f90
+        if (( DA_tmp == 1 )); then
+            rm -rf ${pth_ndbc_work}'nc'
+            cp -r ${pth_ndbc_work}${parm_DA_Code_ww3InputNc}  ${pth_ndbc_work}'nc'  #
+            cd ${pth_ndbc_work}'nc/'
+            ls -1 *.nc >'nc.txt'  ##重定向，-1按列，
+            nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个  
+            ls -1 *.nc >'nc_ENOI_Amatrix.txt'  ##重定向，-1按列，
+            cd ${pth_DA_Code_src} 
+            cat >'mod_params.f90' <<EOF       
 module mod_params
     implicit none
     !********************************* Path setting  *********************************
@@ -2194,11 +2208,11 @@ module mod_params
     character(len=*), parameter :: ndbc_pth = '$pth_ndbc' 
     
     !********************************* ENOI Step Options *********************************
-    integer, parameter :: ENOI = 1      ! 使用ENOI同化方法，1为使用, 0为不使用
+    integer, parameter :: ENOI = 1      ! 使用ENOI同化方法，1为使用, 0为不使用  （废弃）
     integer :: NN = 0                 ! size of ensemble，这个需要运行完                                     
     integer, parameter :: DN = 10       ! step interval to sample the ensemble pool, hour       
     real, parameter    :: alpha = 1     ! scaling parameter of matrix B
-    integer :: generateAmatriax = 1     ! 1表示生成，0表示不生成，
+    integer :: generateAmatriax = 1     ! 1表示生成，0表示不生成，(废弃)
 
 
     !*********************************** Info on input NetCdf file *************************************
@@ -2211,6 +2225,7 @@ module mod_params
     character(len=*), parameter :: TMP_NAME = 'hs'                          ! readdata会用到
 
 
+
     !*********************************** Info on output NetCdf file *************************************
     character(len=*), parameter :: nc_daOut = '$parm_DA_Code_daOuputNc'     ! 输出同化nc文件所在文件夹名称
 
@@ -2221,9 +2236,11 @@ module mod_params
     integer, parameter :: NLATS = 41, NLONS = 69                            ! 
 end module mod_params
 EOF
-        ########################################################单一时刻同化的Makefile
-        cd ${pth_DA_Code_src}
-        cat >'Makefile' << EOF
+        fi
+        ########################################################单一时刻同化的Makefile，编译
+        if (( DA_tmp == 1 )); then
+            cd ${pth_DA_Code_src}
+            cat >'Makefile' << EOF
 Build = $pth_DA_Code_build#../build 不能用相对路径# 当前路径为 makefile 所在路径, 一般不改变
 OBJ_dir = $pth_DA_Code_objs##
 APP_dir = $pth_DA_Code_apps## 一般不改变，
@@ -2231,7 +2248,7 @@ MOD_dir = $pth_DA_Code_mods#
 SRC_dir = $pth_DA_Code_src#
 EOF
         ##
-        cat >> 'Makefile' << "EOF"
+            cat >> 'Makefile' << "EOF"
 EXEC = DA_cycle_WithWW3_ENOI#生成的可执行文件的名称，
 RUN = DA_cycle_WithWW3_ENOI#所需跑的项目文件的名称，不包含.f90的扩展名
 
@@ -2361,26 +2378,109 @@ apps_makefile:
 # depend:
 # 	sfmakedepend $(SOURCES)
 EOF
-        ######################################################单一时刻的编译和执行
-        make
+            make
+        fi
+        ######################################################单一时刻同化执行，在regtest的work中生成grbtxt，
         cd ${pth_DA_Code_apps}
         chmod +x 'DA_cycle_WithWW3_ENOI'
-        # ./'DA_cycle_WithWW3_ENOI' '--------'${blank}${step}'.4.'
-        #########################################################
+        ./'DA_cycle_WithWW3_ENOI' '------------'${blank}${step}'.2.*.' $ThisNCfile $DA_tmp  $pth_WW3_regtest_work $line $pth_WW3_regtest_input
+        ######################################################ww3_uprstr.inp，原先的restart001.ww3转换为restart.ww3，生成新的restart001.ww3，
+        cd ${pth_WW3_regtest_input}
+        cat >'ww3_uprstr.inp' <<"EOF"
+$ -------------------------------------------------------------------- $
+$ WAVEWATCH III Update Restart input file                              $
+$ -------------------------------------------------------------------- $
+$
+$ Time of Assimilation ----------------------------------------------- $
+$ - Starting time in yyyymmdd hhmmss format.
+$
+$ This is the assimilation starting time and has to be the same with
+$ the time at the restart.ww3.
+$    19680607 120000 
+EOF
+        echo $ThisTime >>'ww3_uprstr.inp'
+        cat >>'ww3_uprstr.inp' <<"EOF"
+$
+$ Choose algorithm to update restart file
+$  UPDN for the Nth approach
+$  The UPDN*, with N<2 the same correction factor is applied at all the grid points
+$   UPD0C:: ELIMINATED
+$   UPDOF:: Option 0F  All the spectra are updated with a constant
+$           fac=HsAnl/HsBckg.
+$           Expected input: PRCNTG, as defined at fac
+$   UPD1 :: ELIMINATED
+$   UPDN, with N>1 each gridpoint has its own update factor.
+$   UPD2 :: Option 2   The fac(x,y,frq,theta), is calculated at each grid point
+$           according to HsBckg and HsAnl
+$           Expected input the Analysis field, grbtxt format
+$   UPD3 :: Option 3   The update factor is a surface with the shape of
+$           the background spectrum.
+$           Expected input the Analysis field, grbtxt format
+$   UPD4 :: [NOT INCLUDED in this Version, Just keeping the spot]
+$           Option 4  The generalization of the UPD3. The update factor
+$           is the sum of surfaces which are applied on the background
+$           spectrum. 
+$           The algorithm requires the mapping of each partition on the
+$           individual spectra; the map is used to determine the weighting
+$           surfaces.
+$           Expected input: the Analysis field, grbtxt format and the
+$           functions(frq,theta) of the update to be applied.
+   UPD2
+$
+$ PRCNTG is input for option 1 and it is the percentage of correction
+$applied  to all the gridpoints (e.g. 1.)
+$
+   0.6754
+$
+$ PRCNTG_CAP is global input for option UPD2 and UPD3 and it is a cap on the 
+$ maximun correction applied to all the gridpoints (e.g. 0.5)
+$
+  0.333
+$
+$ Name of the file with the SWH analysis from the DA system            $
+$ suffix .grbtxt for text out of grib2 file.                           $
+$
+   anl.grbtxt
+$
+$ -------------------------------------------------------------------- $
+$ WAVEWATCH III EoF ww3_uprstr.inp
+$ -------------------------------------------------------------------- $
+EOF
+        # cd ${pth_WW3_regtest_work}
+        # mv 'restart001.ww3' 'restart.ww3'
+        cd ${pth_WW3_regtest_input} && cd '../../'
+        ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+            -r ww3_uprstr -w ${parm_WW3_work} ../model ${programGo} \
+        #
+        cd ${pth_WW3_regtest_work}
+        mv restart001.ww3 restart.ww3
+        ######################################################更新参数
         LastTime="${ThisTime}"
+        DA_tmp=DA_tmp+1
         #########################################################
     done < ${parm_DA_cycle_timeTxt}
+    #########################################################
+    echo "----${blank}${step}.3 将生成的nc小时文件移动至ndbc，融合成一个大文件，"
+    cd ${pth_ndbc_work}
+    rm -rf ${parm_DA_Code_daOuputNc}
+    mkdir -p ${parm_DA_Code_daOuputNc}
+    mv `ls $pth_WW3_regtest_work*.nc `  ${pth_ndbc_work}${parm_DA_Code_daOuputNc}
+    ##
+    cd ${pth_ndbc_work}${parm_DA_Code_daOuputNc}
+    cat >'merge_ndbc.m' <<EOF
+
+EOF
     #########################################################
 fi
 
 ## 假设restart.ww3文件包含背景场信息，？
 
 ##
-echo '├──「FAQ，？？？」WDA流程，'
+echo '├──「FAQ，解决，手册上的」WDA流程，'
 
 
 ##
-echo '├──「FAQ，？？？」怎么写ww3_uprstr.inp？'
+echo '├──「FAQ，？？？」怎么写ww3_uprstr.inp？验证方法，NOWW3和WithWW3有一个同化时刻是相同的～'
 # 手册
 #       1、WDA流程图，
 # 看老师的文件，看不了，是2进制文件；
@@ -2390,7 +2490,12 @@ echo '├──「FAQ，？？？」怎么写ww3_uprstr.inp？'
 #       
 
 
+##
+echo '├──「FAQ，解决，txt存储」ENOI的NN怎么搞？？'
 
+
+## 
+echo '├──「FAQ，？？？」nc 文件合并，？？'
 
 
 
