@@ -1,0 +1,34 @@
+&GRID_NML
+  GRID%NAME              =  'grd2'
+  GRID%NML               =  'namelists_grd2.nml'
+  GRID%TYPE              =  'RECT'
+  GRID%COORD             =  'SPHE'
+  GRID%CLOS              =  'NONE'
+  GRID%ZLIM              =  -0.10
+  GRID%DMIN              =   2.50
+/
+
+&RECT_NML
+  RECT%NX                =  41
+  RECT%NY                =  45
+!
+  RECT%SX                =   0.250000000000
+  RECT%SY                =   0.250000000000
+  RECT%X0                =  -76.0000
+  RECT%Y0                =   34.0000
+/
+
+&DEPTH_NML
+  DEPTH%SF             =  0.00
+  DEPTH%FILENAME       = '../data/grd2.bot'
+/
+
+&MASK_NML
+  MASK%FILENAME         = '../data/grd2.mask'
+/
+
+&OBST_NML
+  OBST%SF              =  0.01
+  OBST%FILENAME        = '../data/grd2.obst'
+/
+

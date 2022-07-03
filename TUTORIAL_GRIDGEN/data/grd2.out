@@ -1,0 +1,145 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2021 The MathWorks, Inc.
+                  R2021b (9.11.0.1769968) 64-bit (glnxa64)
+                             September 17, 2021
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+
+fname_nml =
+
+    '/1t/Data-Assimilation-for-Ocean-Current-Forecasts/TUTORIAL_GRIDGEN/namelist/gridgen.grd2.nml'
+
+.........Create grid for grd2..................
+.........Reading Boundaries..................
+*** No splitting of computation ***
+.........Creating Bathymetry..................
+read in the base bathymetry 
+Generating grid bathymetry ....
+Completed 5 per cent of the cells 
+Completed 10 per cent of the cells 
+Completed 15 per cent of the cells 
+Completed 20 per cent of the cells 
+Completed 25 per cent of the cells 
+Completed 30 per cent of the cells 
+Completed 35 per cent of the cells 
+Completed 40 per cent of the cells 
+Completed 45 per cent of the cells 
+Completed 50 per cent of the cells 
+Completed 55 per cent of the cells 
+Completed 60 per cent of the cells 
+Completed 65 per cent of the cells 
+Completed 70 per cent of the cells 
+Completed 75 per cent of the cells 
+Completed 80 per cent of the cells 
+Completed 85 per cent of the cells 
+Completed 90 per cent of the cells 
+Completed 95 per cent of the cells 
+Completed 100 per cent of the cells 
+.........Computing Boundaries..................
+Completed 5 per cent of 188610 boundaries and found 127 internal boundaries 
+Completed 10 per cent of 188610 boundaries and found 241 internal boundaries 
+Completed 15 per cent of 188610 boundaries and found 384 internal boundaries 
+Completed 20 per cent of 188610 boundaries and found 533 internal boundaries 
+Completed 25 per cent of 188610 boundaries and found 692 internal boundaries 
+Completed 30 per cent of 188610 boundaries and found 839 internal boundaries 
+Completed 35 per cent of 188610 boundaries and found 978 internal boundaries 
+Completed 40 per cent of 188610 boundaries and found 1179 internal boundaries 
+Completed 45 per cent of 188610 boundaries and found 1293 internal boundaries 
+Completed 50 per cent of 188610 boundaries and found 1577 internal boundaries 
+Completed 55 per cent of 188610 boundaries and found 1638 internal boundaries 
+Completed 60 per cent of 188610 boundaries and found 1664 internal boundaries 
+Completed 65 per cent of 188610 boundaries and found 1706 internal boundaries 
+Completed 70 per cent of 188610 boundaries and found 1801 internal boundaries 
+Completed 75 per cent of 188610 boundaries and found 1801 internal boundaries 
+Completed 80 per cent of 188610 boundaries and found 1801 internal boundaries 
+Completed 85 per cent of 188610 boundaries and found 1879 internal boundaries 
+Completed 90 per cent of 188610 boundaries and found 1897 internal boundaries 
+Completed 95 per cent of 188610 boundaries and found 1911 internal boundaries 
+Completed 100 per cent of 188610 boundaries and found 1921 internal boundaries 
+.........Splitting Boundaries..................
+Completed 5 per cent of 1921 boundaries and split into 129 boundaries 
+Completed 10 per cent of 1921 boundaries and split into 225 boundaries 
+Completed 15 per cent of 1921 boundaries and split into 321 boundaries 
+Completed 20 per cent of 1921 boundaries and split into 417 boundaries 
+Completed 25 per cent of 1921 boundaries and split into 513 boundaries 
+Completed 30 per cent of 1921 boundaries and split into 609 boundaries 
+Completed 35 per cent of 1921 boundaries and split into 705 boundaries 
+Completed 40 per cent of 1921 boundaries and split into 801 boundaries 
+Completed 45 per cent of 1921 boundaries and split into 897 boundaries 
+Completed 50 per cent of 1921 boundaries and split into 993 boundaries 
+Completed 55 per cent of 1921 boundaries and split into 1089 boundaries 
+Completed 60 per cent of 1921 boundaries and split into 1185 boundaries 
+Completed 65 per cent of 1921 boundaries and split into 1281 boundaries 
+Completed 70 per cent of 1921 boundaries and split into 1377 boundaries 
+Completed 75 per cent of 1921 boundaries and split into 1473 boundaries 
+Completed 80 per cent of 1921 boundaries and split into 1569 boundaries 
+Completed 85 per cent of 1921 boundaries and split into 1665 boundaries 
+Completed 90 per cent of 1921 boundaries and split into 1761 boundaries 
+Completed 95 per cent of 1921 boundaries and split into 1857 boundaries 
+Completed 100 per cent of 1921 boundaries and split into 1953 boundaries 
+.........Cleaning Mask..................
+Completed 5 per cent of land sea mask clean up
+Completed 10 per cent of land sea mask clean up
+Completed 15 per cent of land sea mask clean up
+Completed 20 per cent of land sea mask clean up
+Completed 25 per cent of land sea mask clean up
+Completed 30 per cent of land sea mask clean up
+Completed 35 per cent of land sea mask clean up
+Completed 40 per cent of land sea mask clean up
+Completed 45 per cent of land sea mask clean up
+Completed 50 per cent of land sea mask clean up
+Completed 55 per cent of land sea mask clean up
+Completed 60 per cent of land sea mask clean up
+Completed 65 per cent of land sea mask clean up
+Completed 70 per cent of land sea mask clean up
+Completed 75 per cent of land sea mask clean up
+Completed 80 per cent of land sea mask clean up
+Completed 85 per cent of land sea mask clean up
+Completed 90 per cent of land sea mask clean up
+Completed 95 per cent of land sea mask clean up
+Completed 100 per cent of land sea mask clean up
+.........Separating Water Bodies..................
+1369 Wet cells set to flag id 1 
+.........Creating Obstructions..................
+ Total Number of cells = 1845
+   Number of wet cells = 1369
+Preparing the boundaries 
+ Completed 10 per cent of boundaries 
+ Completed 20 per cent of boundaries 
+ Completed 30 per cent of boundaries 
+ Completed 40 per cent of boundaries 
+ Completed 50 per cent of boundaries 
+ Completed 60 per cent of boundaries 
+ Completed 70 per cent of boundaries 
+ Completed 80 per cent of boundaries 
+ Completed 90 per cent of boundaries 
+ Completed 100 per cent of boundaries 
+Loop through the wet cells to identify boundaries 
+ Completed 5 per cent
+ Completed 10 per cent
+ Completed 15 per cent
+ Completed 20 per cent
+ Completed 25 per cent
+ Completed 30 per cent
+ Completed 35 per cent
+ Completed 40 per cent
+ Completed 45 per cent
+ Completed 50 per cent
+ Completed 55 per cent
+ Completed 60 per cent
+ Completed 65 per cent
+ Completed 70 per cent
+ Completed 75 per cent
+ Completed 80 per cent
+ Completed 85 per cent
+ Completed 90 per cent
+ Completed 95 per cent
+ Completed 100 per cent
+Number of wet cells enclosing boundaries = 124
+Computing subgrid obstruction masks for these cells 
+Elapsed time is 17.692244 seconds.
+[Warning: Closing open netCDF file handles.] 

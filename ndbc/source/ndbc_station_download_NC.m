@@ -95,6 +95,10 @@ for i=station_tf_download%1:1:size(ndbc_station_download,1)
     % temp = nc_WVHT(ndbc_station_download.matchNC_lon{i,2},ndbc_station_download.matchNC_lat{i,2},:);
     eval(['temp = nc_WVHT(ndbc_station_download.',ncNameInTable,'_matchNC_lon{i,2},ndbc_station_download.',ncNameInTable,'_matchNC_lat{i,2},:);'])
     nc_time_WVHT.WVHT = temp(:);
+    
+    
+
+
     %
     oooooo = strcat(path_Nc_time_Hs,num2str(i),'.mat');
     save(oooooo,"nc_time_WVHT");

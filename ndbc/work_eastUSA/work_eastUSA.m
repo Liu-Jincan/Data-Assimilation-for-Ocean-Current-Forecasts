@@ -100,7 +100,7 @@ if(match_Index1_yo==1)
         % clear path_Nc_time_Hs;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % station_tf_download = [1:112];
-        fprintf('           ├──Step4「函数」在work_table中的添加_ndbc_nc_match_WVHT,\n')
+        fprintf('           ├──Step4「函数」在work_table中的添加$(ncNameInT)_ndbc_nc_match_WVHT,\n')
         path_Ndbc_nc_match_Hs_Fig = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs_Fig/');
         path_Ndbc_nc_match_Hs = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs/');
         mkdir(path_Ndbc_nc_match_Hs_Fig);
@@ -111,7 +111,7 @@ if(match_Index1_yo==1)
         path_Ndbc_nc_match = path_Ndbc_nc_match_Hs;
         clear path_Ndbc_nc_match_Hs;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %fprintf('           ├──Step5「函数」根据 下的所有文件生成每个所需同化时刻的Index1和yo文件txt,\n')
+        %fprintf('           ├──Step5「函数」根据$(path_Ndbc_nc_match) 下的所有文件生成每个所需同化时刻的Index1和yo文件txt,\n')
         %path_Index1 = strcat(path_save,ncNameInTable,'_Index1/');
         %path_yo = strcat(path_save,ncNameInTable,'_yo/');
         %mkdir(path_Index1); % rmdir(path_Index1,'s')
@@ -121,7 +121,7 @@ if(match_Index1_yo==1)
         %clear path_Index1;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % toc
-        %fprintf('           ├──Step6「函数」根据 下的所有文件的名称，得到所有需要同化的时刻，求出所有时刻在nc的索引，保存在Index.txt,\n')
+        %fprintf('           ├──Step6「函数」根据$(path_yo) 下的所有文件的名称，得到所有需要同化的时刻，求出所有时刻在nc的索引，保存在Index.txt,\n')
         %path_Index = strcat(path_save,ncNameInTable,'_Index/');
         %mkdir(path_Index);
         %[work_table] = Index(path_Index,...

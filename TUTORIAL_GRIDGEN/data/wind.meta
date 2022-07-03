@@ -1,0 +1,34 @@
+&GRID_NML
+  GRID%NAME              =  'wind'
+  GRID%NML               =  'namelists_wind.nml'
+  GRID%TYPE              =  'RECT'
+  GRID%COORD             =  'SPHE'
+  GRID%CLOS              =  'NONE'
+  GRID%ZLIM              =  -0.10
+  GRID%DMIN              =   2.50
+/
+
+&RECT_NML
+  RECT%NX                =  81
+  RECT%NY                =  61
+!
+  RECT%SX                =   0.250000000000
+  RECT%SY                =   0.250000000000
+  RECT%X0                =  -77.0000
+  RECT%Y0                =   33.0000
+/
+
+&DEPTH_NML
+  DEPTH%SF             =  0.00
+  DEPTH%FILENAME       = '../data/wind.bot'
+/
+
+&MASK_NML
+  MASK%FILENAME         = '../data/wind.mask'
+/
+
+&OBST_NML
+  OBST%SF              =  0.01
+  OBST%FILENAME        = '../data/wind.obst'
+/
+

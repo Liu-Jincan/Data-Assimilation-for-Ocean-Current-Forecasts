@@ -1,8 +1,11 @@
 ######################### 主文件夹
+## 清楚所有文件
 **/*
-!**/.gitignore
+## 保留 .gitignore 文件
+!**/.gitignore  
 !**/*.sh
 !**/*.md
+
 ########################## DA-Code文件夹
 !**/DA-Code
 #
@@ -16,6 +19,7 @@
 !**/DA-Code/build/apps/
 !**/DA-Code/build/apps/DA_cycle_*
 !**/DA-Code/build/apps/Makefile
+
 ########################## ndbc文件夹
 !**/ndbc
 **/ncbc/*
@@ -37,3 +41,21 @@
 !**/TUTORIAL_GRIDGEN/bin/*
 !**/TUTORIAL_GRIDGEN/namelist/
 !**/TUTORIAL_GRIDGEN/namelist/*
+
+
+########################## TrendTendency_EVA文件夹
+## 保留 TrendTendency_EVA 文件夹
+!**/TrendTendency_EVA/
+## 清楚文件
+**/TrendTendency_EVA/*
+## 
+!**/TrendTendency_EVA/src/
+!**/TrendTendency_EVA/src/*.m
+##
+!**/TrendTendency_EVA/work_EVA_m/
+!**/TrendTendency_EVA/work_EVA_m/*.m
+
+
+########################## Mitigation_Li_Zhang文件夹
+!**/Mitigation_Li_Zhang/
+**/Mitigation_Li_Zhang/*

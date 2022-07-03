@@ -1,5 +1,6 @@
 function [ndbc_station_download_NC] = analyse_HS(path_fig,path_ndbc_nc_match,...
-    path_Nc_time_Hs,ndbc_station_download_NC,station_tf_download,path_save,ncNameInTable)
+    path_Nc_time_Hs,ndbc_station_download_NC,station_tf_download,path_save,ncNameInTable,...
+    ndbc_start_datetime,ndbc_end_datetime)
     % author:
     %    liu jin can, UPC
     %
@@ -34,6 +35,13 @@ function [ndbc_station_download_NC] = analyse_HS(path_fig,path_ndbc_nc_match,...
         ndbc_table = buoy_table_All;
         ndbc_WVHT1 = cell2mat(ndbc_table.WVHT(:)); %double
         ndbc_time1 = ndbc_table.YY_MM_DD_hh_mm; % datetime
+
+        % ndbc_start_datetime=datetime('1976-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss');
+        % ndbc_end_datetime=datetime('1977-01-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss');
+        tf0 = find(ndbc_time1>ndbc_start_datetime & ndbc_time1<ndbc_end_datetime );
+        ndbc_WVHT1 = ndbc_WVHT1(tf0);
+        ndbc_time1 = ndbc_time1(tf0);
+
         tf1 = find( ndbc_WVHT1>=0 & ndbc_WVHT1<99 );
         
         ndbc_time2 = ndbc_time1(tf1);
@@ -45,7 +53,7 @@ function [ndbc_station_download_NC] = analyse_HS(path_fig,path_ndbc_nc_match,...
         temp = ndbc_time2(tf2); temp.Minute = 0; temp.Hour = temp.Hour+1;
         ndbc_time2(tf2) = temp;
         % 少于30分钟，小时不变
-        tf3 = find( ndbc_time2.Minute>0 & ndbc_time2.Minute<30 ); % case2；
+        tf3 = find( ndbc_time2.Minute>0 & ndbc_time2.Minute<=30 ); % case2，30分钟的数据按照少于30分钟来算，其实影响不大，<和<=；
         temp = ndbc_time2(tf3); temp.Minute = 0;
         ndbc_time2(tf3) = temp;
         % 年、月、日、时相等的datetime处理：
@@ -100,14 +108,22 @@ function [ndbc_station_download_NC] = analyse_HS(path_fig,path_ndbc_nc_match,...
             work_table = ndbc_station_download_NC;
             save work_table.mat work_table
             disp(strcat('                       已在work_table保存相关信息'));
+        elseif isnan(temp3(1))
+            disp(strcat('                       发现',ndbc_station_download_NC.station_ID{i},'背景场数据为nan，网格划分出现问题。'));pause(1);
+            oooooo = strcat('发现',ndbc_station_download_NC.station_ID{i},'背景场数据为nan，网格划分出现问题。');
+            eval(['ndbc_station_download_NC.',ncNameInTable,'_ndbc_nc_match_WVHT{i,1} = oooooo;'])
+            % save
+            work_table = ndbc_station_download_NC;
+            save work_table.mat work_table
+            disp(strcat('                       已在work_table保存相关信息'));
         else
             % 时序图
             f = figure(1);
             plot(ndbc_nc_match_WVHT.time,ndbc_nc_match_WVHT.ndbc);
             hold on; plot(ndbc_nc_match_WVHT.time,ndbc_nc_match_WVHT.nc);
             %close(f1)
-            savefig(f,strcat(path_fig,num2str(i),'-一小时时间-WVHT数据-时序图','.fig')); %https://ww2.mathworks.cn/help/matlab/ref/savefig.html?s_tid=gn_loc_drop
-            ndbc_nc_match_WVHT.TimeSeriesChart{1,1} = strcat('openfig("',path_fig,num2str(i),'-一小时时间-WVHT数据-时序图','.fig")');
+            savefig(f,strcat(path_fig,num2str(i),'-WVHT-timeseries','.fig')); %https://ww2.mathworks.cn/help/matlab/ref/savefig.html?s_tid=gn_loc_drop
+            ndbc_nc_match_WVHT.TimeSeriesChart{1,1} = strcat('openfig("',path_fig,num2str(i),'-WVHT-timeseries','.fig")');
             close(f)
             %openfig('1.fig');
             disp(strcat('                       已简单画出时序图，并保存;'));
@@ -130,13 +146,17 @@ function [ndbc_station_download_NC] = analyse_HS(path_fig,path_ndbc_nc_match,...
             
             
             % 散点图
-            [f,de] = DensScat(ndbc_nc_match_WVHT.ndbc,ndbc_nc_match_WVHT.nc);
-            colormap('Jet')
-            hc = colorbar;
-            savefig(f,strcat(path_fig,num2str(i),'-一小时时间-WVHT数据-散点图','.fig'));
-            ndbc_nc_match_WVHT.ScatterChart{1,1} = strcat('openfig("',path_fig,num2str(i),'-一小时时间-WVHT数据-散点图','.fig")');
-            close(f)
-            disp(strcat('                       已简单画出散点图，并保存;'));
+            try
+                [f,de] = DensScat(ndbc_nc_match_WVHT.ndbc,ndbc_nc_match_WVHT.nc);
+                colormap('Jet')
+                hc = colorbar;
+                savefig(f,strcat(path_fig,num2str(i),'-WVHT-scatter','.fig'));
+                ndbc_nc_match_WVHT.ScatterChart{1,1} = strcat('openfig("',path_fig,num2str(i),'-WVHT-scatter','.fig")');
+                close(f)
+                disp(strcat('                       已简单画出散点图，并保存;'));
+            catch
+                error('                       散点图画图失败，匹配数据仍保存在具体table中了！！')
+            end
             
             % 保存到path_ndbc_nc_match
             oooooo = strcat(path_ndbc_nc_match,num2str(i),'.mat');

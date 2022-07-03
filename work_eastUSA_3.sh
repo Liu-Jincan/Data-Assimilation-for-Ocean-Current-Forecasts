@@ -1,6 +1,14 @@
 ##
 ##
-programGo='work_eastUSA' ## ～tag，新建文件需要修改～
+programGo='work_eastUSA_2' ## ～tag，新建文件需要修改～
+parm_WW3_input='input_multi' ## ～tag，新建文件需要修改～，input2?
+parm_WW3_work='work_b'        ## ～tag，新建文件需要修改～           ## 测试时需要更换名字，
+parm_WW3_comp='Gnu'        ## ～tag，新建文件需要修改～，实际文件为comp.Gnu，位于model，
+parm_WW3_switch='Ifremer1' ## ～tag，新建文件需要修改～，实际文件为switch_Ifremer1，位于input，
+
+
+
+
 Usage: bannerSimple "my title" "*"
 function bannerSimple() {
     local msg="${2} ${1} ${2}"
@@ -27,8 +35,6 @@ declare -i step #声明是整型
 step=0
 
 
-
-
 # structure1:  矩形网格+CCMP风场+WW3
 #   1. Gridgen
 #   2. run_test
@@ -44,16 +50,15 @@ bannerSimple "grid create - Gridgen" "*"
 pth_Gridgen=${pth_OceanForecast}'TUTORIAL_GRIDGEN/'
 pth_WW3_regtest=${pth_OceanForecast}'WW3-6.07.1/regtests/'${programGo}
 mkdir -p ${pth_WW3_regtest}
-parm_WW3_input='input' ## ～tag，新建文件需要修改～，input2?
 pth_WW3_regtest_input=${pth_WW3_regtest}"/${parm_WW3_input}/"
 mkdir -p ${pth_WW3_regtest_input}
 echo pth_Gridgen
 declare -i Gridgen
 Gridgen=0                           ## ～tag，新建文件需要修改～
-gridgen_objectGrid='east-USA_P25_3' ## ～tag，新建文件需要修改～
+gridgen_objectGrid='wind' ## ～tag，新建文件需要修改～
 gridgen_objectGrid_nml="gridgen.${gridgen_objectGrid}.nml"
 gridgen_m=${programGo}".m"
-gridgen_baseGrid='east-USA_P25_4' ## ～tag，新建文件需要修改～
+gridgen_baseGrid='grd0' ## ～tag，新建文件需要修改～
 gridgen_baseGrid_nml="gridgen.${gridgen_baseGrid}.nml"
 ##
 if ((Gridgen == 1)); then
@@ -99,8 +104,8 @@ BIN_DIR = '../bin'
 REF_DIR = '../reference'
 DATA_DIR = '../data'
 FNAME_POLY = 'user_polygons.flag'      %不知道干什么用的，
-FNAME = 'east-USA_P25_3'               %与namelist文件夹下的nml对应的，
-FNAMEB = 'east-USA_P25_4'
+FNAME = 'wind'               %与namelist文件夹下的nml对应的，
+FNAMEB = 'grd0'
 BOUND_SELECT = 1
 /
 
@@ -176,10 +181,10 @@ $
 TYPE = 'rect'
 DX = 0.25
 DY = 0.25
-LON_WEST = -75
-LON_EAST = -58
-LAT_SOUTH = 36
-LAT_NORTH = 46
+LON_WEST = -77
+LON_EAST = -57
+LAT_SOUTH = 33
+LAT_NORTH = 48
 IS_GLOBAL = 0
 IS_GLOBALB = 0
 /
@@ -280,7 +285,7 @@ DRY_VAL = 999999
 CUT_OFF = 0
 LIM_BATHY = 0.4                  
 LIM_VAL = 0.5
-SPLIT_LIM = 1.25                 %from 5 to 10 times max(dx,dy)
+SPLIT_LIM = 2.5                 %from 5 to 10 times max(dx,dy)
 OFFSET = 0.25                    %OFFSET = max([dx dy])
 LAKE_TOL = 100
 OBSTR_OFFSET = 1
@@ -311,7 +316,7 @@ BIN_DIR = '../bin'
 REF_DIR = '../reference'
 DATA_DIR = '../data'
 FNAME_POLY = 'user_polygons.flag'      %不知道干什么用的
-FNAME = 'east-USA_P25_4'
+FNAME = 'grd0'
 FNAMEB = 'none'                        
 BOUND_SELECT = 1
 /
@@ -333,12 +338,12 @@ $ c. Required grid resolution and boundaries---------------------------------$
 
 &OUTGRID
 TYPE = 'rect'
-DX = 0.25
-DY = 0.25
-LON_WEST = -80
-LON_EAST = -50
+DX = 0.5
+DY = 0.5
+LON_WEST = -77
+LON_EAST = -57
 LAT_SOUTH = 33
-LAT_NORTH = 50
+LAT_NORTH = 48
 IS_GLOBAL = 0
 IS_GLOBALB = 0
 /
@@ -363,8 +368,8 @@ DRY_VAL = 999999
 CUT_OFF = 0
 LIM_BATHY = 0.4                  
 LIM_VAL = 0.5
-SPLIT_LIM = 1.25                 %from 5 to 10 times max(dx,dy)
-OFFSET = 0.25                    %OFFSET = max([dx dy])
+SPLIT_LIM = 2.5                 %from 5 to 10 times max(dx,dy)
+OFFSET = 0.5                    %OFFSET = max([dx dy])
 LAKE_TOL = 100
 OBSTR_OFFSET = 1
 /
@@ -421,11 +426,11 @@ fi
 bannerSimple "grid preprocessor - ww3_grid_nml" "*"
 declare -i ww3_grid_nml
 ww3_grid_nml=0              ## ～tag，新建文件需要修改～
-parm_WW3_work='work'        ## ～tag，新建文件需要修改～           ## 测试时需要更换名字，
 pth_WW3_regtest_work=${pth_WW3_regtest}"/${parm_WW3_work}/"
 mkdir -p ${pth_WW3_regtest_work}
-parm_WW3_comp='Gnu'        ## ～tag，新建文件需要修改～，实际文件为comp.Gnu，位于model，
-parm_WW3_switch='Ifremer1' ## ～tag，新建文件需要修改～，实际文件为switch_Ifremer1，位于input，
+ww3_grid_name='wind'
+ww3_grid_nml_name="ww3_grid_"${ww3_grid_name}'.nml'
+
 ##
 if ((ww3_grid_nml == 1)); then
     step=step+1
@@ -434,7 +439,7 @@ if ((ww3_grid_nml == 1)); then
     echo "----${blank}${step}.1 创建ww3_grid.nml文件，①ww3_grid.nml的名称定了，" \
         "觉得某个ww3_grid.nml文件有价值，就在input文件夹中另存，" ## ～tag，新建文件需要修改～
     cd ${pth_WW3_regtest_input}
-    cat >'ww3_grid.nml' <<EOF
+    cat >$ww3_grid_nml_name << EOF
 ! -------------------------------------------------------------------- !
 ! Define the spectrum parameterization via SPECTRUM_NML namelist
 !
@@ -514,10 +519,10 @@ if ((ww3_grid_nml == 1)); then
 !     TIMESTEPS%DTMIN      = 0.         ! minimum source term time step (s)
 ! -------------------------------------------------------------------- !
 &TIMESTEPS_NML
-  TIMESTEPS%DTMAX         =   600.
-  TIMESTEPS%DTXY          =   200.
-  TIMESTEPS%DTKTH         =   300.
-  TIMESTEPS%DTMIN         =   10.
+  TIMESTEPS%DTMAX         =   1500.
+  TIMESTEPS%DTXY          =   700.
+  TIMESTEPS%DTKTH         =   800.
+  TIMESTEPS%DTMIN         =   30.
 /
 
 
@@ -582,8 +587,8 @@ if ((ww3_grid_nml == 1)); then
 !  下面所有项，在gridgen中生成.meta中有，全部复制过来。
 ! -------------------------------------------------------------------- !
 &GRID_NML
-  GRID%NAME              =  'east-USA_P25_3'
-  GRID%NML               =  'namelists_east-USA_P25_3.nml'
+  GRID%NAME              =  '${ww3_grid_name}'
+  GRID%NML               =  '../${parm_WW3_input}/namelists_${ww3_grid_name}.nml'
   GRID%TYPE              =  'RECT'
   GRID%COORD             =  'SPHE'
   GRID%CLOS              =  'NONE'
@@ -591,16 +596,17 @@ if ((ww3_grid_nml == 1)); then
   GRID%DMIN              =   2.50
 /
 
-
 &RECT_NML
-  RECT%NX                =  69
-  RECT%NY                =  41
+  RECT%NX                =  81
+  RECT%NY                =  61
 !
   RECT%SX                =   0.250000000000
   RECT%SY                =   0.250000000000
-  RECT%X0                =  -75.0000
-  RECT%Y0                =   36.0000
+  RECT%X0                =  -77.0000
+  RECT%Y0                =   33.0000
 /
+
+
 
 
 
@@ -644,27 +650,42 @@ if ((ww3_grid_nml == 1)); then
 
 &DEPTH_NML
   DEPTH%SF             =  0.00
-  DEPTH%FILENAME       = 'east-USA_P25_3.bot'
+  DEPTH%FILENAME       = '../${parm_WW3_input}/${ww3_grid_name}.bot'
 /
 
 &MASK_NML
-  MASK%FILENAME         = 'east-USA_P25_3.mask'
+  MASK%FILENAME         = '../${parm_WW3_input}/${ww3_grid_name}.mask'
 /
 
 &OBST_NML
   OBST%SF              =  0.01
-  OBST%FILENAME        = 'east-USA_P25_3.obst'
+  OBST%FILENAME        = '../${parm_WW3_input}/${ww3_grid_name}.obst'
 /
 EOF
     ######################################################
     echo "----${blank}${step}.2 根据执行ww3_grid的run_test命令，配置相关文件并执行，" \
         "运行完成后，会在work文件夹下生成或更新mapsta.ww3,mask.ww3,mod_def.ww3,ww3_grid.out等文件，"
     cd ${pth_WW3_regtest_input} && cd '../../'
-    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
-        -N -r ww3_grid -w ${parm_WW3_work} ../model ${programGo} \
-        >/dev/null
+    #./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+    #    -N -r ww3_grid -w ${parm_WW3_work} ../model ${programGo} \
+    #    >/dev/null
     ######################################################
 fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##########################################################################################################
 ###########################################################################################################
@@ -673,8 +694,8 @@ declare -i CCMP
 CCMP=0                               ## ～tag，新建文件需要修改～
 pth_CCMP=${pth_OceanForecast}'CCMP/'
 pth_CCMP_work=${pth_CCMP}${programGo}'/' && mkdir -p ${pth_CCMP_work}
-parm_CCMP_mergeBegin='20110901' ## ～tag，新建文件需要修改～，只能是年月日，在ww3_shel.nml中会用到
-parm_CCMP_mergeEnd='20110930'   ## ～tag，新建文件需要修改～，只能是年月日，在ww3_shel.nml中会用到  ## 测试时Begin和End的时间相同即可，
+parm_CCMP_mergeBegin='20180901' ## ～tag，新建文件需要修改～，只能是年月日，在ww3_shel.nml中会用到
+parm_CCMP_mergeEnd='20180915'   ## ～tag，新建文件需要修改～，只能是年月日，在ww3_shel.nml中会用到  ## 测试时Begin和End的时间相同即可，
 # parm_CCMP_mergeName='ww3_ccmp_'${parm_CCMP_mergeBegin}'_'${parm_CCMP_mergeEnd}'.nc'
 parm_CCMP_mergeName='wind.nc'   ## 不能更改名称，否则ww3_prnc会出问题～
 
@@ -684,7 +705,8 @@ if ((CCMP == 1)); then
     ######################################################
     echo "----${blank}${step}.1 生成下载CCMP数据的download_ccmp.m文件，运行.m文件，生成的nc文件放在专门存储数据的大存储文件夹下，" \
         "①下载的速度很慢呀，>30分钟才下了14Mb，去对应下载地方可以看到单个文件下载时，文件大小的变化；猜测是外网很弱，晚上重启看看，" \
-        "②Windows 小飞机下载的相对较快，但也需要3分半一个文件～25Mb，用WPS云文档进行同步吧～～，" \
+        "②Windows 小飞机下载的相对较快, 切换默认浏览器为google浏，用WPS云文档进行同步吧～～，" \
+        "Window 下载CCMP的程序与这部分程序类似，但是\需要变成/。" \
         "③此部分的matlab运行代码一般注释了，能忍受那种10kb的下载速度，就解除注释吧～，提前下好就行～" ## ～tag，新建文件需要修改～
     cd ${pth_CCMP_work}
     cat >'download_ccmp.m' <<EOF
@@ -708,9 +730,9 @@ mkdir(filepath);   %权限不允许，修改文件夹的权限即可，
 % day = num2str([1:1:31]','%02d'); day(2,:); %通配符 day；
 
 % 应用中的通配符
-year = num2str([2011]'); %通配符 year；
-month = num2str([9:10]','%02d'); %通配符 month；
-day = num2str([1:31]','%02d'); %通配符 day；
+year = num2str([2018]'); %通配符 year；
+month = num2str([9]','%02d'); %通配符 month；
+day = num2str([1:15]','%02d'); %通配符 day；
 
 for i=1:1:size(year,1)
     for j=1:1:size(month,1)
@@ -937,8 +959,8 @@ EOF
     ######################################################
     ####################################################
     echo "----${blank}${step}.3 转移CCMP的program下生成的某一时间段风场的nc文件，至WW3的test的input文件夹，ln -snf，"
-    ln -snf ${pth_CCMP_work}'wind.nc' ${pth_WW3_regtest_input}
-    # mv ${pth_CCMP_work}'wind.nc' ${pth_WW3_regtest_input}
+    #ln -snf ${pth_CCMP_work}'wind.nc' ${pth_WW3_regtest_input}
+    mv ${pth_CCMP_work}'wind.nc' ${pth_WW3_regtest_input}
     ####################################################
 fi
 
@@ -950,6 +972,8 @@ fi
 bannerSimple "wind nc preprocessor - ww3_prnc_nml" "*"
 declare -i ww3_prnc_nml
 ww3_prnc_nml=0             ## ～tag，新建文件需要修改～
+ww3_prnc_name='wind'
+ww3_prnc_nml_name="ww3_prnc_"${ww3_prnc_name}'.nml'
 
 ##
 if ((ww3_prnc_nml == 1)); then
@@ -959,7 +983,7 @@ if ((ww3_prnc_nml == 1)); then
     echo "----${blank}${step}.1 创建ww3_prnc.nml文件，①ww3_prnc.nml的名称定了，" \
         "觉得某个ww3_prnc.nml文件有价值，就在input文件夹中另存，" ## ～tag，新建文件需要修改～
     cd ${pth_WW3_regtest_input}
-    cat >'ww3_prnc.nml' <<EOF
+    cat >$ww3_prnc_nml_name <<EOF
    ! -------------------------------------------------------------------- !
    ! WAVEWATCH III ww3_prnc.nml - Field preprocessor                      !
    ! -------------------------------------------------------------------- !
@@ -1027,11 +1051,11 @@ if ((ww3_prnc_nml == 1)); then
    !     FILE%TIMESHIFT     = '00000000 000000' ! shift the time value to 'YYYYMMDD HHMMSS'
    ! -------------------------------------------------------------------- !
    &FILE_NML
-     FILE%FILENAME      = 'wind.nc'
+     FILE%FILENAME      = '../${parm_WW3_input}/wind.nc'
      FILE%LONGITUDE     = 'longitude'
      FILE%LATITUDE      = 'latitude'
-     FILE%VAR(1)        = 'u10m'
-     FILE%VAR(2)        = 'v10m'
+     FILE%VAR(1)        = 'u10'
+     FILE%VAR(2)        = 'v10'
    /
    
    
@@ -1043,9 +1067,9 @@ EOF
     echo "----${blank}${step}.2 根据执行ww3_prnc的run_test命令，配置相关文件并执行，" \
         "运行完成后，会在work文件夹下生成或更新wind.ww3,ww3_prnc.out,ww3_prnc.nml.log等文件，"
     cd ${pth_WW3_regtest_input} && cd '../../'
-    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
-        -N -r ww3_prnc -w ${parm_WW3_work} ../model ${programGo} \
-        >/dev/null
+    #./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+    #    -N -r ww3_prnc -w ${parm_WW3_work} ../model ${programGo} \
+    #    >/dev/null
     # echo "`pwd`"
    
     ######################################################
@@ -1062,6 +1086,8 @@ fi
 bannerSimple "WAVEWATCH3 Running - ww3_shel_nml" "*"
 declare -i ww3_shel_nml
 ww3_shel_nml=0             ## ～tag，新建文件需要修改～
+parm_shel_start='20200729'
+parm_shel_end='20200815'
 
 ##
 if ((ww3_shel_nml == 1)); then
@@ -1108,8 +1134,8 @@ if ((ww3_shel_nml == 1)); then
 EOF
     #############################################
     echo "&DOMAIN_NML" >>'ww3_shel.nml'
-    echo "DOMAIN%START   = '${parm_CCMP_mergeBegin} 000000'" >>'ww3_shel.nml'
-    echo "DOMAIN%STOP   = '${parm_CCMP_mergeEnd} 180000'" >>'ww3_shel.nml'
+    echo "DOMAIN%START   = '${parm_shel_start} 000000'" >>'ww3_shel.nml'
+    echo "DOMAIN%STOP   = '${parm_shel_end} 180000'" >>'ww3_shel.nml'  ##18就18吧～～
     echo "/" >>'ww3_shel.nml'
     ############################################
     cat >>'ww3_shel.nml' <<EOF
@@ -1231,7 +1257,7 @@ TYPE%FIELD%LIST          = 'HS'
 EOF
     #############################################
     echo "&OUTPUT_DATE_NML" >>'ww3_shel.nml'
-    echo "DATE%FIELD          = '${parm_CCMP_mergeBegin} 000000' '3600' '${parm_CCMP_mergeEnd} 180000'" >>'ww3_shel.nml'
+    echo "DATE%FIELD          = '${parm_shel_start} 000000' '3600' '${parm_shel_end} 180000'" >>'ww3_shel.nml'
     echo "/" >>'ww3_shel.nml'
     ############################################
     cat >>'ww3_shel.nml' <<EOF
@@ -1416,8 +1442,8 @@ EOF
     echo "----${blank}${step}.2 根据执行ww3_ounf的run_test命令，配置相关文件并执行，" \
         "运行完成后，会在work文件夹下生成或更新ww3_ounf.out,ww3_ounf.nml.log,ww3..nc等文件，"
     cd ${pth_WW3_regtest_input} && cd '../../'
-    ./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
-        -N -r ww3_ounf -w ${parm_WW3_work} -o netcdf ../model ${programGo} \
+    #./${programGo}'/run_test' -i ${parm_WW3_input} -c ${parm_WW3_comp} -s ${parm_WW3_switch} \
+    #    -N -r ww3_ounf -w ${parm_WW3_work} -o netcdf ../model ${programGo} \
     #    >/dev/null
     # echo "`pwd`"
    
@@ -1441,23 +1467,30 @@ pth_ndbc_work=${pth_ndbc}${programGo}'/'  && mkdir -p ${pth_ndbc_work}
 
 ##
 if ((ndbc == 1)); then
-    parm_ndbc_station_downloadFlag=0      ## ～tag，新建文件需要修改～
-    parm_ndbc_Index1_yo=0                 ## ～tag，新建文件需要修改～      用于同化
-    parm_ndbc_create_new_work_table=0     ## ～tag，新建文件需要修改～      
-    parm_ndbc_match=0                     ## ～tag，新建文件需要修改～      用于浮标与背景场的比较
+    parm_ndbc_station_downloadFlag=0      ## 优先级1 ～tag，新建文件需要修改～
+    parm_ndbc_create_new_work_table=0     ## 优先级1 ～tag，新建文件需要修改～      
+    parm_ndbc_num2buoynum=0               ## 优先级2 ～tag，新建文件需要修改～ 
+    parm_ndbc_buoynum2num=0               ## 优先级2 ～tag，新建文件需要修改～ 
+    parm_ndbc_Index1_yo=0                 ## 优先级3 ～tag，新建文件需要修改～      用于同化  
+                                            ##（自己在程序重新低效率match，还需要调参数，运行很慢，不建议）
+    parm_ndbc_match=0                     ## 优先级3 ～tag，新建文件需要修改～      用于浮标与背景场的比较
+    parm_ndbc_match_spinup=1              ## 优先级4 ～tag，新建文件需要修改～ 
+    parm_ndbc_match_Index1_yo=0           ## 优先级4 ～tag，新建文件需要修改～
+                                            ## 建议用此方法实现Index1_yo的同化，运行很快，
+    
     #####################################################
     step=step+1
     echo "${blank}${step} ndbc，①部分制作看https://liu-jincan.github.io/2022/01/17/yan-jiu-sheng-justtry-target/yan-yi-shang-han-jia-gei-ding-qu-yu-ww3-shi-yan-2022-han-jia-an-pai/#toc-heading-116" \
         "②在ENOI项目的实现的过程中，添加了关于H观测算子的索引Index1，及其对应的观测yo，"
     ######################################################
     echo "----${blank}${step}.1 在ndbc项目创建关于program的文件夹，批量导入并重命名背景场nc文件到program文件夹下的nc/文件夹，①会删除nc/文件夹" ## ～tag，新建文件需要修改～
-    rm -rf ${pth_ndbc_work}'nc/'
-    mkdir -p ${pth_ndbc_work}'nc/'
-    for tmp in `cd ${pth_WW3_regtest_work} && ls ww3.*.nc`; do
-        cp ${pth_WW3_regtest_work}${tmp} ${pth_ndbc_work}'nc/'
-    done
-    cd ${pth_ndbc_work}'nc/'
-    rename -v 's/ww3./ww3_/g' *.nc  ## nice~~
+    # rm -rf ${pth_ndbc_work}'nc/'
+    # mkdir -p ${pth_ndbc_work}'nc/'
+    # for tmp in `cd ${pth_WW3_regtest_work} && ls ww3.*.nc`; do
+    #     cp ${pth_WW3_regtest_work}${tmp} ${pth_ndbc_work}'nc/'
+    # done
+    # cd ${pth_ndbc_work}'nc/'
+    # rename -v 's/ww3./ww3_/g' *.nc  ## nice~~  （可选操作）
     
     
     ######################################################
@@ -1484,6 +1517,8 @@ path_source
 addpath(path_source)
 path_mmap
 addpath(path_mmap)
+
+
 %%
 create_new_work_table
 if(create_new_work_table==1)
@@ -1498,10 +1533,10 @@ if(create_new_work_table==1)
     [work_table] = ndbc_station_info('default',path_save); %调用之前已保存的ndbc_station_info.mat数据；
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     fprintf(['       ├──Step2.选取特定区域需要的站点，剔除年份为nan的站点，在program文件夹下创建ndbc_station_info_needed.mat，\n' ])
-    lat_max = 46;  % 纬度为负数，表示南纬
-    lat_min = 36;
-    lon_max = -58; % 经度为负数，表示西经
-    lon_min = -75;
+    lat_max = 48;  % 纬度为负数，表示南纬
+    lat_min = 33;
+    lon_max = -57; % 经度为负数，表示西经
+    lon_min = -77;
     [work_table] = ndbc_station_info_needed(work_table,lat_max,lat_min,lon_max,lon_min,path_save);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     fprintf(['       ├──Step3.特定区域站点的plot，在program/fig文件夹下创建<区域ndbc浮标图.fig>，table生成对应fig的打开命令，\n' ])
@@ -1519,14 +1554,34 @@ if(create_new_work_table==1)
         station_tf_download = [1:size(work_table,1)];                                                 %要下载的浮标在work_table的索引
         path_station_historyData_SM = strcat(path_save,'station_historyData_SM/');
         mkdir(path_station_historyData_SM);
+
+        fileFolder=fullfile(path_station_historyData_SM);
+        dirOutput=dir(fullfile(fileFolder,'*.mat'));
+        fileNames={dirOutput.name};
+        fileNames = string(fileNames);
+        
+        tmp=[];
+        for i=1:1:length(station_tf_download) 
+            str=strcat(mat2str(i),'.mat');
+            if( length( find(strcmp(str,fileNames)) ) == 1 )
+                tmp=[tmp 0];
+            else
+                tmp=[tmp 1];
+            end
+        end
+        tmp = logical(tmp);
+        station_tf_download = station_tf_download(tmp);
+
         [work_table] = ndbc_station_download(work_table,station_tf_download,path_save);%运行需要时间比较久；第一次是必须运行的； %%
         clear station_tf_download path_station_historyData_SM;
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
+
+
 %%
-match_Index1_yo
-if(match_Index1_yo==1)  
+match
+if(match==1)  
     fprintf('├──「加载work_table.mat」\n')
     load work_table.mat
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1565,14 +1620,19 @@ if(match_Index1_yo==1)
             path_Nc_time_Hs);
         % clear path_Nc_time_Hs;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % station_tf_download = [1:112];
+        % station_tf_download = [55:211];
         fprintf('           ├──Step4「函数」在work_table中的添加$(ncNameInT)_ndbc_nc_match_WVHT,\n')
         path_Ndbc_nc_match_Hs_Fig = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs_Fig/');
         path_Ndbc_nc_match_Hs = strcat(path_save,ncNameInTable,'_Ndbc_nc_match_Hs/');
         mkdir(path_Ndbc_nc_match_Hs_Fig);
         mkdir(path_Ndbc_nc_match_Hs);
+
+        ndbc_start_datetime=datetime('2020-07-29 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss');
+        ndbc_end_datetime=datetime('2020-08-15 18:00:00','InputFormat','yyyy-MM-dd HH:mm:ss');
+
         [work_table] = analyse_HS(path_Ndbc_nc_match_Hs_Fig,path_Ndbc_nc_match_Hs,...
-            path_Nc_time_Hs,work_table,station_tf_download,path_save,ncNameInTable);  %很早被定义过的...
+            path_Nc_time_Hs,work_table,station_tf_download,path_save,ncNameInTable,...
+            ndbc_start_datetime,ndbc_end_datetime);  %很早被定义过的...
         clear path_Ndbc_nc_match_Hs_Fig;
         path_Ndbc_nc_match = path_Ndbc_nc_match_Hs;
         clear path_Ndbc_nc_match_Hs;
@@ -1713,6 +1773,55 @@ if(Index1_yo==1)
     
 end
 %%
+mat_num2buoynum
+if(mat_num2buoynum==1)
+    inputArg1='num2buoynum';
+    %path_save = '/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA2/';
+    ndbc_station_mat_num2buoynum(inputArg1,path_save);
+end
+%%
+mat_buoynum2num
+if(mat_buoynum2num==1)
+    inputArg1='buoynum2num';
+    %path_save = '/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA_2/';
+    ndbc_station_mat_buoynum2num(inputArg1,path_save);
+end
+%%
+match_spinup
+if(match_spinup==1)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % inputArg1=24; %24个小时？
+    % ndbc_start_datetime=datetime('2018-09-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss');
+    % path_save = '/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA_2/';
+    ndbc_spinup_datetime=datetime('2020-08-02 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss'); %一般更改2018-09-03 00:00:00即可
+    ndbc_spinup_endtime=datetime('2020-08-15 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss'); %一般更改2018-09-03 00:00:00即可
+    ndbc_spinup_selectedbuoy= [11;12;13;20;21;23;25;29;30;119];
+    
+    HS_matchnameINtable='ww3_2020_grd3_ST6_nc_ndbc_nc_match_WVHT'; %一般更改ww3_2018_nc即可，前提是work_table必须有HS_matchnameINtable的属性
+    path_Ndbc_nc_match_Hs_Fig_spinup = strcat(path_save,'ww3_2020_grd3_ST6_nc_Ndbc_nc_match_Hs_Fig_spinup/'); %一般更改ww3_2018_nc即可
+    mkdir(path_Ndbc_nc_match_Hs_Fig_spinup);
+    analyse_HS_spinup(ndbc_spinup_datetime,HS_matchnameINtable,ndbc_spinup_endtime,ndbc_spinup_selectedbuoy,path_save,path_Ndbc_nc_match_Hs_Fig_spinup);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
+%%
+
+Match_Index_yo
+if(Match_Index_yo==1)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % ndbc_start_datetime=datetime('2018-09-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss');
+    % path_save = '/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA_2/';
+    cd(path_save)
+    system('rm -rf Index1')
+    system('rm -rf yo')
+    mkdir('Index1')
+    mkdir('yo')
+    path_Ndbc_nc_match = strcat(path_save,'ww3_2018_nc_Ndbc_nc_match_Hs/'); %一般更改ww3_2018_nc即可
+    HindexINtable = 'ww3_2018_nc_IndexInHmatrix'; %一般更改ww3_2018_nc即可
+    buoynumNeededForDA = [9 12 18]; %一般更改[]中buoy在work_table对应的num数字即可。
+    match_Index1_yo(HindexINtable,buoynumNeededForDA,path_save,path_Ndbc_nc_match);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
+%%
 EOF
     ######################################################
     echo "----${blank}${step}.3 运行该m文件，①matlab需要安装Text Analytics Toolbox，②create_new_work_table=1运行会在program文件夹下" \
@@ -1720,10 +1829,14 @@ EOF
         "、work_table.mat、fig/区域ndbc浮标图，work_table.mat包含所需浮标ID、经纬度、SM数据年份、区域浮标fig命令、etopo1水深属性，" \
         "③ndbc_station_downloadFlag=1运行会在program文件夹下创建station_historyData_SM/*.mat，table中还会记录每个浮标数据导入.mat失败对应的txt，" \
         "这个创建耗费时间很长，如果已经创建，需设置为0，" \
-        "④match_Index1_yo=1运行会对nc/中的每个nc创建_Index1,_Nc_time_Hs,Ndbc_nc_match_Hs,Ndbc_nc_match_Hs_Fig,_yo文件夹，耗费时间长，建议放弃～～" \
-        "⑤Index1_yo=1运行，生成Index1和yo文件夹，(测试年2011年),时间长了，也很耗时间，但是是长时间同化最好的方式，一次足矣～～"
+        "④match=1运行会对nc/中的每个nc创建_Index1,_Nc_time_Hs,Ndbc_nc_match_Hs,Ndbc_nc_match_Hs_Fig,_yo文件夹，耗费时间长，建议放弃～～，加入一个时间参数，减少match时间，可行，不用放弃，" \
+        "⑤Index1_yo=1运行，生成Index1和yo文件夹，(测试年2011年),时间长了，也很耗时间，不建议使用～～" \
+        "六、mat_num2buoynum=1，将在station_historyData_SM文件夹下载的浮标文件名称，从work_table的数字索引，变成work_table的ID索引。" \
+        "七、mat_buoynum2num=1，将浮标文件从work_table的ID索引，变成work_table的数字索引。用于外部浮标文件的导入。" \
+        "八、match_spinup=，将匹配的数据，考虑模式的spinup的时间，重新比较。" \
+        "九、Match_Index_yo=，从匹配的数据（*_Ndbc_nc_match_Hs文件夹下），输出同化所需的数据。"
     cd ${pth_ndbc_work} 
-    ${pth_matlab} -nodisplay -r "path_save='${pth_ndbc_work}'; path_source='${pth_ndbc_source}'; path_mmap='${pth_ndbc_mmap}'; create_new_work_table=${parm_ndbc_create_new_work_table};ndbc_station_downloadFlag=${parm_ndbc_station_downloadFlag};match_Index1_yo=${parm_ndbc_match};Index1_yo=${parm_ndbc_Index1_yo};${programGo};exit;" \
+    ${pth_matlab} -nodisplay -r "path_save='${pth_ndbc_work}'; path_source='${pth_ndbc_source}'; path_mmap='${pth_ndbc_mmap}'; create_new_work_table=${parm_ndbc_create_new_work_table};ndbc_station_downloadFlag=${parm_ndbc_station_downloadFlag};match=${parm_ndbc_match};Index1_yo=${parm_ndbc_Index1_yo};mat_num2buoynum=${parm_ndbc_num2buoynum};mat_buoynum2num=${parm_ndbc_buoynum2num};match_spinup=${parm_ndbc_match_spinup};Match_Index_yo=${parm_ndbc_match_Index1_yo};${programGo};exit;" \ 
     #    >${pth_ndbc_work}'.out.create_work_table' 2>&1
     ######################################################
 
@@ -1774,7 +1887,7 @@ if ((DA_cycle_NoWW3_ENOI == 1)); then
     cp -r ${pth_ndbc_work}${parm_DA_Code_ww3InputNc}  ${pth_ndbc_work}'nc'  #
     cd ${pth_ndbc_work}'nc/'
     ls -1 *.nc >'nc.txt'  ##重定向，-1按列，
-    nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个
+    nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个？ WithWW3只需要1个nc，这里需要额外判断。
     ls -1 *.nc >'nc_ENOI_Amatrix.txt'  ##重定向，-1按列，
     ######################################################
     echo "----${blank}${step}.2 mod_params.f90的设置，"   ## ～tag，新建文件需要修改～
@@ -2111,10 +2224,10 @@ if (( DA_cycle_WithWW3_ENOI == 1 )); then
     pth_DA_Code_apps=${pth_DA_Code_build}'apps4/'                       ## ～tag，新建文件需要修改～
     pth_DA_Code_objs=${pth_DA_Code_build}'objs4/'                       ## ～tag，新建文件需要修改～
     pth_DA_Code_mods=${pth_DA_Code_build}'mods4/'                       ## ～tag，新建文件需要修改～
-    parm_DA_Code_ww3InputNc='nc_30days'                  ## ～tag，新建文件需要修改～，所需同化背景场nc所在的文件夹名称，不能为nc；用于A的生成，
-    parm_DA_Code_daOuputNc='nc_WithWW3_ENOI_30days'        ## ～tag，新建文件需要修改～，同化后nc所在的文件夹名称和文件前缀，
-    parm_DA_cycle_WithWW3_Begin=${parm_CCMP_mergeBegin}    ## ～tag，新建文件需要修改～
-    parm_DA_cycle_WithWW3_End=${parm_CCMP_mergeEnd}        ## ～tag，新建文件需要修改～
+    parm_DA_Code_ww3InputNc='nc_Backg_WW3_P125_16days_2020'                  ## ～tag，新建文件需要修改～，所需同化背景场nc所在的文件夹名称，不能为nc；用于A的生成，
+    parm_DA_Code_daOuputNc='nc_WithWW3_ENOI_WW3_P125_16days_2020'        ## ～tag，新建文件需要修改～，同化后nc所在的文件夹名称和文件前缀，
+    parm_DA_cycle_WithWW3_Begin='20200729'       ## ～tag，新建文件需要修改～
+    parm_DA_cycle_WithWW3_End='20200815'        ## ～tag，新建文件需要修改～
     parm_DA_cycle_timeTxt='da_time.txt'                    ## ～tag，新建文件需要修改～
     ######################################################## 删除work中的文档
     cd ${pth_WW3_regtest_work}
@@ -2131,737 +2244,31 @@ if (( DA_cycle_WithWW3_ENOI == 1 )); then
     ## ww3_prnc_nml=1 运行一次，生成wind.ww3，
     ## 
     #
-    # FAQ：第一个同化时刻是ww3_shel.nml的开始时刻可以吗？可以～～，在da_time.txt添加该时刻后，
-    #      shel不会生成restrat001.ww3文件，但是ounf可以生成小时的nc文件，包含了陆地信息（NAN），时间也对上了，
-    #      之前可以，现在又不行了？？？？？？？？？
+    # FAQ：第一个同化时刻是ww3_shel.nml的开始时刻可以吗？不可以～～，
     #
     ##
     rm -rf ${pth_ndbc_work}'nc'
     cp -r ${pth_ndbc_work}${parm_DA_Code_ww3InputNc}  ${pth_ndbc_work}'nc'  #
     cd ${pth_ndbc_work}'nc/'
     ls -1 *.nc >'nc.txt'  ##重定向，-1按列，
-    nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个
+    nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求1个。
+                                                  ##之前以为至少要求2个，可是只有一个也能运行。
+                                                  ##可能WithoutWW3需要2个？
     ls -1 *.nc >'nc_ENOI_Amatrix.txt'  ##重定向，-1按列，
     ##
     cd ${pth_WW3_regtest_input}
-    # ls -1 ${pth_ndbc_work}'yo/'  # https://blog.csdn.net/u014046192/article/details/50414606/     cut函数截取文件
-    cat >${parm_DA_cycle_timeTxt} <<EOF
-20110901T010000.txt
-20110901T020000.txt
-20110901T030000.txt
-20110901T040000.txt
-20110901T050000.txt
-20110901T060000.txt
-20110901T070000.txt
-20110901T080000.txt
-20110901T090000.txt
-20110901T100000.txt
-20110901T110000.txt
-20110901T120000.txt
-20110901T130000.txt
-20110901T140000.txt
-20110901T150000.txt
-20110901T160000.txt
-20110901T170000.txt
-20110901T180000.txt
-20110901T190000.txt
-20110901T200000.txt
-20110901T210000.txt
-20110901T220000.txt
-20110901T230000.txt
-20110902T000000.txt
-20110902T010000.txt
-20110902T020000.txt
-20110902T030000.txt
-20110902T040000.txt
-20110902T050000.txt
-20110902T060000.txt
-20110902T070000.txt
-20110902T080000.txt
-20110902T090000.txt
-20110902T100000.txt
-20110902T110000.txt
-20110902T120000.txt
-20110902T130000.txt
-20110902T140000.txt
-20110902T150000.txt
-20110902T160000.txt
-20110902T170000.txt
-20110902T180000.txt
-20110902T190000.txt
-20110902T200000.txt
-20110902T210000.txt
-20110902T220000.txt
-20110902T230000.txt
-20110903T000000.txt
-20110903T010000.txt
-20110903T020000.txt
-20110903T030000.txt
-20110903T040000.txt
-20110903T050000.txt
-20110903T060000.txt
-20110903T070000.txt
-20110903T080000.txt
-20110903T090000.txt
-20110903T100000.txt
-20110903T110000.txt
-20110903T120000.txt
-20110903T130000.txt
-20110903T140000.txt
-20110903T150000.txt
-20110903T160000.txt
-20110903T170000.txt
-20110903T180000.txt
-20110903T190000.txt
-20110903T200000.txt
-20110903T210000.txt
-20110903T220000.txt
-20110903T230000.txt
-20110904T000000.txt
-20110904T010000.txt
-20110904T020000.txt
-20110904T030000.txt
-20110904T040000.txt
-20110904T050000.txt
-20110904T060000.txt
-20110904T070000.txt
-20110904T080000.txt
-20110904T090000.txt
-20110904T100000.txt
-20110904T110000.txt
-20110904T120000.txt
-20110904T130000.txt
-20110904T140000.txt
-20110904T150000.txt
-20110904T160000.txt
-20110904T170000.txt
-20110904T180000.txt
-20110904T190000.txt
-20110904T200000.txt
-20110904T210000.txt
-20110904T220000.txt
-20110904T230000.txt
-20110905T000000.txt
-20110905T010000.txt
-20110905T020000.txt
-20110905T030000.txt
-20110905T040000.txt
-20110905T050000.txt
-20110905T060000.txt
-20110905T070000.txt
-20110905T080000.txt
-20110905T090000.txt
-20110905T100000.txt
-20110905T110000.txt
-20110905T120000.txt
-20110905T130000.txt
-20110905T140000.txt
-20110905T150000.txt
-20110905T160000.txt
-20110905T170000.txt
-20110905T180000.txt
-20110905T190000.txt
-20110905T200000.txt
-20110905T210000.txt
-20110905T220000.txt
-20110905T230000.txt
-20110906T000000.txt
-20110906T010000.txt
-20110906T020000.txt
-20110906T030000.txt
-20110906T040000.txt
-20110906T050000.txt
-20110906T060000.txt
-20110906T070000.txt
-20110906T080000.txt
-20110906T090000.txt
-20110906T100000.txt
-20110906T110000.txt
-20110906T120000.txt
-20110906T130000.txt
-20110906T140000.txt
-20110906T150000.txt
-20110906T160000.txt
-20110906T170000.txt
-20110906T180000.txt
-20110906T190000.txt
-20110906T200000.txt
-20110906T210000.txt
-20110906T220000.txt
-20110906T230000.txt
-20110907T000000.txt
-20110907T010000.txt
-20110907T020000.txt
-20110907T030000.txt
-20110907T040000.txt
-20110907T050000.txt
-20110907T060000.txt
-20110907T070000.txt
-20110907T080000.txt
-20110907T090000.txt
-20110907T100000.txt
-20110907T110000.txt
-20110907T120000.txt
-20110907T130000.txt
-20110907T140000.txt
-20110907T150000.txt
-20110907T160000.txt
-20110907T170000.txt
-20110907T180000.txt
-20110907T190000.txt
-20110907T200000.txt
-20110907T210000.txt
-20110907T220000.txt
-20110907T230000.txt
-20110908T000000.txt
-20110908T010000.txt
-20110908T020000.txt
-20110908T030000.txt
-20110908T040000.txt
-20110908T050000.txt
-20110908T060000.txt
-20110908T070000.txt
-20110908T080000.txt
-20110908T090000.txt
-20110908T100000.txt
-20110908T110000.txt
-20110908T120000.txt
-20110908T130000.txt
-20110908T140000.txt
-20110908T150000.txt
-20110908T160000.txt
-20110908T170000.txt
-20110908T180000.txt
-20110908T190000.txt
-20110908T200000.txt
-20110908T210000.txt
-20110908T220000.txt
-20110908T230000.txt
-20110909T000000.txt
-20110909T010000.txt
-20110909T020000.txt
-20110909T030000.txt
-20110909T040000.txt
-20110909T050000.txt
-20110909T060000.txt
-20110909T070000.txt
-20110909T080000.txt
-20110909T090000.txt
-20110909T100000.txt
-20110909T110000.txt
-20110909T120000.txt
-20110909T130000.txt
-20110909T140000.txt
-20110909T150000.txt
-20110909T160000.txt
-20110909T170000.txt
-20110909T180000.txt
-20110909T190000.txt
-20110909T200000.txt
-20110909T210000.txt
-20110909T220000.txt
-20110909T230000.txt
-20110910T000000.txt
-20110910T010000.txt
-20110910T020000.txt
-20110910T030000.txt
-20110910T040000.txt
-20110910T050000.txt
-20110910T060000.txt
-20110910T070000.txt
-20110910T080000.txt
-20110910T090000.txt
-20110910T100000.txt
-20110910T110000.txt
-20110910T120000.txt
-20110910T130000.txt
-20110910T140000.txt
-20110910T150000.txt
-20110910T160000.txt
-20110910T170000.txt
-20110910T180000.txt
-20110910T190000.txt
-20110910T200000.txt
-20110910T210000.txt
-20110910T220000.txt
-20110910T230000.txt
-20110911T000000.txt
-20110911T010000.txt
-20110911T020000.txt
-20110911T030000.txt
-20110911T040000.txt
-20110911T050000.txt
-20110911T060000.txt
-20110911T070000.txt
-20110911T080000.txt
-20110911T090000.txt
-20110911T100000.txt
-20110911T110000.txt
-20110911T120000.txt
-20110911T130000.txt
-20110911T140000.txt
-20110911T150000.txt
-20110911T160000.txt
-20110911T170000.txt
-20110911T180000.txt
-20110911T190000.txt
-20110911T200000.txt
-20110911T210000.txt
-20110911T220000.txt
-20110911T230000.txt
-20110912T000000.txt
-20110912T010000.txt
-20110912T020000.txt
-20110912T030000.txt
-20110912T040000.txt
-20110912T050000.txt
-20110912T060000.txt
-20110912T070000.txt
-20110912T080000.txt
-20110912T090000.txt
-20110912T100000.txt
-20110912T110000.txt
-20110912T120000.txt
-20110912T130000.txt
-20110912T140000.txt
-20110912T150000.txt
-20110912T160000.txt
-20110912T170000.txt
-20110912T180000.txt
-20110912T190000.txt
-20110912T200000.txt
-20110912T210000.txt
-20110912T220000.txt
-20110912T230000.txt
-20110913T000000.txt
-20110913T010000.txt
-20110913T020000.txt
-20110913T030000.txt
-20110913T040000.txt
-20110913T050000.txt
-20110913T060000.txt
-20110913T070000.txt
-20110913T080000.txt
-20110913T090000.txt
-20110913T100000.txt
-20110913T110000.txt
-20110913T120000.txt
-20110913T130000.txt
-20110913T140000.txt
-20110913T150000.txt
-20110913T160000.txt
-20110913T170000.txt
-20110913T180000.txt
-20110913T190000.txt
-20110913T200000.txt
-20110913T210000.txt
-20110913T220000.txt
-20110913T230000.txt
-20110914T000000.txt
-20110914T010000.txt
-20110914T020000.txt
-20110914T030000.txt
-20110914T040000.txt
-20110914T050000.txt
-20110914T060000.txt
-20110914T070000.txt
-20110914T080000.txt
-20110914T090000.txt
-20110914T100000.txt
-20110914T110000.txt
-20110914T120000.txt
-20110914T130000.txt
-20110914T140000.txt
-20110914T150000.txt
-20110914T160000.txt
-20110914T170000.txt
-20110914T180000.txt
-20110914T190000.txt
-20110914T200000.txt
-20110914T210000.txt
-20110914T220000.txt
-20110914T230000.txt
-20110915T000000.txt
-20110915T010000.txt
-20110915T020000.txt
-20110915T030000.txt
-20110915T040000.txt
-20110915T050000.txt
-20110915T060000.txt
-20110915T070000.txt
-20110915T080000.txt
-20110915T090000.txt
-20110915T100000.txt
-20110915T110000.txt
-20110915T120000.txt
-20110915T130000.txt
-20110915T140000.txt
-20110915T150000.txt
-20110915T160000.txt
-20110915T170000.txt
-20110915T180000.txt
-20110915T190000.txt
-20110915T200000.txt
-20110915T210000.txt
-20110915T220000.txt
-20110915T230000.txt
-20110916T000000.txt
-20110916T010000.txt
-20110916T020000.txt
-20110916T030000.txt
-20110916T040000.txt
-20110916T050000.txt
-20110916T060000.txt
-20110916T070000.txt
-20110916T080000.txt
-20110916T090000.txt
-20110916T100000.txt
-20110916T110000.txt
-20110916T120000.txt
-20110916T130000.txt
-20110916T140000.txt
-20110916T150000.txt
-20110916T160000.txt
-20110916T170000.txt
-20110916T180000.txt
-20110916T190000.txt
-20110916T200000.txt
-20110916T210000.txt
-20110916T220000.txt
-20110916T230000.txt
-20110917T000000.txt
-20110917T010000.txt
-20110917T020000.txt
-20110917T030000.txt
-20110917T040000.txt
-20110917T050000.txt
-20110917T060000.txt
-20110917T070000.txt
-20110917T080000.txt
-20110917T090000.txt
-20110917T100000.txt
-20110917T110000.txt
-20110917T120000.txt
-20110917T130000.txt
-20110917T140000.txt
-20110917T150000.txt
-20110917T160000.txt
-20110917T170000.txt
-20110917T180000.txt
-20110917T190000.txt
-20110917T200000.txt
-20110917T210000.txt
-20110917T220000.txt
-20110917T230000.txt
-20110918T000000.txt
-20110918T010000.txt
-20110918T020000.txt
-20110918T030000.txt
-20110918T040000.txt
-20110918T050000.txt
-20110918T060000.txt
-20110918T070000.txt
-20110918T080000.txt
-20110918T090000.txt
-20110918T100000.txt
-20110918T110000.txt
-20110918T120000.txt
-20110918T130000.txt
-20110918T140000.txt
-20110918T150000.txt
-20110918T160000.txt
-20110918T170000.txt
-20110918T180000.txt
-20110918T190000.txt
-20110918T200000.txt
-20110918T210000.txt
-20110918T220000.txt
-20110918T230000.txt
-20110919T000000.txt
-20110919T010000.txt
-20110919T020000.txt
-20110919T030000.txt
-20110919T040000.txt
-20110919T050000.txt
-20110919T060000.txt
-20110919T070000.txt
-20110919T080000.txt
-20110919T090000.txt
-20110919T100000.txt
-20110919T110000.txt
-20110919T120000.txt
-20110919T130000.txt
-20110919T140000.txt
-20110919T150000.txt
-20110919T160000.txt
-20110919T170000.txt
-20110919T180000.txt
-20110919T190000.txt
-20110919T200000.txt
-20110919T210000.txt
-20110919T220000.txt
-20110919T230000.txt
-20110920T000000.txt
-20110920T010000.txt
-20110920T020000.txt
-20110920T030000.txt
-20110920T040000.txt
-20110920T050000.txt
-20110920T060000.txt
-20110920T070000.txt
-20110920T080000.txt
-20110920T090000.txt
-20110920T100000.txt
-20110920T110000.txt
-20110920T120000.txt
-20110920T130000.txt
-20110920T140000.txt
-20110920T150000.txt
-20110920T160000.txt
-20110920T170000.txt
-20110920T180000.txt
-20110920T190000.txt
-20110920T200000.txt
-20110920T210000.txt
-20110920T220000.txt
-20110920T230000.txt
-20110921T000000.txt
-20110921T010000.txt
-20110921T020000.txt
-20110921T030000.txt
-20110921T040000.txt
-20110921T050000.txt
-20110921T060000.txt
-20110921T070000.txt
-20110921T080000.txt
-20110921T090000.txt
-20110921T100000.txt
-20110921T110000.txt
-20110921T120000.txt
-20110921T130000.txt
-20110921T140000.txt
-20110921T150000.txt
-20110921T160000.txt
-20110921T170000.txt
-20110921T180000.txt
-20110921T190000.txt
-20110921T200000.txt
-20110921T210000.txt
-20110921T220000.txt
-20110921T230000.txt
-20110922T000000.txt
-20110922T010000.txt
-20110922T020000.txt
-20110922T030000.txt
-20110922T040000.txt
-20110922T050000.txt
-20110922T060000.txt
-20110922T070000.txt
-20110922T080000.txt
-20110922T090000.txt
-20110922T100000.txt
-20110922T110000.txt
-20110922T120000.txt
-20110922T130000.txt
-20110922T140000.txt
-20110922T150000.txt
-20110922T160000.txt
-20110922T170000.txt
-20110922T180000.txt
-20110922T190000.txt
-20110922T200000.txt
-20110922T210000.txt
-20110922T220000.txt
-20110922T230000.txt
-20110923T000000.txt
-20110923T010000.txt
-20110923T020000.txt
-20110923T030000.txt
-20110923T040000.txt
-20110923T050000.txt
-20110923T060000.txt
-20110923T070000.txt
-20110923T080000.txt
-20110923T090000.txt
-20110923T100000.txt
-20110923T110000.txt
-20110923T120000.txt
-20110923T130000.txt
-20110923T140000.txt
-20110923T150000.txt
-20110923T160000.txt
-20110923T170000.txt
-20110923T180000.txt
-20110923T190000.txt
-20110923T200000.txt
-20110923T210000.txt
-20110923T220000.txt
-20110923T230000.txt
-20110924T000000.txt
-20110924T010000.txt
-20110924T020000.txt
-20110924T030000.txt
-20110924T040000.txt
-20110924T050000.txt
-20110924T060000.txt
-20110924T070000.txt
-20110924T080000.txt
-20110924T090000.txt
-20110924T100000.txt
-20110924T110000.txt
-20110924T120000.txt
-20110924T130000.txt
-20110924T140000.txt
-20110924T150000.txt
-20110924T160000.txt
-20110924T170000.txt
-20110924T180000.txt
-20110924T190000.txt
-20110924T200000.txt
-20110924T210000.txt
-20110924T220000.txt
-20110924T230000.txt
-20110925T000000.txt
-20110925T010000.txt
-20110925T020000.txt
-20110925T030000.txt
-20110925T040000.txt
-20110925T050000.txt
-20110925T060000.txt
-20110925T070000.txt
-20110925T080000.txt
-20110925T090000.txt
-20110925T100000.txt
-20110925T110000.txt
-20110925T120000.txt
-20110925T130000.txt
-20110925T140000.txt
-20110925T150000.txt
-20110925T160000.txt
-20110925T170000.txt
-20110925T180000.txt
-20110925T190000.txt
-20110925T200000.txt
-20110925T210000.txt
-20110925T220000.txt
-20110925T230000.txt
-20110926T000000.txt
-20110926T010000.txt
-20110926T020000.txt
-20110926T030000.txt
-20110926T040000.txt
-20110926T050000.txt
-20110926T060000.txt
-20110926T070000.txt
-20110926T080000.txt
-20110926T090000.txt
-20110926T100000.txt
-20110926T110000.txt
-20110926T120000.txt
-20110926T130000.txt
-20110926T140000.txt
-20110926T150000.txt
-20110926T160000.txt
-20110926T170000.txt
-20110926T180000.txt
-20110926T190000.txt
-20110926T200000.txt
-20110926T210000.txt
-20110926T220000.txt
-20110926T230000.txt
-20110927T000000.txt
-20110927T010000.txt
-20110927T020000.txt
-20110927T030000.txt
-20110927T040000.txt
-20110927T050000.txt
-20110927T060000.txt
-20110927T070000.txt
-20110927T080000.txt
-20110927T090000.txt
-20110927T100000.txt
-20110927T110000.txt
-20110927T120000.txt
-20110927T130000.txt
-20110927T140000.txt
-20110927T150000.txt
-20110927T160000.txt
-20110927T170000.txt
-20110927T180000.txt
-20110927T190000.txt
-20110927T200000.txt
-20110927T210000.txt
-20110927T220000.txt
-20110927T230000.txt
-20110928T000000.txt
-20110928T010000.txt
-20110928T020000.txt
-20110928T030000.txt
-20110928T040000.txt
-20110928T050000.txt
-20110928T060000.txt
-20110928T070000.txt
-20110928T080000.txt
-20110928T090000.txt
-20110928T100000.txt
-20110928T110000.txt
-20110928T120000.txt
-20110928T130000.txt
-20110928T140000.txt
-20110928T150000.txt
-20110928T160000.txt
-20110928T170000.txt
-20110928T180000.txt
-20110928T190000.txt
-20110928T200000.txt
-20110928T210000.txt
-20110928T220000.txt
-20110928T230000.txt
-20110929T000000.txt
-20110929T010000.txt
-20110929T020000.txt
-20110929T030000.txt
-20110929T040000.txt
-20110929T050000.txt
-20110929T060000.txt
-20110929T070000.txt
-20110929T080000.txt
-20110929T090000.txt
-20110929T100000.txt
-20110929T110000.txt
-20110929T120000.txt
-20110929T130000.txt
-20110929T140000.txt
-20110929T150000.txt
-20110929T160000.txt
-20110929T170000.txt
-20110929T180000.txt
-20110929T190000.txt
-20110929T200000.txt
-20110929T210000.txt
-20110929T220000.txt
-20110929T230000.txt
-20110930T000000.txt
-20110930T010000.txt
-20110930T020000.txt
-20110930T030000.txt
-20110930T040000.txt
-20110930T050000.txt
-20110930T060000.txt
-20110930T070000.txt
-20110930T080000.txt
-20110930T090000.txt
-20110930T100000.txt
-20110930T110000.txt
-20110930T120000.txt
-20110930T130000.txt
-20110930T140000.txt
-20110930T150000.txt
-20110930T160000.txt
-20110930T170000.txt
-20110930T180000.txt
-EOF
-    
+    ls -1 ${pth_ndbc_work}'yo/' > ${parm_DA_cycle_timeTxt}   # https://blog.csdn.net/u014046192/article/details/50414606/     cut函数截取文件   
+    sed -i '1d' ${parm_DA_cycle_timeTxt} # 删除第一个同化的时刻，因为第一个同化时刻不可以是ww3_shel.nml的开始时刻
+    #cat >${parm_DA_cycle_timeTxt} <<EOF
+#20180901T010000.txt
+#20180901T020000.txt
+#20180901T030000.txt
+#20180901T040000.txt
+#20180901T050000.txt
+#EOF
+                    # 最后一个时刻没有同化数据怎么办？，最后得到的数据会比背景数据短一些；
+                    # 可以自己手动根据restart文件再重启运行，cdo合并小时文件和最后的时间段数据；
+
     ######################################################### 2. 循环da_time.txt
     echo "----${blank}${step}.2 循环da_time.txt，对于每一个同化时刻，①制作ww3_shell.nml文件，" \
         "运行得到同化时刻的restart001.ww3，②制作ww3_ounf_nml文件，运行得到nc小时文件；" \
@@ -2938,12 +2345,13 @@ EOF
             -N -r ww3_ounf -w ${parm_WW3_work} -o netcdf ../model ${programGo} \
         
         #########################################################单一时刻同化的nc.txt，nc_ENOI_Amatrix.txt，mod_params.f90
+        ls -1
         if (( DA_tmp == 1 )); then
             rm -rf ${pth_ndbc_work}'nc'
             cp -r ${pth_ndbc_work}${parm_DA_Code_ww3InputNc}  ${pth_ndbc_work}'nc'  #
             cd ${pth_ndbc_work}'nc/'
             ls -1 *.nc >'nc.txt'  ##重定向，-1按列，
-            nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个  
+            nc_fileNameNum=`ls -l *.nc|grep "^-"|wc -l`   ##最少要求2个？ 1个就可以  
             ls -1 *.nc >'nc_ENOI_Amatrix.txt'  ##重定向，-1按列，
             cd ${pth_DA_Code_src} 
             cat >'mod_params.f90' <<EOF       
@@ -2956,7 +2364,7 @@ module mod_params
     
     !********************************* ENOI Step Options *********************************
     integer, parameter :: ENOI = 1      ! 使用ENOI同化方法，1为使用, 0为不使用  （废弃）
-    integer :: NN = 0                 ! size of ensemble，这个需要运行完                                     
+    integer :: NN = 0                 ! size of ensemble，这个运行完会自动更新，全局变量，                                     
     integer, parameter :: DN = 10       ! step interval to sample the ensemble pool, hour       
     real, parameter    :: alpha = 1     ! scaling parameter of matrix B
     integer :: generateAmatriax = 1     ! 1表示生成，0表示不生成，(废弃)
@@ -2977,14 +2385,15 @@ module mod_params
     character(len=*), parameter :: nc_daOut = '$parm_DA_Code_daOuputNc'     ! 输出同化nc文件所在文件夹名称
 
     !************************************* DA Subdomain Setting ***************************************
-    integer, parameter :: sub_xy(4) = (/1, 1, 69, 41/)                      ! readdata会用到,
-    integer, parameter :: sub_x = 69, sub_y = 41                            ! x 对应的经度，y 对应的是纬度，readdata会用到,
-    integer, parameter :: N = 41*69                                         ! number of model grid points , NLATS * NLONS
-    integer, parameter :: NLATS = 41, NLONS = 69                            ! 
+    integer, parameter :: sub_xy(4) = (/1, 1, 161, 121/)                      ! readdata会用到,
+    integer, parameter :: sub_x = 161, sub_y = 121                            ! x 对应的经度，y 对应的是纬度，readdata会用到,
+    integer, parameter :: N = 121*161                                         ! number of model grid points , NLATS * NLONS
+    integer, parameter :: NLATS = 121, NLONS = 161                            ! 
 end module mod_params
 EOF
         fi
         ########################################################单一时刻同化的Makefile，编译
+        ls -1
         if (( DA_tmp == 1 )); then
             cd ${pth_DA_Code_src}
             cat >'Makefile' << EOF
@@ -3182,7 +2591,7 @@ $
 $ PRCNTG_CAP is global input for option UPD2 and UPD3 and it is a cap on the 
 $ maximun correction applied to all the gridpoints (e.g. 0.5)
 $ 0.5, 0, 0.001
-   100000
+   100
 $
 $ Name of the file with the SWH analysis from the DA system            $
 $ suffix .grbtxt for text out of grib2 file.                           $
@@ -3264,10 +2673,11 @@ EOF
     mv `ls $pth_WW3_regtest_work*.nc `  ${pth_ndbc_work}${parm_DA_Code_daOuputNc}
     ##
     cd ${pth_ndbc_work}${parm_DA_Code_daOuputNc}
+    ## merge_ndbc.m 文件已废弃，使用cdo即可，
     cat >'merge_ndbc.m' <<EOF
 clc, clear all
 
-filename='$pth_ndbc_work$parm_DA_Code_daOuputNc/ww3.2011.nc';
+filename='$pth_ndbc_work$parm_DA_Code_daOuputNc/DA.nc';
 
 % clc, clear all
 % datadir='/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA/nc_WithWW3_ENOI_30days/';
@@ -3397,7 +2807,7 @@ netcdf.close(cid);
 % c=ncread('ww3.20110901T01Z.nc','hs')
 
 EOF
-    ${pth_matlab} -nodisplay -r "merge_ndbc; exit;" \
+    # ${pth_matlab} -nodisplay -r "merge_ndbc; exit;" \
 
     #########################################################
 fi
@@ -3461,28 +2871,36 @@ echo '├──「FAQ，？？？」format格式化？？'
 ############################################################################################################
 bannerSimple "Data assimilation analysis - ndbc_WithWW3_ENOI " "*"
 declare -i ndbc_WithWW3_ENOI_ana
-ndbc_WithWW3_ENOI_ana=1       ## ～tag，新建文件需要修改～
-# 在进行这一步之前需要将此同化生成的文件夹内的相关文件进行删除和重命名
-#   1、删除每个小时的nc文件
-#   2、删除.m文件
-#   3、nc 文件夹中的nc名称只能有一个点，且不能与worktable中的属性相同（否则会覆盖信息）
-#   4、文件夹中的nc至少是2个；
+ndbc_WithWW3_ENOI_ana=0       ## ～tag，新建文件需要修改～
+# 在进行这一步之前需要将此同化生成的文件夹内的相关文件放在nc文件夹，重命名，
+#   1、删除每个小时的nc文件 （可选）
+#   2、删除.m文件  （可选）
+#   3、nc 文件夹中的nc名称只能有一个点，且不能与worktable中的属性相同（否则会覆盖信息） （保留）
+#   4、文件夹中的nc至少是2个；  （废弃）
 
 if (( ndbc_WithWW3_ENOI_ana == 1 )); then
-    parm_DA_Code_daOuputNc='nc_WithWW3_ENOI_30days'  ## ～tag，新建文件需要修改～
-    parm_ndbc_station_downloadFlag=0      ## ～tag，新建文件需要修改～
-    parm_ndbc_Index1_yo=0                 ## ～tag，新建文件需要修改～      用于同化
-    parm_ndbc_create_new_work_table=0     ## ～tag，新建文件需要修改～      
-    parm_ndbc_match=1                     ## ～tag，新建文件需要修改～      用于浮标与背景场的比较
+    # parm_DA_Code_daOuputNc='nc_WithWW3_ENOI_30days'  ## ～tag，新建文件需要修改～
+    parm_ndbc_station_downloadFlag=0      ## 优先级1 ～tag，新建文件需要修改～
+    parm_ndbc_create_new_work_table=0     ## 优先级1 ～tag，新建文件需要修改～      
+    parm_ndbc_num2buoynum=0               ## 优先级2 ～tag，新建文件需要修改～ 
+    parm_ndbc_buoynum2num=0               ## 优先级2 ～tag，新建文件需要修改～ 
+    parm_ndbc_Index1_yo=0                 ## 优先级3 ～tag，新建文件需要修改～      用于同化  
+                                            ##（自己在程序重新低效率match，还需要调参数，运行很慢，不建议）
+    parm_ndbc_match=0                     ## 优先级3 ～tag，新建文件需要修改～      用于浮标与背景场的比较
+    parm_ndbc_match_spinup=1              ## 优先级4 ～tag，新建文件需要修改～ 
+    parm_ndbc_match_Index1_yo=0           ## 优先级4 ～tag，新建文件需要修改～
+                                            ## 建议用此方法实现Index1_yo的同化，运行很快，
     #########################################################
-    rm -rf ${pth_ndbc_work}'nc/'
-    cp -r ${pth_ndbc_work}${parm_DA_Code_daOuputNc}  ${pth_ndbc_work}'nc'
-    cd ${pth_ndbc_work}'nc/'
+    # rm -rf ${pth_ndbc_work}'nc/'
+    # cp -r ${pth_ndbc_work}${parm_DA_Code_daOuputNc}  ${pth_ndbc_work}'nc'
+    # cd ${pth_ndbc_work}'nc/'
     ##########################################################
-    cd ${pth_ndbc_work}
+    # cd ${pth_ndbc_work}
     ##########################################################
+    # cd ${pth_ndbc_work} 
+    # ${pth_matlab} -nodisplay -r "path_save='${pth_ndbc_work}'; path_source='${pth_ndbc_source}'; path_mmap='${pth_ndbc_mmap}'; create_new_work_table=${parm_ndbc_create_new_work_table};ndbc_station_downloadFlag=${parm_ndbc_station_downloadFlag};match_Index1_yo=${parm_ndbc_match};Index1_yo=${parm_ndbc_Index1_yo};${programGo};exit;" \
     cd ${pth_ndbc_work} 
-    ${pth_matlab} -nodisplay -r "path_save='${pth_ndbc_work}'; path_source='${pth_ndbc_source}'; path_mmap='${pth_ndbc_mmap}'; create_new_work_table=${parm_ndbc_create_new_work_table};ndbc_station_downloadFlag=${parm_ndbc_station_downloadFlag};match_Index1_yo=${parm_ndbc_match};Index1_yo=${parm_ndbc_Index1_yo};${programGo};exit;" \
+    ${pth_matlab} -nodisplay -r "path_save='${pth_ndbc_work}'; path_source='${pth_ndbc_source}'; path_mmap='${pth_ndbc_mmap}'; create_new_work_table=${parm_ndbc_create_new_work_table};ndbc_station_downloadFlag=${parm_ndbc_station_downloadFlag};match=${parm_ndbc_match};Index1_yo=${parm_ndbc_Index1_yo};mat_num2buoynum=${parm_ndbc_num2buoynum};mat_buoynum2num=${parm_ndbc_buoynum2num};match_spinup=${parm_ndbc_match_spinup};Match_Index_yo=${parm_ndbc_match_Index1_yo};${programGo};exit;" \ 
     
 fi
 
@@ -3490,6 +2908,463 @@ fi
 
 
 
+# structure4: 矩形网格+ERA5风场+WW3+cfosat+ENOI同化
+############################################################################################################
+############################################################################################################
+bannerSimple "Data assimilation preparing && Background analysis - cfosat" "*"
+declare -i cfosat
+cfosat=0                               ## ～tag，新建文件需要修改～  ，一般设置为1,后面的程序会用到这里的.m程序，
+pth_cfosat=${pth_OceanForecast}'CFOSAT/'
+pth_cfosat_source=${pth_cfosat}'source/'
+pth_cfosat_work=${pth_cfosat}${programGo}'/'  && mkdir -p ${pth_cfosat_work}
+
+if (( cfosat == 1 )); then
+    #################################3
+    parm_cfosat_match=0      ## 优先级1 ～tag，新建文件需要修改～
+        ## cfosat_oper_swi_l2_*.nc 中 nadir_swh_box 时间序列与矩形格点时空匹配，
+            ## % 去除value 为 nan 的数据
+            ## % 去除lat, lon 不在区域的数据
+            ## % lat 匹配的 nclat， % lon 匹配的 nclon   (空间匹配)
+            ## % 在H矩阵的索引
+            ## % time 匹配的 nctime     （时间匹配）
+            ## % 经过错位的时间和空间，很可能会出现多个数据时空一致但值不同的情况，可采取均一化处理
+        ## 保存在一个.mat 中，变量名称为 newTable 
+    parm_cfosat_match_Index1_yo=0           ## 优先级2 ～tag，新建文件需要修改～
+        ## 将 parm_cfosat_match=1 生成的.mat文件相关数据输出到Index1和yo文件夹；
+            ## 生成的文件夹需要放在ndbc文件部分，再进行同化；
+    #################################3
+    cd ${pth_cfosat_work}
+    cat >${programGo}'.m' <<EOF
+% author:
+%    liu jin can, UPC
+
+% path_save = '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/cfosat/work_eastUSA/'; %work工作目录路径，最后必须是'/'
+path_save
+cd(path_save)
+path_source
+% addpath '/home/jincanliu/Data-Assimilation-for-Ocean-Current-Forecasts/cfosat/source'
+addpath(path_source)
+
+match
+if(match==1) 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    path_CFO_OPER_SWI_L2 = strcat(path_save,'swim_l2_op05/');  %%放入的nc数据应该是所想研究时间段内的数据
+    lat_max = 48;  % 纬度为负数，表示南纬
+    lat_min = 33;
+    lon_max = -57; % 经度为负数，表示西经
+    lon_min = -77;
+    lat = lat_min:0.125:lat_max;
+    lon = lon_min:0.125:lon_max;
+    match_CFO_OPER_SWI_L2(path_save,path_CFO_OPER_SWI_L2,lat,lon,'swim_l2_op05_nadir_swh_box'...  % .mat 名称
+        ,'nadir_swh_box','time_nadir_l2',...  % 用到的变量
+        'lat_nadir_l2','lon_nadir_l2','2009-01-01 00:00:00');
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
+%%
+Match_Index_yo
+if(Match_Index_yo==1)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % ndbc_start_datetime=datetime('2018-09-01 00:00:00','InputFormat','yyyy-MM-dd HH:mm:ss');
+    % path_save = '/1t/Data-Assimilation-for-Ocean-Current-Forecasts/ndbc/work_eastUSA_2/';
+    cd(path_save)
+    system('rm -rf Index1')
+    system('rm -rf yo')
+    mkdir('Index1')
+    mkdir('yo')
+    cfosat_match_Index1_yo(path_save,...
+        'swim_l2_op05_nadir_swh_box'... % .mat文件名称
+        );
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
+%%
+EOF
+    #################################3
+    cd ${pth_cfosat_work} 
+    ${pth_matlab} -nodisplay -r "path_save='${pth_cfosat_work}'; path_source='${pth_cfosat_source}'; match=${parm_cfosat_match};Match_Index_yo=${parm_cfosat_match_Index1_yo};${programGo};exit;" 
+    
+fi
+
+
+
+
+
+
+
+############################################################################################################
+############################################################################################################
+bannerSimple "wind nc create  - era5_wind" "*"
+declare -i era5_wind
+era5_wind=0                               ## ～tag，新建文件需要修改～  ，一般设置为1,后面的程序会用到这里的.m程序，
+
+
+if (( era5_wind == 1 )); then
+    #################################
+    parm_era5_wind_download=0   ## 优先级1 ～tag，新建文件需要修改～
+        ## 从ECMWF, CDS, 下载相关数据，
+            ## 注册
+        ## 网页下载nc，single level, 
+        ## python程序下载nc，
+            ## 程序有两个，位于ERA5/source，download_era5_China_nanhai_1979_2020.py 和 download_era5_China_nanhai_1958_1978.py
+            ## anaconda（环境搭建、包管理）+pycharm (运行、调试)， 
+            ##        包管理，需要科学上网。
+            ##              Linux、Ubuntu中nohup的使用和关闭  https://blog.csdn.net/qq_36079986/article/details/110294300
+            ##              pip install cdsapi
+            ##              pip install python-dateutil     https://blog.csdn.net/m0_52625549/article/details/124599093
+            ##              软件和更新的源更换？
+            ##              Exception: Missing/incomplete configuration file: /home/jincanliu/.cdsapirc    https://blog.csdn.net/hulihutudewo/article/details/123020199
+            ##        运行程序时，一定要知道在哪个环境运行的，pycharm中会显示～
+            ##
+            ##        「OK」将anaconda虚拟环境打包并移动到不同的服务器上，https://blog.csdn.net/Lcz971209/article/details/124164138
+            ##              1、本地环境迁移（要求二者的操作系统一致）：py-ev-ERA5 的本地环境，放在了 ERA5/py-ev-ERA5， 接下来的操作看 https://blog.csdn.net/Lcz971209/article/details/124164138
+            ##                      source activate py-ev-ERA5 出错，用conda activate py-ev-ERA5
+            ##              2、在线环境迁移：提供一个安装列表，这些列表包含了原环境中所有的包。
+            ##                      详细过程看 https://blog.csdn.net/Lcz971209/article/details/124164138
+            ##
+        ## 「OK」pycharm debug
+            ##        pycharm下debug详解， https://blog.csdn.net/weixin_42375937/article/details/122946695
+
+    parm_era5_wind_merge=0    ## 优先级2 ～tag，新建文件需要修改～
+        ## 使用cdo命令， cdo -b F32  mergetime ERA5_202007.nc ERA5_202008.nc wind.nc  （推荐）
+        ##            
+        ## 
+        ## 自己编写的*merge.mc命令，（又要重新编写一次，因为ERA5和CCMP下载的数据是不一样的），很麻烦～ （不建议）
+    
+    #parm_wind_ww3=0     ## 优先级？ （已废弃） ～tag，新建文件需要修改～
+        ## 将wind.nc转换成可以让ww3_prnc.nml正常运行的文件，
+
+    parm_era5_wind_latitude_reversed=0  ##优先级3, ～tag，新建文件需要修改～
+        ## 合并后，ww3_prnc.nml 运行会出错，因为ERA5（ECMWF）的latitude需要reversed；
+        ## nco解决;
+        ##      ncpdq -h -O -a -latitude （纬度变量） wind.nc （原文件） wind_ndpdh.nc （新文件）
+
+        ## 运行ww3_prnc时需修改为u10, v10
+
+
+    #################################
+fi
+
+
+
+
+
+
+############################################################################################################
+############################################################################################################
+bannerSimple "wind nc ww3" "*"
+declare -i wind_to_ww3
+wind_to_ww3=0             ##（废弃，原文件夹wind_to_ww3仍然保留） ～tag，新建文件需要修改～ 
+    ## 将wind.nc转换成可以让ww3_prnc.nml正常运行的文件，
+    ## 废弃原因，对于ERA5风场，具体分析了ww3_prnc失败原因，是latitude需要reversed，nco解决；
+
+pth_wind_to_ww3=${pth_OceanForecast}'wind_to_ww3/'
+if (( wind_to_ww3 == 1 )); then
+    #####################################
+    ## 优先级1, 将wind.nc放进wind_to_ww3/文件夹
+    
+    #####################################
+    cd ${pth_wind_to_ww3}
+
+fi
+
+
+
+# structure5: 矩形网格嵌套 =1
+##########################################################################################################
+###########################################################################################################
+bannerSimple "grid preprocessor - ww3_multi_nml" "*"
+declare -i ww3_multi_nml
+ww3_multi_nml=0              ## ～tag，新建文件需要修改～
+
+if (( ww3_multi_nml == 1 )); then
+    ###################################################
+    cd ${pth_WW3_regtest_input}
+    cat >'ww3_multi.nml' <<EOF
+! -------------------------------------------------------------------- !
+! WAVEWATCH III - ww3_multi.nml - multi-grid model                     !
+! -------------------------------------------------------------------- !
+! 默认设置位于model/nml;
+! regtests/mww3_test_03 有参考的例子；
+!
+! -------------------------------------------------------------------- !
+! Define top-level model parameters via DOMAIN_NML namelist
+!
+! * IOSTYP defines the output server mode for parallel implementation.
+!             0 : No data server processes, direct access output from
+!                 each process (requires true parallel file system).
+!             1 : No data server process. All output for each type 
+!                 performed by process that performs computations too.
+!             2 : Last process is reserved for all output, and does no
+!                 computing.
+!             3 : Multiple dedicated output processes.
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     DOMAIN%NRINP  =  0  ! Number of grids defining input fields.
+!     DOMAIN%NRGRD  =  1  ! Number of wave model grids.
+!     DOMAIN%UNIPTS =  F  ! Flag for using unified point output file.
+!     DOMAIN%IOSTYP =  1  ! Output server type
+!     DOMAIN%UPPROC =  F  ! Flag for dedicated process for unified point output.
+!     DOMAIN%PSHARE =  F  ! Flag for grids sharing dedicated output processes.
+!     DOMAIN%FLGHG1 =  F  ! Flag for masking computation in two-way nesting
+!     DOMAIN%FLGHG2 =  F  ! Flag for masking at printout time
+!     DOMAIN%START  = '19680606 000000'  ! Start date for the entire model 
+!     DOMAIN%STOP   = '19680607 000000'  ! Stop date for the entire model
+!
+! -------------------------------------------------------------------- !
+&DOMAIN_NML
+  DOMAIN%NRINP  =  1
+  DOMAIN%NRGRD  =  3
+  DOMAIN%UNIPTS =  T
+  DOMAIN%PSHARE =  T
+  DOMAIN%FLGHG1 =  T
+  DOMAIN%FLGHG2 =  T
+  DOMAIN%START  = '20200728 000000'
+  DOMAIN%STOP   = '20200816 000000'
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define each input grid via the INPUT_GRID_NML namelist
+!
+! * index I must match indexes from 1 to DOMAIN%NRINP
+! * INPUT(I)%NAME must be set for each active input grid I
+！  
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     INPUT(I)%NAME                  = 'unset'
+!     INPUT(I)%FORCING%WATER_LEVELS  = F
+!     INPUT(I)%FORCING%CURRENTS      = F
+!     INPUT(I)%FORCING%WINDS         = F
+!     INPUT(I)%FORCING%ATM_MOMENTUM  = F
+!     INPUT(I)%FORCING%AIR_DENSITY   = F
+!     INPUT(I)%FORCING%ICE_CONC      = F
+!     INPUT(I)%FORCING%ICE_PARAM1    = F
+!     INPUT(I)%FORCING%ICE_PARAM2    = F
+!     INPUT(I)%FORCING%ICE_PARAM3    = F
+!     INPUT(I)%FORCING%ICE_PARAM4    = F
+!     INPUT(I)%FORCING%ICE_PARAM5    = F
+!     INPUT(I)%FORCING%MUD_DENSITY   = F
+!     INPUT(I)%FORCING%MUD_THICKNESS = F
+!     INPUT(I)%FORCING%MUD_VISCOSITY = F
+!     INPUT(I)%ASSIM%MEAN            = F
+!     INPUT(I)%ASSIM%SPEC1D          = F
+!     INPUT(I)%ASSIM%SPEC2D          = F
+!
+!
+! -------------------------------------------------------------------- !
+&INPUT_GRID_NML
+  INPUT(1)%NAME                  = 'wind'
+  INPUT(1)%FORCING%WINDS         = T
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define each model grid via the MODEL_GRID_NML namelist
+!
+! * index I must match indexes from 1 to DOMAIN%NRGRD
+! * MODEL(I)%NAME must be set for each active model grid I
+! * FORCING can be set as : 
+!    - 'no'          : This input is not used.
+!    - 'native'      : This grid has its own input files, e.g. grid
+!                      grdX (mod_def.grdX) uses ice.grdX.
+!    - 'INPUT%NAME'  : Take input from the grid identified by
+!                      INPUT%NAME.
+! * RESOURCE%RANK_ID : Rank number of grid (internally sorted and reassigned).
+! * RESOURCE%GROUP_ID : Group number (internally reassigned so that different
+!                                     ranks result in different group numbers).
+! * RESOURCE%COMM_FRAC : Fraction of communicator (processes) used for this grid.
+! * RESOURCE%BOUND_FLAG : Flag identifying dumping of boundary data used by this
+!                         grid. If true, the file nest.MODID is generated.
+!
+! * Limitations relevant to irregular (curvilinear) grids:
+!   1) Equal rank is not supported when one or more is an irregular
+!       grid. Use non-equal rank instead. (see wmgridmd.ftn)
+!   2) Non-native input grids: feature is not supported when either
+!      an input grid or computational grids is irregular.
+!      (see wmupdtmd.ftn)
+!   3) Irregular grids with unified point output: This is supported
+!      but the feature has not been verified for accuracy.
+!      (see wmiopomd.ftn)
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     MODEL(I)%NAME                  = 'unset'
+!     MODEL(I)%FORCING%WATER_LEVELS  = 'no'
+!     MODEL(I)%FORCING%CURRENTS      = 'no'
+!     MODEL(I)%FORCING%WINDS         = 'no'
+!     MODEL(I)%FORCING%ATM_MOMENTUM  = 'no'
+!     MODEL(I)%FORCING%AIR_DENSITY   = 'no'
+!     MODEL(I)%FORCING%ICE_CONC      = 'no'
+!     MODEL(I)%FORCING%ICE_PARAM1    = 'no'
+!     MODEL(I)%FORCING%ICE_PARAM2    = 'no'
+!     MODEL(I)%FORCING%ICE_PARAM3    = 'no'
+!     MODEL(I)%FORCING%ICE_PARAM4    = 'no'
+!     MODEL(I)%FORCING%ICE_PARAM5    = 'no'
+!     MODEL(I)%FORCING%MUD_DENSITY   = 'no'
+!     MODEL(I)%FORCING%MUD_THICKNESS = 'no'
+!     MODEL(I)%FORCING%MUD_VISCOSITY = 'no'
+!     MODEL(I)%ASSIM%MEAN            = 'no'
+!     MODEL(I)%ASSIM%SPEC1d          = 'no'
+!     MODEL(I)%ASSIM%SPEC2d          = 'no'
+!     MODEL(I)%RESOURCE%RANK_ID      = I
+!     MODEL(I)%RESOURCE%GROUP_ID     = 1
+!     MODEL(I)%RESOURCE%COMM_FRAC    = 0.00,1.00
+!     MODEL(I)%RESOURCE%BOUND_FLAG   = F
+!
+!     MODEL(4)%FORCING = 'no' 'no' 'no' 'no' 'no' 'no'
+!
+!     MODEL(2)%RESOURCE = 1 1 0.00 1.00 F
+! -------------------------------------------------------------------- !
+&MODEL_GRID_NML
+
+  MODEL(1)%NAME                  = 'grd1'
+  MODEL(1)%FORCING%WINDS         = 'wind'
+  MODEL(1)%RESOURCE%RANK_ID      = 1
+
+  MODEL(2)%NAME                  = 'grd2'
+  MODEL(2)%FORCING%WINDS         = 'wind'
+  MODEL(2)%RESOURCE%RANK_ID      = 2
+
+
+  MODEL(3)%NAME                  = 'grd3'
+  MODEL(3)%FORCING%WINDS         = 'wind'
+  MODEL(3)%RESOURCE%RANK_ID      = 3
+/
+
+
+! -------------------------------------------------------------------- !
+! Define the output types point parameters via OUTPUT_TYPE_NML namelist
+!
+! * index I must match indexes from 1 to DOMAIN%NRGRD
+!
+! * ALLTYPE will apply the output types for all the model grids
+!
+! * ITYPE(I) will apply the output types for the model grid number I
+!
+! * need DOMAIN%UNIPTS equal true to use a unified point output file
+!
+! * the point file is a space separated values per line :
+!   longitude latitude 'name' (C*40)
+!
+! * the detailed list of field names is given in model/nml/ww3_shel.nml :
+!  DPT CUR WND AST WLV ICE IBG TAU RHO D50 IC1 IC5
+!  HS LM T02 T0M1 T01 FP DIR SPR DP HIG
+!  EF TH1M STH1M TH2M STH2M WN
+!  PHS PTP PLP PDIR PSPR PWS PDP PQP PPE PGW PSW PTM10 PT01 PT02 PEP TWS PNR
+!  UST CHA CGE FAW TAW TWA WCC WCF WCH WCM FWS
+!  SXY TWO BHD FOC TUS USS P2S USF P2L TWI FIC USP TOC
+!  ABR UBR BED FBB TBB
+!  MSS MSC WL02 AXT AYT AXY
+!  DTD FC CFX CFD CFK
+!  U1 U2 
+!
+! * output track file formatted (T) or unformated (F)
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     ALLTYPE%FIELD%LIST         =  'unset'
+!     ALLTYPE%POINT%NAME         =  'unset'
+!     ALLTYPE%POINT%FILE         =  'points.list'
+!     ALLTYPE%TRACK%FORMAT       =  T
+!     ALLTYPE%PARTITION%X0       =  0
+!     ALLTYPE%PARTITION%XN       =  0
+!     ALLTYPE%PARTITION%NX       =  0
+!     ALLTYPE%PARTITION%Y0       =  0
+!     ALLTYPE%PARTITION%YN       =  0
+!     ALLTYPE%PARTITION%NY       =  0
+!     ALLTYPE%PARTITION%FORMAT   =  T
+!
+!     ITYPE(3)%TRACK%FORMAT      =  F
+! -------------------------------------------------------------------- !
+&OUTPUT_TYPE_NML
+  ALLTYPE%FIELD%LIST     = 'HS'
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define output dates via OUTPUT_DATE_NML namelist
+!
+! * index I must match indexes from 1 to DOMAIN%NRGRD
+! * ALLDATE will apply the output dates for all the model grids
+! * IDATE(I) will apply the output dates for the model grid number i
+! * start and stop times are with format 'yyyymmdd hhmmss'
+! * if time stride is equal '0', then output is disabled
+! * time stride is given in seconds
+! * it is possible to overwrite a global output date for a given grid
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     ALLDATE%FIELD%START         =  '19680606 000000'
+!     ALLDATE%FIELD%STRIDE        =  '0'
+!     ALLDATE%FIELD%STOP          =  '19680607 000000'
+!     ALLDATE%POINT%START         =  '19680606 000000'
+!     ALLDATE%POINT%STRIDE        =  '0'
+!     ALLDATE%POINT%STOP          =  '19680607 000000'
+!     ALLDATE%TRACK%START         =  '19680606 000000'
+!     ALLDATE%TRACK%STRIDE        =  '0'
+!     ALLDATE%TRACK%STOP          =  '19680607 000000'
+!     ALLDATE%RESTART%START       =  '19680606 000000'
+!     ALLDATE%RESTART%STRIDE      =  '0'
+!     ALLDATE%RESTART%STOP        =  '19680607 000000'
+!     ALLDATE%BOUNDARY%START      =  '19680606 000000'
+!     ALLDATE%BOUNDARY%STRIDE     =  '0'
+!     ALLDATE%BOUNDARY%STOP       =  '19680607 000000'
+!     ALLDATE%PARTITION%START     =  '19680606 000000'
+!     ALLDATE%PARTITION%STRIDE    =  '0'
+!     ALLDATE%PARTITION%STOP      =  '19680607 000000'
+!     
+!     ALLDATE%RESTART             =  '19680606 000000' '0' '19680607 000000'
+!
+!     IDATE(3)%PARTITION%START    =  '19680606 000000' 
+! -------------------------------------------------------------------- !
+&OUTPUT_DATE_NML
+  ALLDATE%FIELD%START         = '20200729 000000'
+  ALLDATE%FIELD%STRIDE        = '3600'
+  ALLDATE%FIELD%STOP          = '20200815 180000'
+/
+
+
+
+! -------------------------------------------------------------------- !
+! Define homogeneous input via HOMOG_COUNT_NML and HOMOG_INPUT_NML namelist
+!
+! * the number of each homogeneous input is defined by HOMOG_COUNT
+! * the total number of homogeneous input is automatically calculated
+! * the homogeneous input must start from index 1 to N
+! * if VALUE1 is equal 0, then the homogeneous input is desactivated
+! * NAME can only be MOV
+! * each homogeneous input is defined over a maximum of 3 values detailled below :
+!     - MOV is defined by speed and direction
+!
+! * namelist must be terminated with /
+! * definitions & defaults:
+!     HOMOG_COUNT%N_MOV             =  0
+!
+!     HOMOG_INPUT(I)%NAME           =  'unset'
+!     HOMOG_INPUT(I)%DATE           =  '19680606 000000'
+!     HOMOG_INPUT(I)%VALUE1         =  0
+!     HOMOG_INPUT(I)%VALUE2         =  0
+!     HOMOG_INPUT(I)%VALUE3         =  0
+! -------------------------------------------------------------------- !
+&HOMOG_COUNT_NML
+
+/
+
+&HOMOG_INPUT_NML
+
+/
+
+
+! -------------------------------------------------------------------- !
+! WAVEWATCH III - end of namelist                                      !
+! -------------------------------------------------------------------- !
+EOF
+    ###################################################
+fi
 
 
 

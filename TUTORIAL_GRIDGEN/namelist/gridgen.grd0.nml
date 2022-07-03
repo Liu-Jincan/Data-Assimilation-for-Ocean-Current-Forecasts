@@ -1,0 +1,64 @@
+$ a. Path to directories and file names-----------------------------------$
+
+&GRID_INIT
+BIN_DIR = '../bin'
+REF_DIR = '../reference'
+DATA_DIR = '../data'
+FNAME_POLY = 'user_polygons.flag'      %不知道干什么用的
+FNAME = 'grd0'
+FNAMEB = 'none'                        
+BOUND_SELECT = 1
+/
+
+
+
+$ b. Information on bathymetry file--------------------------------------$
+
+&BATHY_FILE
+REF_GRID = 'gebco'
+XVAR = 'lon'
+YVAR = 'lat'
+ZVAR = 'elevation'
+LONFROM = -180
+/
+
+
+$ c. Required grid resolution and boundaries---------------------------------$
+
+&OUTGRID
+TYPE = 'rect'
+DX = 0.5
+DY = 0.5
+LON_WEST = -77
+LON_EAST = -57
+LAT_SOUTH = 33
+LAT_NORTH = 48
+IS_GLOBAL = 0
+IS_GLOBALB = 0
+/
+
+
+
+$ d. Boundary options-------------------------------------------------------$
+
+&GRID_BOUND
+BOUNDARY = 'full'    
+READ_BOUNDARY = 1
+OPT_POLY = 0
+MIN_DIST = 4
+/
+
+
+
+$ e. Parameter values used in the software-------------------------------------$
+
+&GRID_PARAM
+DRY_VAL = 999999
+CUT_OFF = 0
+LIM_BATHY = 0.4                  
+LIM_VAL = 0.5
+SPLIT_LIM = 2.5                 %from 5 to 10 times max(dx,dy)
+OFFSET = 0.5                    %OFFSET = max([dx dy])
+LAKE_TOL = 100
+OBSTR_OFFSET = 1
+/
